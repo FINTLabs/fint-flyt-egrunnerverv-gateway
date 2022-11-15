@@ -1,6 +1,20 @@
+fint:
+  application-id: fint-flyt-egrunnerverv-instance-gateway
+  cache:
+    defaultCacheEntryTimeToLiveMillis: 518400000
+    defaultCacheHeapSize: 1000000
+logging:
+  level:
+    no.fintlabs.cache.ehcache.FintEhCacheEventLogger: WARN
+server:
+  max-http-header-size: 40KB
+  error:
+    include-message: always
 spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://idp.felleskomponent.no/nidp/oauth/nam
+  codec:
+    max-in-memory-size: 100MB
+  profiles:
+    include:
+      - flyt-kafka
+      - flyt-logging
+      - flyt-resource-server

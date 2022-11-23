@@ -1,11 +1,10 @@
 package no.fintlabs
 
-import net.bytebuddy.implementation.bind.annotation.Empty
+
 import no.fintlabs.model.egrunnerverv.EgrunnervervDocument
 import no.fintlabs.model.egrunnerverv.EgrunnervervInstance
 import no.fintlabs.model.egrunnerverv.EgrunnervervInstanceElement
 import no.fintlabs.model.egrunnerverv.EgrunnervervInstanceMetadata
-import no.fintlabs.model.fint.instance.Document
 import no.fintlabs.model.fint.instance.Instance
 import no.fintlabs.model.fint.instance.InstanceField
 import spock.lang.Specification

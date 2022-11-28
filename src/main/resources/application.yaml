@@ -18,3 +18,4 @@ spring:
       - flyt-kafka
       - flyt-logging
       - flyt-resource-server
+      - flyt-file-client

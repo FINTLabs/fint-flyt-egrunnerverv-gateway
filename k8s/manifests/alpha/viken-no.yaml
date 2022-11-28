@@ -80,5 +80,6 @@ spec:
             - { name: TZ, value: Europe/Oslo }
             - { name: JAVA_TOOL_OPTIONS, value: '-XX:+ExitOnOutOfMemoryError -Xmx480M -verbose:gc' }
             - { name: fint.org-id, value: 'viken.no' }
+            - { name: fint.flyt.base-url, value: 'https://viken-no-skjema.vigoiks.no' }
             - { name: fint.flyt.resource-server.security.api.external.enabled, value: 'true' }
             - { name: fint.flyt.resource-server.security.api.external.authorized-client-ids, value: '1' }

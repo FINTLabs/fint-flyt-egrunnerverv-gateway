@@ -5,6 +5,22 @@ metadata:
 spec:
   itemPath: "vaults/aks-alpha-vault/items/aiven-kafka"
 ---
+apiVersion: "fintlabs.no/v1alpha1"
+kind: NamOAuthClientApplicationResource
+metadata:
+  name: oauth2-client-flyt-egrunnerverv-instance-gateway
+  labels:
+    app.kubernetes.io/name: oauth2-client-flyt-egrunnerverv-instance-gateway
+    app.kubernetes.io/instance: viken-no-oauth2-client-flyt-egrunnerverv-instance-gateway
+    app.kubernetes.io/version: latest
+    app.kubernetes.io/component: oauth-client
+    app.kubernetes.io/part-of: fint-flyt
+    fintlabs.no/team: flyt
+    fintlabs.no/org-id: viken.no
+spec:
+  grantTypes:
+    - client_credentials
+---
 apiVersion: v1
 kind: Service
 metadata:

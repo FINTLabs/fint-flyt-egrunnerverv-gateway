@@ -11,12 +11,12 @@ metadata:
   name: oauth2-client-flyt-egrunnerverv-instance-gateway
   labels:
     app.kubernetes.io/name: oauth2-client-flyt-egrunnerverv-instance-gateway
-    app.kubernetes.io/instance: viken-no-oauth2-client-flyt-egrunnerverv-instance-gateway
+    app.kubernetes.io/instance: vlfk-no-oauth2-client-flyt-egrunnerverv-instance-gateway
     app.kubernetes.io/version: latest
     app.kubernetes.io/component: oauth-client
     app.kubernetes.io/part-of: fint-flyt
     fintlabs.no/team: flyt
-    fintlabs.no/org-id: viken.no
+    fintlabs.no/org-id: vlfk.no
 spec:
   grantTypes:
     - client_credentials
@@ -44,7 +44,7 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`viken-no-skjema.vigoiks.no`) && PathPrefix(`/api/egrunnerverv/instanser`)
+    - match: Host(`vlfk-no-skjema.vigoiks.no`) && PathPrefix(`/api/egrunnerverv/instanser`)
       kind: Rule
       services:
         - name: fint-flyt-egrunnerverv-instance-gateway
@@ -95,7 +95,7 @@ spec:
           env:
             - { name: TZ, value: Europe/Oslo }
             - { name: JAVA_TOOL_OPTIONS, value: '-XX:+ExitOnOutOfMemoryError -Xmx480M -verbose:gc' }
-            - { name: fint.org-id, value: 'viken.no' }
-            - { name: fint.flyt.base-url, value: 'https://viken-no-skjema.vigoiks.no' }
+            - { name: fint.org-id, value: 'vlfk.no' }
+            - { name: fint.flyt.base-url, value: 'https://vlfk-no-skjema.vigoiks.no' }
             - { name: fint.flyt.resource-server.security.api.external.enabled, value: 'true' }
-            - { name: fint.flyt.resource-server.security.api.external.authorized-client-ids, value: '1' }
+            - { name: fint.flyt.resource-server.security.api.external.authorized-client-ids, value: '2' }

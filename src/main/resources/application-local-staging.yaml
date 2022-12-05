@@ -13,5 +13,7 @@ fint:
 spring:
   kafka:
     bootstrap-servers: localhost:9092
+  webflux:
+    base-path: vlfk-no
 server:
   port: 8102

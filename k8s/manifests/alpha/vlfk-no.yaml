@@ -44,7 +44,7 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`vlfk-no-skjema.vigoiks.no`) && PathPrefix(`/api/egrunnerverv/instanser`)
+    - match: Host(`flyt.vigoiks.no`) && PathPrefix(`/vlfk-no/api/egrunnerverv/instanser`)
       kind: Rule
       services:
         - name: fint-flyt-egrunnerverv-instance-gateway

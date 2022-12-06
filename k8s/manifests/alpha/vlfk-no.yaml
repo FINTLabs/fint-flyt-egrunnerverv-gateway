@@ -99,3 +99,4 @@ spec:
             - { name: fint.flyt.base-url, value: 'https://vlfk-no-skjema.vigoiks.no' }
             - { name: fint.flyt.resource-server.security.api.external.enabled, value: 'true' }
             - { name: fint.flyt.resource-server.security.api.external.authorized-client-ids, value: '2' }
+            - { name: spring.webflux.base-path, value: 'vlfk-no' }

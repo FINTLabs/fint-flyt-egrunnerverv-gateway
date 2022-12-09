@@ -1,7 +1,7 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: fint-flyt-instance-service
+  name: fint-flyt-egrunnerverv-instance-gateway
 spec:
   entryPoints:
     - web
@@ -9,7 +9,7 @@ spec:
     - match: Host(`hostname`) && PathPrefix(`path`)
       kind: Rule
       services:
-        - name: fint-flyt-instance-service
+        - name: fint-flyt-egrunnerverv-instance-gateway
           port: 8080
       middlewares:
         - name: fint-flyt-auth-forward

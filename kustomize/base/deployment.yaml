@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fint-flyt-instance-service
+  name: fint-flyt-egrunnerverv-instance-gateway
 spec:
   replicas: 1
   strategy:
@@ -12,10 +12,10 @@ spec:
       volumes:
         - name: credentials
           secret:
-            secretName: fint-flyt-instance-service-kafka-certificates
+            secretName: fint-flyt-egrunnerverv-instance-gateway-kafka-certificates
       containers:
-        - image: ghcr.io/fintlabs/fint-flyt-instance-service:sha-0000000
-          name: fint-flyt-instance-service
+        - image: ghcr.io/fintlabs/fint-flyt-egrunnerverv-instance-gateway:sha-0000000
+          name: fint-flyt-egrunnerverv-instance-gateway
           volumeMounts:
             - name: credentials
               mountPath: /credentials
@@ -30,6 +30,6 @@ spec:
             - containerPort: 8080
           envFrom:
             - secretRef:
-                name: fint-flyt-instance-service-kafka
+                name: fint-flyt-egrunnerverv-instance-gateway-kafka
             - configMapRef:
-                name: fint-flyt-instance-service
+                name: fint-flyt-egrunnerverv-instance-gateway

@@ -1,8 +1,8 @@
 apiVersion: "fintlabs.no/v1alpha1"
 kind: KafkaUserAndAcl
 metadata:
-  name: fint-flyt-egrunnerverv-instance-gateway
+  name: fint-flyt-instance-service
 spec:
   acls:
     - permission: admin
-      topic: 'read'
+      topic: 'no-permission'

@@ -23,7 +23,7 @@ import static no.fintlabs.resourceserver.UrlPaths.EXTERNAL_API;
 
 
 @RestController
-@RequestMapping(EXTERNAL_API + "/egrunnerverv/instanser")
+@RequestMapping(EXTERNAL_API + "/egrunnerverv/instances")
 public class EgrunnervervInstanceController {
 
 

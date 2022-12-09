@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fint-flyt-egrunnerverv-instance-gateway
+data:
+  JAVA_TOOL_OPTIONS: '-XX:+ExitOnOutOfMemoryError -Xmx1840M'
+  fint.org-id: 'vlfk.no'
+  fint.flyt.base-url: 'flyt.vigoiks.no'
+  fint.flyt.resource-server.security.api.external.enabled: 'true'
+  fint.flyt.resource-server.security.api.external.authorized-org-ids: '2'
+  spring.webflux.base-path: 'alpha/vlfk-no'

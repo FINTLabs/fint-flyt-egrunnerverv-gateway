@@ -44,7 +44,7 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`flyt.vigoiks.no`) && PathPrefix(`/vlfk-no/api/egrunnerverv/instanser`)
+    - match: Host(`flyt.vigoiks.no`) && PathPrefix(`/alpha/vlfk-no/api/egrunnerverv/instances`)
       kind: Rule
       services:
         - name: fint-flyt-egrunnerverv-instance-gateway
@@ -99,4 +99,4 @@ spec:
             - { name: fint.flyt.base-url, value: 'https://vlfk-no-skjema.vigoiks.no' }
             - { name: fint.flyt.resource-server.security.api.external.enabled, value: 'true' }
             - { name: fint.flyt.resource-server.security.api.external.authorized-client-ids, value: '2' }
-            - { name: spring.webflux.base-path, value: 'vlfk-no' }
+            - { name: spring.webflux.base-path, value: 'alpha/vlfk-no' }

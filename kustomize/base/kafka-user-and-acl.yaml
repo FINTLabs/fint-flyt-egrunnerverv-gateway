@@ -5,4 +5,4 @@ metadata:
 spec:
   acls:
     - permission: admin
-      topic: 'no-permission'
+      topic: 'read'

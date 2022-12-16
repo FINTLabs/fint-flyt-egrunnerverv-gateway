@@ -6,10 +6,7 @@ import no.fintlabs.model.EgrunnervervDocumentInstance;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import static no.fintlabs.resourceserver.UrlPaths.EXTERNAL_API;
@@ -23,7 +20,7 @@ import static no.fintlabs.resourceserver.UrlPaths.EXTERNAL_API;
 
 
 @RestController
-@RequestMapping(EXTERNAL_API + "/egrunnerverv/instances")
+@RequestMapping(EXTERNAL_API + "/egrunnerverv/instances/{orgNr}")
 public class EgrunnervervInstanceController {
 
 

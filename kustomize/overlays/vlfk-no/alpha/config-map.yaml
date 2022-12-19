@@ -9,4 +9,4 @@ data:
   fint.flyt.base-url: 'flyt.vigoiks.no/alpha/vlfk-no'
   fint.flyt.resource-server.security.api.external.enabled: 'true'
   fint.flyt.resource-server.security.api.external.authorized-client-ids: '2'
-  spring.webflux.base-path: 'alpha/vlfk-no'
+  spring.webflux.base-path: 'alpha'

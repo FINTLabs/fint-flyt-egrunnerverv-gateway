@@ -15,9 +15,8 @@ import java.util.List;
 @NoArgsConstructor
 public class EgrunnervervArchiveInstance {
 
-    @JsonProperty(value="sys_id")
     @NotBlank
-    private String sysId;
+    private String sys_id;
     private String knr;
     private String gnr;
     private String bnr;

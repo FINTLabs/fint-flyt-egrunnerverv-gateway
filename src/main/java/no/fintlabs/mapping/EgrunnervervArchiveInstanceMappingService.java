@@ -17,7 +17,7 @@ public class EgrunnervervArchiveInstanceMappingService implements InstanceMapper
     public Mono<Instance> map(Long aLong, EgrunnervervArchiveInstance egrunnervervArchiveInstance) {
         return Mono.just(Instance.builder()
                 .fieldPerKey(Stream.of(
-                                InstanceField.builder().key("sys_id").value(egrunnervervArchiveInstance.getSysId()).build(),
+                                InstanceField.builder().key("sys_id").value(egrunnervervArchiveInstance.getSys_id()).build(),
                                 InstanceField.builder().key("knr").value(egrunnervervArchiveInstance.getKnr()).build(),
                                 InstanceField.builder().key("gnr").value(egrunnervervArchiveInstance.getGnr()).build(),
                                 InstanceField.builder().key("bnr").value(egrunnervervArchiveInstance.getBnr()).build(),

@@ -2,7 +2,6 @@ package no.fintlabs.mapping
 
 import no.fintlabs.gateway.instance.model.instance.Instance
 import no.fintlabs.gateway.instance.model.instance.InstanceField
-import no.fintlabs.mapping.EgrunnervervArchiveInstanceMappingService
 import no.fintlabs.model.EgrunnervervArchiveInstance
 import spock.lang.Specification
 
@@ -17,7 +16,7 @@ class EgrunnervervArchiveInstanceMappingServiceSpec extends Specification {
 
         egrunnervervArchiveInstance = EgrunnervervArchiveInstance
                 .builder()
-                .sysId("testSysId")
+                .sys_id("testSysId")
                 .knr("testKnr")
                 .gnr("testGnr")
                 .bnr("testBnr")
@@ -33,7 +32,7 @@ class EgrunnervervArchiveInstanceMappingServiceSpec extends Specification {
         expectedInstance = Instance
                 .builder()
                 .fieldPerKey(Map.of(
-                        "sysId", InstanceField.builder().key("sysId").value("testSysId").build(),
+                        "sys_id", InstanceField.builder().key("sys_id").value("testSysId").build(),
                         "knr", InstanceField.builder().key("knr").value("testKnr").build(),
                         "gnr", InstanceField.builder().key("gnr").value("testGnr").build(),
                         "bnr", InstanceField.builder().key("bnr").value("testBnr").build(),

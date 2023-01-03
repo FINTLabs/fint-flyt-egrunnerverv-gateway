@@ -21,7 +21,7 @@ public class InstanceProcessorConfiguration {
     ) {
         return instanceProcessorFactoryService.createInstanceProcessor(
                 "archive",
-                egrunnervervArchiveInstance -> Optional.ofNullable(egrunnervervArchiveInstance.getSys_id()),
+                egrunnervervArchiveInstance -> Optional.ofNullable(egrunnervervArchiveInstance.getSysId()),
                 egrunnervervArchiveInstanceMappingService
         );
     }

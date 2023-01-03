@@ -1,6 +1,5 @@
 package no.fintlabs.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +15,7 @@ import java.util.List;
 public class EgrunnervervArchiveInstance {
 
     @NotBlank
-    private String sys_id;
+    private String sysId;
     private String knr;
     private String gnr;
     private String bnr;

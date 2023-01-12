@@ -31,5 +31,7 @@ spec:
           envFrom:
             - secretRef:
                 name: fint-flyt-egrunnerverv-instance-gateway-kafka
+            - secretRef:
+                name: fint-flyt-file-oauth2-client
             - configMapRef:
                 name: fint-flyt-egrunnerverv-instance-gateway

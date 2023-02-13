@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.security.PrivateKey;
 import java.util.List;
 
 @Data

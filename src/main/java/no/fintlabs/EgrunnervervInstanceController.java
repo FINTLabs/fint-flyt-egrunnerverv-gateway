@@ -1,6 +1,7 @@
 package no.fintlabs;
 
 import no.fintlabs.gateway.instance.InstanceProcessor;
+import no.fintlabs.gateway.instance.validation.InstanceValidationService;
 import no.fintlabs.model.EgrunnervervArchiveInstance;
 import no.fintlabs.model.EgrunnervervDocumentInstance;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,12 @@ public class EgrunnervervInstanceController {
 
     private final InstanceProcessor<EgrunnervervArchiveInstance> archiveInstanceProcessor;
     private final InstanceProcessor<EgrunnervervDocumentInstance> documentInstanceProcessor;
+    private final InstanceValidationService instanceValidationService;
 
-    public EgrunnervervInstanceController(InstanceProcessor<EgrunnervervArchiveInstance> archiveInstanceProcessor, InstanceProcessor<EgrunnervervDocumentInstance> documentInstanceProcessor) {
+    public EgrunnervervInstanceController(InstanceProcessor<EgrunnervervArchiveInstance> archiveInstanceProcessor, InstanceProcessor<EgrunnervervDocumentInstance> documentInstanceProcessor, InstanceValidationService instanceValidationService) {
         this.archiveInstanceProcessor = archiveInstanceProcessor;
         this.documentInstanceProcessor = documentInstanceProcessor;
+        this.instanceValidationService = instanceValidationService;
     }
 
 
@@ -32,7 +35,6 @@ public class EgrunnervervInstanceController {
     ) {
         return authenticationMono.flatMap(authentication -> archiveInstanceProcessor.processInstance(authentication, egrunnervervArchiveInstance));
     }
-
 
     @PostMapping("document")
     public Mono<ResponseEntity<?>> postDocumentInstance(

@@ -58,6 +58,7 @@ public class EgrunnervervArchiveInstanceMappingService implements InstanceMapper
                         "epost", egrunnervervArchiveCasePart.getEpost(),
                         "telefon", egrunnervervArchiveCasePart.getTelefon(),
                         "postadresse", egrunnervervArchiveCasePart.getPostadresse(),
+                        "postnummer", egrunnervervArchiveCasePart.getPostnummer(),
                         "poststed", egrunnervervArchiveCasePart.getPoststed()
                 ))
                 .build();

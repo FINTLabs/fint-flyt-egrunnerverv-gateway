@@ -1,7 +1,7 @@
 package no.fintlabs.mapping;
 
 import no.fintlabs.gateway.instance.InstanceMapper;
-import no.fintlabs.gateway.instance.model.instance.InstanceElement;
+import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.model.EgrunnervervArchiveCasePart;
 import no.fintlabs.model.EgrunnervervArchiveClassification;
 import no.fintlabs.model.EgrunnervervArchiveInstance;
@@ -14,7 +14,7 @@ import java.util.Map;
 @Service
 public class EgrunnervervArchiveInstanceMappingService implements InstanceMapper<EgrunnervervArchiveInstance> {
     @Override
-    public Mono<InstanceElement> map(Long sourceApplicationId, EgrunnervervArchiveInstance egrunnervervArchiveInstance) {
+    public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervArchiveInstance egrunnervervArchiveInstance) {
         Map<String, String> valuePerKey = new HashMap<>();
         valuePerKey.put("sys_id", egrunnervervArchiveInstance.getSys_id());
         valuePerKey.put("knr", egrunnervervArchiveInstance.getKnr());
@@ -31,16 +31,16 @@ public class EgrunnervervArchiveInstanceMappingService implements InstanceMapper
         valuePerKey.put("kommunenavn", egrunnervervArchiveInstance.getKommunenavn());
         valuePerKey.put("adresse", egrunnervervArchiveInstance.getAdresse());
         return Mono.just(
-                InstanceElement.builder()
+                InstanceObject.builder()
                         .valuePerKey(valuePerKey)
-                        .elementCollectionPerKey(Map.of(
+                        .objectCollectionPerKey(Map.of(
                                 "saksparter", egrunnervervArchiveInstance.getSaksparter()
                                         .stream()
-                                        .map(this::toInstanceElement)
+                                        .map(this::toInstanceObject)
                                         .toList(),
                                 "klasseringer", egrunnervervArchiveInstance.getKlasseringer()
                                         .stream()
-                                        .map(this::toInstanceElement)
+                                        .map(this::toInstanceObject)
                                         .toList()
                         ))
                         .build()
@@ -48,8 +48,8 @@ public class EgrunnervervArchiveInstanceMappingService implements InstanceMapper
     }
 
 
-    private InstanceElement toInstanceElement(EgrunnervervArchiveCasePart egrunnervervArchiveCasePart) {
-        return InstanceElement
+    private InstanceObject toInstanceObject(EgrunnervervArchiveCasePart egrunnervervArchiveCasePart) {
+        return InstanceObject
                 .builder()
                 .valuePerKey(Map.of(
                         "sakspartRolleId", egrunnervervArchiveCasePart.getSakspartRolleId(),
@@ -64,8 +64,8 @@ public class EgrunnervervArchiveInstanceMappingService implements InstanceMapper
                 .build();
     }
 
-    private InstanceElement toInstanceElement(EgrunnervervArchiveClassification egrunnervervArchiveClassification) {
-        return InstanceElement
+    private InstanceObject toInstanceObject(EgrunnervervArchiveClassification egrunnervervArchiveClassification) {
+        return InstanceObject
                 .builder()
                 .valuePerKey(Map.of(
                         "ordningsprinsipp", egrunnervervArchiveClassification.getOrdningsprinsipp(),

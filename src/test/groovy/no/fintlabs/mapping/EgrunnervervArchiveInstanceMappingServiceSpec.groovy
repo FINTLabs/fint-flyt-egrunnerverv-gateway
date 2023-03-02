@@ -1,7 +1,7 @@
 package no.fintlabs.mapping
 
 
-import no.fintlabs.gateway.instance.model.instance.InstanceElement
+import no.fintlabs.gateway.instance.model.instance.InstanceObject
 import no.fintlabs.model.EgrunnervervArchiveCasePart
 import no.fintlabs.model.EgrunnervervArchiveClassification
 import no.fintlabs.model.EgrunnervervArchiveInstance
@@ -11,7 +11,7 @@ class EgrunnervervArchiveInstanceMappingServiceSpec extends Specification {
 
     private EgrunnervervArchiveInstanceMappingService egrunnervervArchiveInstanceMappingService
     private EgrunnervervArchiveInstance egrunnervervArchiveInstance
-    private InstanceElement expectedInstance
+    private InstanceObject expectedInstance
 
     def setup() {
         egrunnervervArchiveInstanceMappingService = new EgrunnervervArchiveInstanceMappingService()
@@ -77,29 +77,29 @@ class EgrunnervervArchiveInstanceMappingServiceSpec extends Specification {
                 ))
                 .build()
 
-        Map<String, String> valuePerKey = new HashMap<>();
-        valuePerKey.put("sys_id", "testSysId");
-        valuePerKey.put("knr", "testKnr");
-        valuePerKey.put("gnr", "testGnr");
-        valuePerKey.put("bnr", "testBnr");
-        valuePerKey.put("fnr", "testFnr");
-        valuePerKey.put("snr", "testSnr");
-        valuePerKey.put("takstnummer", "testTakstnummer");
-        valuePerKey.put("tittel", "testTittel");
-        valuePerKey.put("eierforholdsnavn", "testEierforholdsnavn");
-        valuePerKey.put("eierforholdskode", "");
-        valuePerKey.put("prosjektnr", null);
-        valuePerKey.put("prosjektnavn", "testProsjektnavn");
-        valuePerKey.put("kommunenavn", "testKommunenavn");
-        valuePerKey.put("adresse", "testAdresse");
-        expectedInstance = InstanceElement
+        Map<String, String> valuePerKey = new HashMap<>()
+        valuePerKey.put("sys_id", "testSysId")
+        valuePerKey.put("knr", "testKnr")
+        valuePerKey.put("gnr", "testGnr")
+        valuePerKey.put("bnr", "testBnr")
+        valuePerKey.put("fnr", "testFnr")
+        valuePerKey.put("snr", "testSnr")
+        valuePerKey.put("takstnummer", "testTakstnummer")
+        valuePerKey.put("tittel", "testTittel")
+        valuePerKey.put("eierforholdsnavn", "testEierforholdsnavn")
+        valuePerKey.put("eierforholdskode", "")
+        valuePerKey.put("prosjektnr", null)
+        valuePerKey.put("prosjektnavn", "testProsjektnavn")
+        valuePerKey.put("kommunenavn", "testKommunenavn")
+        valuePerKey.put("adresse", "testAdresse")
+        expectedInstance = InstanceObject
                 .builder()
                 .valuePerKey(valuePerKey)
-                .elementCollectionPerKey(
+                .objectCollectionPerKey(
 
                         Map.of(
                                 "saksparter", List.of(
-                                InstanceElement
+                                InstanceObject
                                         .builder()
                                         .valuePerKey(Map.of(
                                                 "sakspartRolleId", "test1SakspartRolleId",
@@ -112,7 +112,7 @@ class EgrunnervervArchiveInstanceMappingServiceSpec extends Specification {
                                                 "poststed", "test1Poststed"
                                         ))
                                         .build(),
-                                InstanceElement
+                                InstanceObject
                                         .builder()
                                         .valuePerKey(Map.of(
                                                 "sakspartRolleId", "test2SakspartRolleId",
@@ -128,7 +128,7 @@ class EgrunnervervArchiveInstanceMappingServiceSpec extends Specification {
 
                         ),
                                 "klasseringer", List.of(
-                                InstanceElement
+                                InstanceObject
                                         .builder()
                                         .valuePerKey(Map.of(
                                                 "ordningsprinsipp", "test1Ordningsprinsipp",
@@ -138,7 +138,7 @@ class EgrunnervervArchiveInstanceMappingServiceSpec extends Specification {
                                                 "untattOffentlighet", "test1UntattOffentlighet"
                                         ))
                                         .build(),
-                                InstanceElement
+                                InstanceObject
                                         .builder()
                                         .valuePerKey(Map.of(
                                                 "ordningsprinsipp", "test2Ordningsprinsipp",
@@ -156,10 +156,10 @@ class EgrunnervervArchiveInstanceMappingServiceSpec extends Specification {
 
     def 'should map to instance'() {
         when:
-        InstanceElement instanceElement = egrunnervervArchiveInstanceMappingService.map(1, egrunnervervArchiveInstance).block()
+        InstanceObject instanceObject = egrunnervervArchiveInstanceMappingService.map(1, egrunnervervArchiveInstance).block()
 
         then:
-        instanceElement == expectedInstance
+        instanceObject == expectedInstance
     }
 
 }

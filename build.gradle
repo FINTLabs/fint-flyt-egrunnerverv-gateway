@@ -41,8 +41,11 @@ dependencies {
     implementation 'javax.validation:validation-api'
     implementation 'org.hibernate.validator:hibernate-validator'
 
+    implementation 'org.springframework.kafka:spring-kafka:2.8.4'
     implementation 'no.fintlabs:fint-kafka:2.3.0'
     implementation 'no.fintlabs:fint-flyt-kafka:2.2.0'
+
+    implementation 'org.modelmapper:modelmapper:3.1.1'
 
     implementation 'no.fintlabs:fint-flyt-cache:1.0.0'
     implementation 'no.fintlabs:fint-flyt-instance-gateway:4.0.0'

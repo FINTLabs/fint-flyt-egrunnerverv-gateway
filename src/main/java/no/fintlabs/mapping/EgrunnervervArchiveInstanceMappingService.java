@@ -4,7 +4,7 @@ import no.fintlabs.gateway.instance.InstanceMapper;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.model.EgrunnervervArchiveCasePart;
 import no.fintlabs.model.EgrunnervervArchiveClassification;
-import no.fintlabs.model.EgrunnervervArchiveInstance;
+import no.fintlabs.model.EgrunnervervArchiveInstanceToMap;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -12,33 +12,35 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class EgrunnervervArchiveInstanceMappingService implements InstanceMapper<EgrunnervervArchiveInstance> {
+public class EgrunnervervArchiveInstanceMappingService implements InstanceMapper<EgrunnervervArchiveInstanceToMap> {
+
     @Override
-    public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervArchiveInstance egrunnervervArchiveInstance) {
+    public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervArchiveInstanceToMap egrunnervervArchiveInstanceToMap) {
         Map<String, String> valuePerKey = new HashMap<>();
-        valuePerKey.put("sys_id", egrunnervervArchiveInstance.getSys_id());
-        valuePerKey.put("knr", egrunnervervArchiveInstance.getKnr());
-        valuePerKey.put("gnr", egrunnervervArchiveInstance.getGnr());
-        valuePerKey.put("bnr", egrunnervervArchiveInstance.getBnr());
-        valuePerKey.put("fnr", egrunnervervArchiveInstance.getFnr());
-        valuePerKey.put("snr", egrunnervervArchiveInstance.getSnr());
-        valuePerKey.put("takstnummer", egrunnervervArchiveInstance.getTakstnummer());
-        valuePerKey.put("tittel", egrunnervervArchiveInstance.getTittel());
-        valuePerKey.put("eierforholdsnavn", egrunnervervArchiveInstance.getEierforholdsnavn());
-        valuePerKey.put("eierforholdskode", egrunnervervArchiveInstance.getEierforholdskode());
-        valuePerKey.put("prosjektnr", egrunnervervArchiveInstance.getProsjektnr());
-        valuePerKey.put("prosjektnavn", egrunnervervArchiveInstance.getProsjektnavn());
-        valuePerKey.put("kommunenavn", egrunnervervArchiveInstance.getKommunenavn());
-        valuePerKey.put("adresse", egrunnervervArchiveInstance.getAdresse());
+        valuePerKey.put("sys_id", egrunnervervArchiveInstanceToMap.getSysId());
+        valuePerKey.put("knr", egrunnervervArchiveInstanceToMap.getKnr());
+        valuePerKey.put("gnr", egrunnervervArchiveInstanceToMap.getGnr());
+        valuePerKey.put("bnr", egrunnervervArchiveInstanceToMap.getBnr());
+        valuePerKey.put("fnr", egrunnervervArchiveInstanceToMap.getFnr());
+        valuePerKey.put("snr", egrunnervervArchiveInstanceToMap.getSnr());
+        valuePerKey.put("takstnummer", egrunnervervArchiveInstanceToMap.getTakstnummer());
+        valuePerKey.put("tittel", egrunnervervArchiveInstanceToMap.getTittel());
+        valuePerKey.put("eierforholdsnavn", egrunnervervArchiveInstanceToMap.getEierforholdsnavn());
+        valuePerKey.put("eierforholdskode", egrunnervervArchiveInstanceToMap.getEierforholdskode());
+        valuePerKey.put("prosjektnr", egrunnervervArchiveInstanceToMap.getProsjektnr());
+        valuePerKey.put("prosjektnavn", egrunnervervArchiveInstanceToMap.getProsjektnavn());
+        valuePerKey.put("kommunenavn", egrunnervervArchiveInstanceToMap.getKommunenavn());
+        valuePerKey.put("adresse", egrunnervervArchiveInstanceToMap.getAdresse());
+        valuePerKey.put("saksansvarlig", egrunnervervArchiveInstanceToMap.getSaksansvarlig());
         return Mono.just(
                 InstanceObject.builder()
                         .valuePerKey(valuePerKey)
                         .objectCollectionPerKey(Map.of(
-                                "saksparter", egrunnervervArchiveInstance.getSaksparter()
+                                "saksparter", egrunnervervArchiveInstanceToMap.getSaksparter()
                                         .stream()
                                         .map(this::toInstanceObject)
                                         .toList(),
-                                "klasseringer", egrunnervervArchiveInstance.getKlasseringer()
+                                "klasseringer", egrunnervervArchiveInstanceToMap.getKlasseringer()
                                         .stream()
                                         .map(this::toInstanceObject)
                                         .toList()

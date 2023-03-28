@@ -1,24 +1,24 @@
 package no.fintlabs.mapping
 
-
 import no.fintlabs.gateway.instance.model.instance.InstanceObject
 import no.fintlabs.model.EgrunnervervArchiveCasePart
 import no.fintlabs.model.EgrunnervervArchiveClassification
-import no.fintlabs.model.EgrunnervervArchiveInstance
+import no.fintlabs.model.EgrunnervervArchiveInstanceToMap
 import spock.lang.Specification
 
 class EgrunnervervArchiveInstanceMappingServiceSpec extends Specification {
 
+    public static final int egrunnervervSourceApplicationId = 2
     private EgrunnervervArchiveInstanceMappingService egrunnervervArchiveInstanceMappingService
-    private EgrunnervervArchiveInstance egrunnervervArchiveInstance
+    private EgrunnervervArchiveInstanceToMap egrunnervervArchiveInstanceToMap
     private InstanceObject expectedInstance
 
     def setup() {
         egrunnervervArchiveInstanceMappingService = new EgrunnervervArchiveInstanceMappingService()
 
-        egrunnervervArchiveInstance = EgrunnervervArchiveInstance
+        egrunnervervArchiveInstanceToMap = EgrunnervervArchiveInstanceToMap
                 .builder()
-                .sys_id("testSysId")
+                .sysId("testSysId")
                 .knr("testKnr")
                 .gnr("testGnr")
                 .bnr("testBnr")
@@ -26,12 +26,14 @@ class EgrunnervervArchiveInstanceMappingServiceSpec extends Specification {
                 .snr("testSnr")
                 .takstnummer("testTakstnummer")
                 .tittel("testTittel")
+                .saksansvarligEpost("testSaksansvarligEpost")
                 .eierforholdsnavn("testEierforholdsnavn")
                 .eierforholdskode("")
                 .prosjektnr(null)
                 .prosjektnavn("testProsjektnavn")
                 .kommunenavn("testKommunenavn")
                 .adresse("testAdresse")
+                .saksansvarlig("testSaksansvarlig")
                 .saksparter(List.of(
                         EgrunnervervArchiveCasePart
                                 .builder()
@@ -92,6 +94,7 @@ class EgrunnervervArchiveInstanceMappingServiceSpec extends Specification {
         valuePerKey.put("prosjektnavn", "testProsjektnavn")
         valuePerKey.put("kommunenavn", "testKommunenavn")
         valuePerKey.put("adresse", "testAdresse")
+        valuePerKey.put("saksansvarlig", "testSaksansvarlig")
         expectedInstance = InstanceObject
                 .builder()
                 .valuePerKey(valuePerKey)
@@ -156,7 +159,7 @@ class EgrunnervervArchiveInstanceMappingServiceSpec extends Specification {
 
     def 'should map to instance'() {
         when:
-        InstanceObject instanceObject = egrunnervervArchiveInstanceMappingService.map(1, egrunnervervArchiveInstance).block()
+        InstanceObject instanceObject = egrunnervervArchiveInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervArchiveInstanceToMap).block()
 
         then:
         instanceObject == expectedInstance

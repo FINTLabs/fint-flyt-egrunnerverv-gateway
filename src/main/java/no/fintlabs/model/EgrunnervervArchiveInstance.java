@@ -1,23 +1,24 @@
 package no.fintlabs.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@Data
-@Builder
+@Getter
+@Setter
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class EgrunnervervArchiveInstance {
 
     @NotBlank
-    private String sys_id;
+    @JsonProperty("sys_id")
+    private String sysId;
     @NotNull
     private String knr;
     @NotNull
@@ -46,7 +47,6 @@ public class EgrunnervervArchiveInstance {
     private String kommunenavn;
     @NotNull
     private String adresse;
-
 
     private List<@Valid @NotNull EgrunnervervArchiveCasePart> saksparter;
     private List<@Valid @NotNull EgrunnervervArchiveClassification> klasseringer;

@@ -8,6 +8,10 @@ plugins {
 group = 'no.fintlabs'
 sourceCompatibility = '17'
 
+jar {
+    enabled = false
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -69,8 +73,4 @@ test {
     useJUnitPlatform()
 }
 
-jar {
-    enabled = true
-    archiveVersion = ""
-    archiveClassifier = ""
-}
+

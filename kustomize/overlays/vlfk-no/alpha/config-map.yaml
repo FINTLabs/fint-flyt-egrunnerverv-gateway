@@ -9,3 +9,4 @@ data:
   fint.flyt.resource-server.security.api.external.enabled: 'true'
   fint.flyt.resource-server.security.api.external.authorized-client-ids: '2'
   spring.webflux.base-path: 'alpha'
+  fint.flyt.egrunnerverv.retentionTimeInDays: '30'

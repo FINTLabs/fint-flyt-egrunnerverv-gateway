@@ -1,19 +1,15 @@
 package no.fintlabs;
 
+import no.fintlabs.exceptions.ArchiveCaseNotFoundException;
+import no.fintlabs.exceptions.ArchiveResourceNotFoundException;
 import no.fintlabs.gateway.instance.InstanceProcessor;
-import no.fintlabs.model.EgrunnervervArchiveInstance;
-import no.fintlabs.model.EgrunnervervArchiveInstanceToMap;
-import org.modelmapper.ModelMapper;
+import no.fintlabs.gateway.instance.kafka.ArchiveCaseRequestService;
+import no.fintlabs.models.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-
-import java.util.Optional;
 
 import static no.fintlabs.resourceserver.UrlPaths.EXTERNAL_API;
 
@@ -22,47 +18,86 @@ import static no.fintlabs.resourceserver.UrlPaths.EXTERNAL_API;
 public class EgrunnervervInstanceController {
 
 
-    private final InstanceProcessor<EgrunnervervArchiveInstanceToMap> archiveInstanceProcessor;
+    private final InstanceProcessor<EgrunnervervSakInstance> sakInstanceProcessor;
+    private final InstanceProcessor<EgrunnervervJournalpostInstance> journalpostInstanceProcessor;
+    private final ArchiveCaseRequestService archiveCaseRequestService;
     private final ResourceRepository resourceRepository;
+    private final EgrunnervervSimpleInstanceProducerService egrunnervervSimpleInstanceProducerService;
 
-    public EgrunnervervInstanceController(InstanceProcessor<EgrunnervervArchiveInstanceToMap> archiveInstanceProcessor, ResourceRepository resourceRepository) {
-        this.archiveInstanceProcessor = archiveInstanceProcessor;
+
+    public EgrunnervervInstanceController(
+            InstanceProcessor<EgrunnervervSakInstance> sakInstanceProcessor,
+            InstanceProcessor<EgrunnervervJournalpostInstance> journalpostInstanceProcessor,
+            ArchiveCaseRequestService archiveCaseRequestService,
+            ResourceRepository resourceRepository,
+            EgrunnervervSimpleInstanceProducerService egrunnervervSimpleInstanceProducerService
+    ) {
+        this.sakInstanceProcessor = sakInstanceProcessor;
+        this.journalpostInstanceProcessor = journalpostInstanceProcessor;
+        this.archiveCaseRequestService = archiveCaseRequestService;
         this.resourceRepository = resourceRepository;
+        this.egrunnervervSimpleInstanceProducerService = egrunnervervSimpleInstanceProducerService;
     }
 
 
     @PostMapping("archive")
-    public Mono<ResponseEntity<?>> postArchiveInstance(
-            @RequestBody EgrunnervervArchiveInstance egrunnervervArchiveInstance,
+    public Mono<ResponseEntity<?>> postSakInstance(
+            @RequestBody EgrunnervervSakInstanceDto egrunnervervSakInstanceDto,
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
+
+        String saksansvarlig = resourceRepository.getUsername(egrunnervervSakInstanceDto.getSaksansvarligEpost())
+                .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervSakInstanceDto.getSaksansvarligEpost()));
+
         return authenticationMono.flatMap(
-                authentication -> archiveInstanceProcessor.processInstance(
-                        authentication,
-                        getEgrunnervervArchiveInstanceToMap(egrunnervervArchiveInstance)
-                )
+                authentication -> sakInstanceProcessor.processInstance(
+                                authentication,
+                                EgrunnervervSakInstance.builder()
+                                        .egrunnervervSakInstanceDto(egrunnervervSakInstanceDto)
+                                        .saksansvarlig(saksansvarlig)
+                                        .build()
+                        )
+                        .doOnNext(responseEntity -> {
+                            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                                egrunnervervSimpleInstanceProducerService.publishSimpleSakInstance(
+                                        EgrunnervervSimpleInstance.builder()
+                                                .sysId(egrunnervervSakInstanceDto.getSysId())
+                                                .tableName(egrunnervervSakInstanceDto.getTable())
+                                                .build()
+                                );
+                            }
+                        })
         );
     }
 
-    private EgrunnervervArchiveInstanceToMap getEgrunnervervArchiveInstanceToMap(EgrunnervervArchiveInstance egrunnervervArchiveInstance) {
-        Optional<String> saksansvarlig = resourceRepository.getUsername(egrunnervervArchiveInstance.getSaksansvarligEpost());
-        if (saksansvarlig.isEmpty()) {
-            throw new ArchiveResourceNotFoundException(egrunnervervArchiveInstance.getSaksansvarligEpost());
-        }
+    @PostMapping("document")
+    public Mono<ResponseEntity<?>> postJournalpostInstance(
+            @RequestBody EgrunnervervJournalpostInstanceDto egrunnervervJournalpostInstanceDto,
+            @RequestParam("id") String saksnummer,
+            @AuthenticationPrincipal Mono<Authentication> authenticationMono
+    ) {
 
-        ModelMapper modelMapper = new ModelMapper();
+        archiveCaseRequestService.getByArchiveCaseId(saksnummer)
+                .orElseThrow(() -> new ArchiveCaseNotFoundException(saksnummer));
 
-        EgrunnervervArchiveInstanceToMap egrunnervervArchiveInstanceToMap = modelMapper.map(egrunnervervArchiveInstance, EgrunnervervArchiveInstanceToMap.class);
-        egrunnervervArchiveInstanceToMap.setSaksansvarlig(saksansvarlig.get());
-        return egrunnervervArchiveInstanceToMap;
+        return authenticationMono.flatMap(
+                authentication -> journalpostInstanceProcessor.processInstance(
+                        authentication,
+                        EgrunnervervJournalpostInstance.builder()
+                                .egrunnervervJournalpostInstanceDto(egrunnervervJournalpostInstanceDto)
+                                .saksnummer(saksnummer)
+                                .build()
+                ).doOnNext(responseEntity -> {
+                    if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                        egrunnervervSimpleInstanceProducerService.publishSimpleJournalpostInstance(
+                                EgrunnervervSimpleInstance.builder()
+                                        .sysId(egrunnervervJournalpostInstanceDto.getSysId())
+                                        .tableName(egrunnervervJournalpostInstanceDto.getTable())
+                                        .build()
+                        );
+                    }
+                })
+        );
     }
-
-//    @PostMapping("document")
-//    public Mono<ResponseEntity<?>> postDocumentInstance(
-//            @RequestBody EgrunnervervDocumentInstance egrunnervervDocumentInstance,
-//            @AuthenticationPrincipal Mono<Authentication> authenticationMono
-//    ) {
-//        return authenticationMono.flatMap(authentication -> documentInstanceProcessor.processInstance(authentication, egrunnervervDocumentInstance));
-//    }
 
 }

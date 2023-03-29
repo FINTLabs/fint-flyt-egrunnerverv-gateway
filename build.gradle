@@ -6,7 +6,6 @@ plugins {
 }
 
 group = 'no.fintlabs'
-version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
 
 configurations {
@@ -41,7 +40,7 @@ dependencies {
     implementation 'javax.validation:validation-api'
     implementation 'org.hibernate.validator:hibernate-validator'
 
-    implementation 'org.springframework.kafka:spring-kafka:2.8.4'
+    implementation 'org.springframework.kafka:spring-kafka:2.9.0'
     implementation 'no.fintlabs:fint-kafka:2.3.0'
     implementation 'no.fintlabs:fint-flyt-kafka:2.2.0'
 

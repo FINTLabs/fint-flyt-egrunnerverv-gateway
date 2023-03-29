@@ -22,19 +22,21 @@ public class EgrunnervervInstanceController {
     private final InstanceProcessor<EgrunnervervJournalpostInstance> journalpostInstanceProcessor;
     private final ArchiveCaseRequestService archiveCaseRequestService;
     private final ResourceRepository resourceRepository;
-    private final EgrunnervervSimpleSakProducerService egrunnervervSimpleSakProducerService;
+    private final EgrunnervervSimpleInstanceProducerService egrunnervervSimpleInstanceProducerService;
 
 
     public EgrunnervervInstanceController(
             InstanceProcessor<EgrunnervervSakInstance> sakInstanceProcessor,
             InstanceProcessor<EgrunnervervJournalpostInstance> journalpostInstanceProcessor,
             ArchiveCaseRequestService archiveCaseRequestService,
-            ResourceRepository resourceRepository, EgrunnervervSimpleSakProducerService egrunnervervSimpleSakProducerService) {
+            ResourceRepository resourceRepository,
+            EgrunnervervSimpleInstanceProducerService egrunnervervSimpleInstanceProducerService
+    ) {
         this.sakInstanceProcessor = sakInstanceProcessor;
         this.journalpostInstanceProcessor = journalpostInstanceProcessor;
         this.archiveCaseRequestService = archiveCaseRequestService;
         this.resourceRepository = resourceRepository;
-        this.egrunnervervSimpleSakProducerService = egrunnervervSimpleSakProducerService;
+        this.egrunnervervSimpleInstanceProducerService = egrunnervervSimpleInstanceProducerService;
     }
 
 
@@ -57,8 +59,8 @@ public class EgrunnervervInstanceController {
                         )
                         .doOnNext(responseEntity -> {
                             if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                                egrunnervervSimpleSakProducerService.publishSimpleSakInstance(
-                                        EgrunnervervSimpleSakInstance.builder()
+                                egrunnervervSimpleInstanceProducerService.publishSimpleSakInstance(
+                                        EgrunnervervSimpleInstance.builder()
                                                 .sysId(egrunnervervSakInstanceDto.getSysId())
                                                 .tableName(egrunnervervSakInstanceDto.getTable())
                                                 .build()
@@ -85,7 +87,16 @@ public class EgrunnervervInstanceController {
                                 .egrunnervervJournalpostInstanceDto(egrunnervervJournalpostInstanceDto)
                                 .saksnummer(saksnummer)
                                 .build()
-                )
+                ).doOnNext(responseEntity -> {
+                    if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                        egrunnervervSimpleInstanceProducerService.publishSimpleJournalpostInstance(
+                                EgrunnervervSimpleInstance.builder()
+                                        .sysId(egrunnervervJournalpostInstanceDto.getSysId())
+                                        .tableName(egrunnervervJournalpostInstanceDto.getTable())
+                                        .build()
+                        );
+                    }
+                })
         );
     }
 

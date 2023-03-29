@@ -15,7 +15,7 @@ public class EgrunnervervJournalpostDocument {
     @NotNull
     private final String tittel;
     @NotNull
-    private final String hoveddokument;
+    private final Boolean hoveddokument;
     @NotNull
     private final String filnavn;
     @NotNull

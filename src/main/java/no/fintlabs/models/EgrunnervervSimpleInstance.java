@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Data
 @Builder
-public class EgrunnervervSimpleSakInstance {
+public class EgrunnervervSimpleInstance {
     @NotNull
     private String sysId;
     @NotNull

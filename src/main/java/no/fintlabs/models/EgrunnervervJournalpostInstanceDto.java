@@ -19,6 +19,8 @@ public class EgrunnervervJournalpostInstanceDto {
     @JsonProperty("sys_id")
     private final String sysId;
     @NotNull
+    private final String table;
+    @NotNull
     private final String tittel;
     @NotNull
     private final String dokumentNavn;

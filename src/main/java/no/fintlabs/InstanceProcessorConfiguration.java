@@ -2,8 +2,10 @@ package no.fintlabs;
 
 import no.fintlabs.gateway.instance.InstanceProcessor;
 import no.fintlabs.gateway.instance.InstanceProcessorFactoryService;
-import no.fintlabs.mapping.EgrunnervervArchiveInstanceMappingService;
-import no.fintlabs.model.EgrunnervervArchiveInstanceToMap;
+import no.fintlabs.mapping.EgrunnervervJournalpostInstanceMappingService;
+import no.fintlabs.mapping.EgrunnervervSakInstanceMappingService;
+import no.fintlabs.models.EgrunnervervJournalpostInstance;
+import no.fintlabs.models.EgrunnervervSakInstance;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,15 +15,28 @@ import java.util.Optional;
 public class InstanceProcessorConfiguration {
 
     @Bean
-    public InstanceProcessor<EgrunnervervArchiveInstanceToMap> archiveInstanceProcessor(
+    public InstanceProcessor<EgrunnervervSakInstance> sakInstanceProcessor(
             InstanceProcessorFactoryService instanceProcessorFactoryService,
-            EgrunnervervArchiveInstanceMappingService egrunnervervArchiveInstanceMappingService
+            EgrunnervervSakInstanceMappingService egrunnervervSakInstanceMappingService
     ) {
         return instanceProcessorFactoryService.createInstanceProcessor(
-                "archive",
-                egrunnervervArchiveInstanceToMap -> Optional.ofNullable(egrunnervervArchiveInstanceToMap.getSysId()),
-                egrunnervervArchiveInstanceMappingService
+                "sak",
+                egrunnervervSakInstance -> Optional.ofNullable(egrunnervervSakInstance.getEgrunnervervSakInstanceDto().getSysId()),
+                egrunnervervSakInstanceMappingService
         );
     }
+
+    @Bean
+    public InstanceProcessor<EgrunnervervJournalpostInstance> journalpostInstanceProcessor(
+            InstanceProcessorFactoryService instanceProcessorFactoryService,
+            EgrunnervervJournalpostInstanceMappingService egrunnervervJournalpostInstanceMappingService
+    ) {
+        return instanceProcessorFactoryService.createInstanceProcessor(
+                "journalpost",
+                egrunnervervJournalpostInstance -> Optional.ofNullable(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getSysId()),
+                egrunnervervJournalpostInstanceMappingService
+        );
+    }
+
 
 }

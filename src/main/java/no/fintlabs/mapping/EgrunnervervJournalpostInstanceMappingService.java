@@ -13,10 +13,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class EgrunnervervJournalpostInstanceMappingService implements InstanceMapper<EgrunnervervJournalpostInstance> {
@@ -62,11 +59,11 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                 .map((Tuple2<Map<String, String>, List<InstanceObject>> hovedDokumentValuePerKeyAndVedleggInstanceObjects) -> {
                             HashMap<String, String> valuePerKey = new HashMap<>(
                                     Map.of(
-                                            "saksnummer", egrunnervervJournalpostInstance.getSaksnummer(),
-                                            "tittel", egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getTittel(),
-                                            "dokumentNavn", egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getDokumentNavn(),
-                                            "dokumentDato", egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getDokumentDato(),
-                                            "forsendelsesmaate", egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getForsendelsesMate()
+                                            "saksnummer", Optional.ofNullable(egrunnervervJournalpostInstance.getSaksnummer()).orElse(""),
+                                            "tittel", Optional.ofNullable(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getTittel()).orElse(""),
+                                            "dokumentNavn", Optional.ofNullable(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getDokumentNavn()).orElse(""),
+                                            "dokumentDato", Optional.ofNullable(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getDokumentDato()).orElse(""),
+                                            "forsendelsesmaate", Optional.ofNullable(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getForsendelsesMate()).orElse("")
                                     )
                             );
                             valuePerKey.putAll(hovedDokumentValuePerKeyAndVedleggInstanceObjects.getT1());
@@ -90,13 +87,13 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
         return InstanceObject
                 .builder()
                 .valuePerKey(Map.of(
-                        "navn", egrunnervervJournalpostReceiver.getNavn(),
-                        "organisasjonsnummer", egrunnervervJournalpostReceiver.getOrganisasjonsnummer(),
-                        "epost", egrunnervervJournalpostReceiver.getEpost(),
-                        "telefon", egrunnervervJournalpostReceiver.getTelefon(),
-                        "postadresse", egrunnervervJournalpostReceiver.getPostadresse(),
-                        "postnummer", egrunnervervJournalpostReceiver.getPostnummer(),
-                        "poststed", egrunnervervJournalpostReceiver.getPoststed()
+                        "navn", Optional.ofNullable(egrunnervervJournalpostReceiver.getNavn()).orElse(""),
+                        "organisasjonsnummer", Optional.ofNullable(egrunnervervJournalpostReceiver.getOrganisasjonsnummer()).orElse(""),
+                        "epost", Optional.ofNullable(egrunnervervJournalpostReceiver.getEpost()).orElse(""),
+                        "telefon", Optional.ofNullable(egrunnervervJournalpostReceiver.getTelefon()).orElse(""),
+                        "postadresse", Optional.ofNullable(egrunnervervJournalpostReceiver.getPostadresse()).orElse(""),
+                        "postnummer", Optional.ofNullable(egrunnervervJournalpostReceiver.getPostnummer()).orElse(""),
+                        "poststed", Optional.ofNullable(egrunnervervJournalpostReceiver.getPoststed()).orElse("")
                 ))
                 .build();
     }
@@ -132,8 +129,8 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
             EgrunnervervJournalpostDocument egrunnervervJournalpostDocument, UUID fileId
     ) {
         return Map.of(
-                "hoveddokumentTittel", egrunnervervJournalpostDocument.getTittel(),
-                "hoveddokumentFilnavn", egrunnervervJournalpostDocument.getFilnavn(),
+                "hoveddokumentTittel", Optional.ofNullable(egrunnervervJournalpostDocument.getTittel()).orElse(""),
+                "hoveddokumentFilnavn", Optional.ofNullable(egrunnervervJournalpostDocument.getFilnavn()).orElse(""),
                 "hoveddokumentFil", fileId.toString()
         );
     }
@@ -159,8 +156,8 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
         return InstanceObject
                 .builder()
                 .valuePerKey(Map.of(
-                        "tittel", egrunnervervJournalpostDocument.getTittel(),
-                        "filnavn", egrunnervervJournalpostDocument.getFilnavn(),
+                        "tittel", Optional.ofNullable(egrunnervervJournalpostDocument.getTittel()).orElse(""),
+                        "filnavn", Optional.ofNullable(egrunnervervJournalpostDocument.getFilnavn()).orElse(""),
                         "fil", fileId.toString()
                 ))
                 .build();

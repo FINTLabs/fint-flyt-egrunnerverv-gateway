@@ -38,7 +38,9 @@ public class ResourceRepository {
     }
 
     public void updatePersonalRessurs(PersonalressursResource resource) {
-        personalressursResources.put(resource.getKontaktinformasjon().getEpostadresse().toLowerCase(), resource);
+        if (resource.getKontaktinformasjon() != null && resource.getKontaktinformasjon().getEpostadresse() != null) {
+            personalressursResources.put(resource.getKontaktinformasjon().getEpostadresse().toLowerCase(), resource);
+        }
     }
 
     public void updateArkivRessurs(ArkivressursResource resource) {

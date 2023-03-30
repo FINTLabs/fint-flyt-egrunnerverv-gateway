@@ -38,7 +38,6 @@ class EgrunnervervSakInstanceDtoMappingServiceSpec extends Specification {
                 .saksparter(List.of(
                         EgrunnervervSaksPart
                                 .builder()
-                                .sakspartRolleId("test1SakspartRolleId")
                                 .navn("test1Navn")
                                 .organisasjonsnummer("test1Organisasjonsnr")
                                 .epost("test1Epost")
@@ -49,7 +48,6 @@ class EgrunnervervSakInstanceDtoMappingServiceSpec extends Specification {
                                 .build(),
                         EgrunnervervSaksPart
                                 .builder()
-                                .sakspartRolleId("test2SakspartRolleId")
                                 .navn("test2Navn")
                                 .organisasjonsnummer("test2Organisasjonsnr")
                                 .epost("test2Epost")
@@ -113,7 +111,6 @@ class EgrunnervervSakInstanceDtoMappingServiceSpec extends Specification {
                                 InstanceObject
                                         .builder()
                                         .valuePerKey(Map.of(
-                                                "sakspartRolleId", "test1SakspartRolleId",
                                                 "navn", "test1Navn",
                                                 "organisasjonsnummer", "test1Organisasjonsnr",
                                                 "epost", "test1Epost",
@@ -126,7 +123,6 @@ class EgrunnervervSakInstanceDtoMappingServiceSpec extends Specification {
                                 InstanceObject
                                         .builder()
                                         .valuePerKey(Map.of(
-                                                "sakspartRolleId", "test2SakspartRolleId",
                                                 "navn", "test2Navn",
                                                 "organisasjonsnummer", "test2Organisasjonsnr",
                                                 "epost", "test2Epost",

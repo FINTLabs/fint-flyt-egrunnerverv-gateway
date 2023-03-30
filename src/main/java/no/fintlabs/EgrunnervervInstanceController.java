@@ -46,7 +46,7 @@ public class EgrunnervervInstanceController {
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
 
-        String saksansvarlig = resourceRepository.getUsername(egrunnervervSakInstanceDto.getSaksansvarligEpost())
+        String saksansvarlig = resourceRepository.getSaksansvarligHref(egrunnervervSakInstanceDto.getSaksansvarligEpost())
                 .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervSakInstanceDto.getSaksansvarligEpost()));
 
         return authenticationMono.flatMap(

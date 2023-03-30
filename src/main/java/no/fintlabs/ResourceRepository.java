@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static no.fintlabs.links.ResourceLinkUtil.getFirstSelfLink;
+
 @Repository
 public class ResourceRepository {
 
@@ -17,7 +19,7 @@ public class ResourceRepository {
     private final Map<String, ArkivressursResource> arkivressursResources = new HashMap<>();
 
 
-    public Optional<String> getUsername(String epost) {
+    public Optional<String> getSaksansvarligHref(String epost) {
 
         Optional<PersonalressursResource> personalressursResource = Optional.ofNullable(personalressursResources.get(epost.toLowerCase()));
 
@@ -26,7 +28,7 @@ public class ResourceRepository {
                 .stream()
                 .filter(arkivressursResource -> filterArkivRessurs(arkivressursResource, resource.getBrukernavn().getIdentifikatorverdi()))
                 .findFirst()
-                .map(arkivressursResource -> arkivressursResource.getSystemId().getIdentifikatorverdi()));
+                .map(ResourceLinkUtil::getFirstSelfLink));
     }
 
     private boolean filterArkivRessurs(ArkivressursResource arkivressursResource, String personalRessursUsername) {
@@ -40,7 +42,7 @@ public class ResourceRepository {
     }
 
     public void updateArkivRessurs(ArkivressursResource resource) {
-        arkivressursResources.put(ResourceLinkUtil.getFirstSelfLink(resource), resource);
+        arkivressursResources.put(getFirstSelfLink(resource), resource);
     }
 
 }

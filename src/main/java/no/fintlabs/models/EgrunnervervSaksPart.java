@@ -13,8 +13,6 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class EgrunnervervSaksPart {
     @NotNull
-    private final String sakspartRolleId;
-    @NotNull
     private final String navn;
     @NotNull
     private final String organisasjonsnummer;

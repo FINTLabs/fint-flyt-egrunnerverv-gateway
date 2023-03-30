@@ -2,9 +2,9 @@ package no.fintlabs.mapping;
 
 import no.fintlabs.gateway.instance.InstanceMapper;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
-import no.fintlabs.models.EgrunnervervSaksPart;
-import no.fintlabs.models.EgrunnervervSakKlassering;
 import no.fintlabs.models.EgrunnervervSakInstance;
+import no.fintlabs.models.EgrunnervervSakKlassering;
+import no.fintlabs.models.EgrunnervervSaksPart;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -49,12 +49,10 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
         );
     }
 
-
     private InstanceObject toInstanceObject(EgrunnervervSaksPart egrunnervervSaksPart) {
         return InstanceObject
                 .builder()
                 .valuePerKey(Map.of(
-                        "sakspartRolleId", egrunnervervSaksPart.getSakspartRolleId(),
                         "navn", egrunnervervSaksPart.getNavn(),
                         "organisasjonsnummer", egrunnervervSaksPart.getOrganisasjonsnummer(),
                         "epost", egrunnervervSaksPart.getEpost(),

@@ -19,7 +19,7 @@ public class ResourceRepository {
 
     public Optional<String> getUsername(String epost) {
 
-        Optional<PersonalressursResource> personalressursResource = Optional.ofNullable(personalressursResources.get(epost));
+        Optional<PersonalressursResource> personalressursResource = Optional.ofNullable(personalressursResources.get(epost.toLowerCase()));
 
         return personalressursResource.flatMap(resource -> arkivressursResources
                 .values()
@@ -36,7 +36,7 @@ public class ResourceRepository {
     }
 
     public void updatePersonalRessurs(PersonalressursResource resource) {
-        personalressursResources.put(resource.getKontaktinformasjon().getEpostadresse(), resource);
+        personalressursResources.put(resource.getKontaktinformasjon().getEpostadresse().toLowerCase(), resource);
     }
 
     public void updateArkivRessurs(ArkivressursResource resource) {

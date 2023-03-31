@@ -1,10 +1,10 @@
 package no.fintlabs;
 
-import no.fintlabs.exceptions.ArchiveCaseNotFoundException;
-import no.fintlabs.exceptions.ArchiveResourceNotFoundException;
 import no.fintlabs.gateway.instance.InstanceProcessor;
-import no.fintlabs.gateway.instance.kafka.ArchiveCaseRequestService;
-import no.fintlabs.models.*;
+import no.fintlabs.models.EgrunnervervJournalpostInstance;
+import no.fintlabs.models.EgrunnervervJournalpostInstanceBody;
+import no.fintlabs.models.EgrunnervervSakInstance;
+import no.fintlabs.models.EgrunnervervSimpleInstance;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,49 +20,36 @@ public class EgrunnervervInstanceController {
 
     private final InstanceProcessor<EgrunnervervSakInstance> sakInstanceProcessor;
     private final InstanceProcessor<EgrunnervervJournalpostInstance> journalpostInstanceProcessor;
-    private final ArchiveCaseRequestService archiveCaseRequestService;
-    private final ResourceRepository resourceRepository;
     private final EgrunnervervSimpleInstanceProducerService egrunnervervSimpleInstanceProducerService;
 
 
     public EgrunnervervInstanceController(
             InstanceProcessor<EgrunnervervSakInstance> sakInstanceProcessor,
             InstanceProcessor<EgrunnervervJournalpostInstance> journalpostInstanceProcessor,
-            ArchiveCaseRequestService archiveCaseRequestService,
-            ResourceRepository resourceRepository,
             EgrunnervervSimpleInstanceProducerService egrunnervervSimpleInstanceProducerService
     ) {
         this.sakInstanceProcessor = sakInstanceProcessor;
         this.journalpostInstanceProcessor = journalpostInstanceProcessor;
-        this.archiveCaseRequestService = archiveCaseRequestService;
-        this.resourceRepository = resourceRepository;
         this.egrunnervervSimpleInstanceProducerService = egrunnervervSimpleInstanceProducerService;
     }
 
 
     @PostMapping("archive")
     public Mono<ResponseEntity<?>> postSakInstance(
-            @RequestBody EgrunnervervSakInstanceDto egrunnervervSakInstanceDto,
+            @RequestBody EgrunnervervSakInstance egrunnervervSakInstance,
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
-
-        String saksansvarlig = resourceRepository.getSaksansvarligHref(egrunnervervSakInstanceDto.getSaksansvarligEpost())
-                .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervSakInstanceDto.getSaksansvarligEpost()));
-
         return authenticationMono.flatMap(
                 authentication -> sakInstanceProcessor.processInstance(
                                 authentication,
-                                EgrunnervervSakInstance.builder()
-                                        .egrunnervervSakInstanceDto(egrunnervervSakInstanceDto)
-                                        .saksansvarlig(saksansvarlig)
-                                        .build()
+                                egrunnervervSakInstance
                         )
                         .doOnNext(responseEntity -> {
                             if (responseEntity.getStatusCode().is2xxSuccessful()) {
                                 egrunnervervSimpleInstanceProducerService.publishSimpleSakInstance(
                                         EgrunnervervSimpleInstance.builder()
-                                                .sysId(egrunnervervSakInstanceDto.getSysId())
-                                                .tableName(egrunnervervSakInstanceDto.getTable())
+                                                .sysId(egrunnervervSakInstance.getSysId())
+                                                .tableName(egrunnervervSakInstance.getTable())
                                                 .build()
                                 );
                             }
@@ -72,27 +59,25 @@ public class EgrunnervervInstanceController {
 
     @PostMapping("document")
     public Mono<ResponseEntity<?>> postJournalpostInstance(
-            @RequestBody EgrunnervervJournalpostInstanceDto egrunnervervJournalpostInstanceDto,
+            @RequestBody EgrunnervervJournalpostInstanceBody egrunnervervJournalpostInstanceBody,
             @RequestParam("id") String saksnummer,
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
-
-        archiveCaseRequestService.getByArchiveCaseId(saksnummer)
-                .orElseThrow(() -> new ArchiveCaseNotFoundException(saksnummer));
+        EgrunnervervJournalpostInstance egrunnervervJournalpostInstance = EgrunnervervJournalpostInstance.builder()
+                .egrunnervervJournalpostInstanceBody(egrunnervervJournalpostInstanceBody)
+                .saksnummer(saksnummer)
+                .build();
 
         return authenticationMono.flatMap(
                 authentication -> journalpostInstanceProcessor.processInstance(
                         authentication,
-                        EgrunnervervJournalpostInstance.builder()
-                                .egrunnervervJournalpostInstanceDto(egrunnervervJournalpostInstanceDto)
-                                .saksnummer(saksnummer)
-                                .build()
+                        egrunnervervJournalpostInstance
                 ).doOnNext(responseEntity -> {
                     if (responseEntity.getStatusCode().is2xxSuccessful()) {
                         egrunnervervSimpleInstanceProducerService.publishSimpleJournalpostInstance(
                                 EgrunnervervSimpleInstance.builder()
-                                        .sysId(egrunnervervJournalpostInstanceDto.getSysId())
-                                        .tableName(egrunnervervJournalpostInstanceDto.getTable())
+                                        .sysId(egrunnervervJournalpostInstanceBody.getSysId())
+                                        .tableName(egrunnervervJournalpostInstanceBody.getTable())
                                         .build()
                         );
                     }

@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class EgrunnervervJournalpostInstance {
     @NotNull
-    private final EgrunnervervJournalpostInstanceDto egrunnervervJournalpostInstanceDto;
+    private final EgrunnervervJournalpostInstanceBody egrunnervervJournalpostInstanceBody;
     @NotNull
     private final String saksnummer;
 }

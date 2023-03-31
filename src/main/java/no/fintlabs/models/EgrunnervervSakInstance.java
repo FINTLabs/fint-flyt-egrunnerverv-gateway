@@ -20,7 +20,7 @@ public class EgrunnervervSakInstance {
     @NotBlank
     @JsonProperty("sys_id")
     private final String sysId;
-    @NotNull
+    @NotBlank
     private final String table;
     @NotNull
     private final String knr;

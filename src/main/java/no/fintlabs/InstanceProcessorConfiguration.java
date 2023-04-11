@@ -21,7 +21,7 @@ public class InstanceProcessorConfiguration {
     ) {
         return instanceProcessorFactoryService.createInstanceProcessor(
                 "sak",
-                egrunnervervSakInstance -> Optional.ofNullable(egrunnervervSakInstance.getEgrunnervervSakInstanceDto().getSysId()),
+                egrunnervervSakInstance -> Optional.ofNullable(egrunnervervSakInstance.getSysId()),
                 egrunnervervSakInstanceMappingService
         );
     }
@@ -33,7 +33,9 @@ public class InstanceProcessorConfiguration {
     ) {
         return instanceProcessorFactoryService.createInstanceProcessor(
                 "journalpost",
-                egrunnervervJournalpostInstance -> Optional.ofNullable(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getSysId()),
+                egrunnervervJournalpostInstance -> Optional.ofNullable(
+                        egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getSysId()
+                ),
                 egrunnervervJournalpostInstanceMappingService
         );
     }

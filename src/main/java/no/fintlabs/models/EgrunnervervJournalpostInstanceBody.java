@@ -1,5 +1,6 @@
 package no.fintlabs.models;
 
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -7,6 +8,7 @@ import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -14,11 +16,11 @@ import java.util.List;
 @Jacksonized
 @EqualsAndHashCode
 @Builder
-public class EgrunnervervJournalpostInstanceDto {
+public class EgrunnervervJournalpostInstanceBody {
     @NotNull
     @JsonProperty("sys_id")
     private final String sysId;
-    @NotNull
+    @NotBlank
     private final String table;
     @NotNull
     private final String tittel;

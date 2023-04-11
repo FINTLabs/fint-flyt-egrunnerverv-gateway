@@ -1,24 +1,27 @@
 package no.fintlabs.mapping
 
+import no.fintlabs.ResourceRepository
 import no.fintlabs.gateway.instance.model.instance.InstanceObject
 import no.fintlabs.models.EgrunnervervSakInstance
-import no.fintlabs.models.EgrunnervervSakInstanceDto
 import no.fintlabs.models.EgrunnervervSakKlassering
 import no.fintlabs.models.EgrunnervervSaksPart
 import spock.lang.Specification
 
-class EgrunnervervSakInstanceDtoMappingServiceSpec extends Specification {
+class EgrunnervervSakInstanceMappingServiceSpec extends Specification {
 
     public static final int egrunnervervSourceApplicationId = 2
     private EgrunnervervSakInstanceMappingService egrunnervervSakInstanceMappingService
-    private EgrunnervervSakInstanceDto egrunnervervSakInstanceDto
     private EgrunnervervSakInstance egrunnervervSakInstance
     private InstanceObject expectedInstance
+    private ResourceRepository resourceRepository
 
     def setup() {
-        egrunnervervSakInstanceMappingService = new EgrunnervervSakInstanceMappingService()
+        resourceRepository = Mock(ResourceRepository.class)
+        resourceRepository.getSaksansvarligHref("testSaksansvarligEpost") >> Optional.of("testSaksansvarlig")
 
-        egrunnervervSakInstanceDto = EgrunnervervSakInstanceDto
+        egrunnervervSakInstanceMappingService = new EgrunnervervSakInstanceMappingService(resourceRepository)
+
+        egrunnervervSakInstance = EgrunnervervSakInstance
                 .builder()
                 .sysId("testSysId")
                 .knr("testKnr")
@@ -76,12 +79,6 @@ class EgrunnervervSakInstanceDtoMappingServiceSpec extends Specification {
                                 .build()
 
                 ))
-                .build()
-
-        egrunnervervSakInstance = EgrunnervervSakInstance
-                .builder()
-                .egrunnervervSakInstanceDto(egrunnervervSakInstanceDto)
-                .saksansvarlig("testSaksansvarlig")
                 .build()
 
         Map<String, String> valuePerKey = new HashMap<>()

@@ -1,11 +1,14 @@
 package no.fintlabs.mapping;
 
+import no.fintlabs.exceptions.ArchiveCaseNotFoundException;
 import no.fintlabs.gateway.instance.InstanceMapper;
+import no.fintlabs.gateway.instance.kafka.ArchiveCaseRequestService;
 import no.fintlabs.gateway.instance.model.File;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.gateway.instance.web.FileClient;
 import no.fintlabs.models.EgrunnervervJournalpostDocument;
 import no.fintlabs.models.EgrunnervervJournalpostInstance;
+import no.fintlabs.models.EgrunnervervJournalpostInstanceBody;
 import no.fintlabs.models.EgrunnervervJournalpostReceiver;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -18,16 +21,28 @@ import java.util.*;
 @Service
 public class EgrunnervervJournalpostInstanceMappingService implements InstanceMapper<EgrunnervervJournalpostInstance> {
 
+    private final ArchiveCaseRequestService archiveCaseRequestService;
     private final FileClient fileClient;
 
-    public EgrunnervervJournalpostInstanceMappingService(FileClient fileClient) {
+    public EgrunnervervJournalpostInstanceMappingService(
+            ArchiveCaseRequestService archiveCaseRequestService,
+            FileClient fileClient
+    ) {
+        this.archiveCaseRequestService = archiveCaseRequestService;
         this.fileClient = fileClient;
     }
 
     @Override
     public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervJournalpostInstance egrunnervervJournalpostInstance) {
-        EgrunnervervJournalpostDocument hoveddokument = egrunnervervJournalpostInstance
-                .getEgrunnervervJournalpostInstanceDto().getDokumenter()
+
+        archiveCaseRequestService.getByArchiveCaseId(egrunnervervJournalpostInstance.getSaksnummer())
+                .orElseThrow(() -> new ArchiveCaseNotFoundException(egrunnervervJournalpostInstance.getSaksnummer()));
+
+        EgrunnervervJournalpostInstanceBody egrunnervervJournalpostInstanceBody =
+                egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody();
+
+        EgrunnervervJournalpostDocument hoveddokument = egrunnervervJournalpostInstanceBody
+                .getDokumenter()
                 .stream()
                 .filter(EgrunnervervJournalpostDocument::getHoveddokument)
                 .findFirst()
@@ -35,20 +50,20 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                     throw new IllegalStateException("No hoveddokument");
                 });
 
-        List<EgrunnervervJournalpostDocument> vedlegg = egrunnervervJournalpostInstance
-                .getEgrunnervervJournalpostInstanceDto().getDokumenter()
+        List<EgrunnervervJournalpostDocument> vedlegg = egrunnervervJournalpostInstanceBody
+                .getDokumenter()
                 .stream()
                 .filter(dokument -> !dokument.getHoveddokument())
                 .toList();
 
         Mono<Map<String, String>> hoveddokumentInstanceValuePerKeyMono = mapHoveddokumentToInstanceValuePerKey(
                 sourceApplicationId,
-                egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getSysId(),
+                egrunnervervJournalpostInstanceBody.getSysId(),
                 hoveddokument
         );
         Mono<List<InstanceObject>> vedleggInstanceObjectsMono = mapAttachmentDocumentsToInstanceObjects(
                 sourceApplicationId,
-                egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getSysId(),
+                egrunnervervJournalpostInstanceBody.getSysId(),
                 vedlegg
         );
 
@@ -60,10 +75,10 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                             HashMap<String, String> valuePerKey = new HashMap<>(
                                     Map.of(
                                             "saksnummer", Optional.ofNullable(egrunnervervJournalpostInstance.getSaksnummer()).orElse(""),
-                                            "tittel", Optional.ofNullable(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getTittel()).orElse(""),
-                                            "dokumentNavn", Optional.ofNullable(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getDokumentNavn()).orElse(""),
-                                            "dokumentDato", Optional.ofNullable(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getDokumentDato()).orElse(""),
-                                            "forsendelsesmaate", Optional.ofNullable(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getForsendelsesMate()).orElse("")
+                                            "tittel", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getTittel()).orElse(""),
+                                            "dokumentNavn", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getDokumentNavn()).orElse(""),
+                                            "dokumentDato", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getDokumentDato()).orElse(""),
+                                            "forsendelsesmaate", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getForsendelsesMate()).orElse("")
                                     )
                             );
                             valuePerKey.putAll(hovedDokumentValuePerKeyAndVedleggInstanceObjects.getT1());
@@ -71,7 +86,7 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                                     .valuePerKey(valuePerKey)
                                     .objectCollectionPerKey(
                                             Map.of(
-                                                    "mottakere", egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceDto().getMottakere()
+                                                    "mottakere", egrunnervervJournalpostInstanceBody.getMottakere()
                                                             .stream()
                                                             .map(this::toInstanceObject)
                                                             .toList(),

@@ -4,5 +4,4 @@ metadata:
   name: fint-flyt-egrunnerverv-instance-gateway
 data:
   fint.org-id: 'vlfk.no'
-  spring.webflux.base-path: 'alpha'
-  logging.level.no.fintlabs.EgrunnervervInstanceController: 'DEBUG'
+  spring.webflux.base-path: 'beta'

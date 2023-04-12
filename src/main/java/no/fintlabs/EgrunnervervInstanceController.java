@@ -1,5 +1,6 @@
 package no.fintlabs;
 
+import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.gateway.instance.InstanceProcessor;
 import no.fintlabs.models.EgrunnervervJournalpostInstance;
 import no.fintlabs.models.EgrunnervervJournalpostInstanceBody;
@@ -15,6 +16,7 @@ import static no.fintlabs.resourceserver.UrlPaths.EXTERNAL_API;
 
 @RestController
 @RequestMapping(EXTERNAL_API + "/egrunnerverv/instances/{orgNr}")
+@Slf4j
 public class EgrunnervervInstanceController {
 
 
@@ -63,6 +65,9 @@ public class EgrunnervervInstanceController {
             @RequestParam("id") String saksnummer,
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
+
+        log.debug("table=" + egrunnervervJournalpostInstanceBody.getTable());
+
         EgrunnervervJournalpostInstance egrunnervervJournalpostInstance = EgrunnervervJournalpostInstance.builder()
                 .egrunnervervJournalpostInstanceBody(egrunnervervJournalpostInstanceBody)
                 .saksnummer(saksnummer)

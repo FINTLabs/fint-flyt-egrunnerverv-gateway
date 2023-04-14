@@ -25,7 +25,7 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
     @Override
     public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervSakInstance egrunnervervSakInstance) {
 
-        String saksansvarlig = resourceRepository.getSaksansvarligHref(egrunnervervSakInstance.getSaksansvarligEpost())
+        String saksansvarlig = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervSakInstance.getSaksansvarligEpost())
                 .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervSakInstance.getSaksansvarligEpost()));
 
         Map<String, String> valuePerKey = new HashMap<>();

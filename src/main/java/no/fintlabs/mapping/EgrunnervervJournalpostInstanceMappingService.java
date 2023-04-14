@@ -1,6 +1,8 @@
 package no.fintlabs.mapping;
 
+import no.fintlabs.ResourceRepository;
 import no.fintlabs.exceptions.ArchiveCaseNotFoundException;
+import no.fintlabs.exceptions.ArchiveResourceNotFoundException;
 import no.fintlabs.gateway.instance.InstanceMapper;
 import no.fintlabs.gateway.instance.kafka.ArchiveCaseRequestService;
 import no.fintlabs.gateway.instance.model.File;
@@ -24,12 +26,16 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
     private final ArchiveCaseRequestService archiveCaseRequestService;
     private final FileClient fileClient;
 
+    private final ResourceRepository resourceRepository;
+
+
     public EgrunnervervJournalpostInstanceMappingService(
             ArchiveCaseRequestService archiveCaseRequestService,
-            FileClient fileClient
-    ) {
+            FileClient fileClient,
+            ResourceRepository resourceRepository) {
         this.archiveCaseRequestService = archiveCaseRequestService;
         this.fileClient = fileClient;
+        this.resourceRepository = resourceRepository;
     }
 
     @Override
@@ -46,9 +52,7 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                 .stream()
                 .filter(EgrunnervervJournalpostDocument::getHoveddokument)
                 .findFirst()
-                .orElseThrow(() -> {
-                    throw new IllegalStateException("No hoveddokument");
-                });
+                .orElseThrow(() -> new IllegalStateException("No hoveddokument"));
 
         List<EgrunnervervJournalpostDocument> vedlegg = egrunnervervJournalpostInstanceBody
                 .getDokumenter()
@@ -72,15 +76,27 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                         vedleggInstanceObjectsMono
                 )
                 .map((Tuple2<Map<String, String>, List<InstanceObject>> hovedDokumentValuePerKeyAndVedleggInstanceObjects) -> {
-                            HashMap<String, String> valuePerKey = new HashMap<>(
-                                    Map.of(
-                                            "saksnummer", Optional.ofNullable(egrunnervervJournalpostInstance.getSaksnummer()).orElse(""),
-                                            "tittel", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getTittel()).orElse(""),
-                                            "dokumentNavn", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getDokumentNavn()).orElse(""),
-                                            "dokumentDato", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getDokumentDato()).orElse(""),
-                                            "forsendelsesmaate", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getForsendelsesMate()).orElse("")
-                                    )
-                            );
+
+                            String saksbehandler = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost())
+                                    .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost()));
+
+                            HashMap<String, String> valuePerKey = new HashMap<>();
+                            valuePerKey.put("saksnummer", Optional.ofNullable(egrunnervervJournalpostInstance.getSaksnummer()).orElse(""));
+                            valuePerKey.put("tittel", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getTittel()).orElse(""));
+                            valuePerKey.put("dokumentNavn", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getDokumentNavn()).orElse(""));
+                            valuePerKey.put("dokumentDato", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getDokumentDato()).orElse(""));
+                            valuePerKey.put("forsendelsesmaate", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getForsendelsesMate()).orElse(""));
+                            valuePerKey.put("kommunenavn", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getKommunenavn()).orElse(""));
+                            valuePerKey.put("knr", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getKnr()).orElse(""));
+                            valuePerKey.put("gnr", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getGnr()).orElse(""));
+                            valuePerKey.put("bnr", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getBnr()).orElse(""));
+                            valuePerKey.put("fnr", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getFnr()).orElse(""));
+                            valuePerKey.put("snr", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getSnr()).orElse(""));
+                            valuePerKey.put("eierforholdskode", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getEierforholdskode()).orElse(""));
+                            valuePerKey.put("prosjektnavn", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getProsjektnavn()).orElse(""));
+                            valuePerKey.put("saksbehandlerEpost", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost()).orElse(""));
+                            valuePerKey.put("saksbehandler", Optional.ofNullable(saksbehandler).orElse(""));
+
                             valuePerKey.putAll(hovedDokumentValuePerKeyAndVedleggInstanceObjects.getT1());
                             return InstanceObject.builder()
                                     .valuePerKey(valuePerKey)

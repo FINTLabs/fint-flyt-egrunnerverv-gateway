@@ -92,7 +92,7 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                             valuePerKey.put("bnr", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getBnr()).orElse(""));
                             valuePerKey.put("fnr", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getFnr()).orElse(""));
                             valuePerKey.put("snr", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getSnr()).orElse(""));
-                            valuePerKey.put("eierforholdskode", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getEierforholdskode()).orElse(""));
+                            valuePerKey.put("eierforhold", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getEierforhold()).orElse(""));
                             valuePerKey.put("prosjektnavn", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getProsjektnavn()).orElse(""));
                             valuePerKey.put("saksbehandlerEpost", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost()).orElse(""));
                             valuePerKey.put("saksbehandler", Optional.ofNullable(saksbehandler).orElse(""));

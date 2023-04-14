@@ -44,7 +44,7 @@ public class EgrunnervervJournalpostInstanceBody {
     @NotNull
     private final String snr;
     @NotNull
-    private final String eierforholdskode;
+    private final String eierforhold;
     @NotNull
     private final String prosjektnavn;
     @NotNull

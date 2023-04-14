@@ -46,6 +46,10 @@ public class EgrunnervervJournalpostInstanceBody {
     @NotNull
     private final String eierforhold;
     @NotNull
+    private final String id;
+    @NotNull
+    private final String maltittel;
+    @NotNull
     private final String prosjektnavn;
     @NotNull
     @JsonProperty("saksbehandler")

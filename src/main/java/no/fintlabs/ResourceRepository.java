@@ -19,7 +19,7 @@ public class ResourceRepository {
     private final Map<String, ArkivressursResource> arkivressursResources = new HashMap<>();
 
 
-    public Optional<String> getSaksansvarligHref(String epost) {
+    public Optional<String> getArkivressursHrefFromPersonEmail(String epost) {
 
         Optional<PersonalressursResource> personalressursResource = Optional.ofNullable(personalressursResources.get(epost.toLowerCase()));
 

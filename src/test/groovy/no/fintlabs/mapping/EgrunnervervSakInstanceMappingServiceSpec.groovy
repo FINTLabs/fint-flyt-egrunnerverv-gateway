@@ -17,7 +17,7 @@ class EgrunnervervSakInstanceMappingServiceSpec extends Specification {
 
     def setup() {
         resourceRepository = Mock(ResourceRepository.class)
-        resourceRepository.getSaksansvarligHref("testSaksansvarligEpost") >> Optional.of("testSaksansvarlig")
+        resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost") >> Optional.of("testSaksansvarlig")
 
         egrunnervervSakInstanceMappingService = new EgrunnervervSakInstanceMappingService(resourceRepository)
 

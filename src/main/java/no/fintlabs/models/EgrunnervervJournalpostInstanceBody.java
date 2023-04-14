@@ -31,6 +31,25 @@ public class EgrunnervervJournalpostInstanceBody {
     @NotNull
     @JsonProperty("forsendelsesmaate")
     private final String forsendelsesMate;
+    @NotNull
+    private final String kommunenavn;
+    @NotNull
+    private final String knr;
+    @NotNull
+    private final String gnr;
+    @NotNull
+    private final String bnr;
+    @NotNull
+    private final String fnr;
+    @NotNull
+    private final String snr;
+    @NotNull
+    private final String eierforholdskode;
+    @NotNull
+    private final String prosjektnavn;
+    @NotNull
+    @JsonProperty("saksbehandler")
+    private final String saksbehandlerEpost;
 
     private final List<@Valid @NotNull EgrunnervervJournalpostReceiver> mottakere;
     private final List<@Valid @NotNull EgrunnervervJournalpostDocument> dokumenter;

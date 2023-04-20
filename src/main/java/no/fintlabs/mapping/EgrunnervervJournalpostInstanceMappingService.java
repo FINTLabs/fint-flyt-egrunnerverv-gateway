@@ -13,6 +13,7 @@ import no.fintlabs.models.EgrunnervervJournalpostInstance;
 import no.fintlabs.models.EgrunnervervJournalpostInstanceBody;
 import no.fintlabs.models.EgrunnervervJournalpostReceiver;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -186,11 +187,16 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
     private InstanceObject mapAttachmentDocumentAndFileIdToInstanceObject(
             EgrunnervervJournalpostDocument egrunnervervJournalpostDocument, UUID fileId
     ) {
+        MediaType mediaType = MediaTypeFactory.getMediaType(egrunnervervJournalpostDocument.getFilnavn())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No media type fround for fileName=" + egrunnervervJournalpostDocument.getFilnavn()
+                ));
         return InstanceObject
                 .builder()
                 .valuePerKey(Map.of(
-                        "tittel", Optional.ofNullable(egrunnervervJournalpostDocument.getTittel()).orElse(""),
-                        "filnavn", Optional.ofNullable(egrunnervervJournalpostDocument.getFilnavn()).orElse(""),
+                                "tittel", Optional.ofNullable(egrunnervervJournalpostDocument.getTittel()).orElse(""),
+                                "filnavn", Optional.ofNullable(egrunnervervJournalpostDocument.getFilnavn()).orElse(""),
+                                "mediatype", mediaType.toString(),
                         "fil", fileId.toString()
                 ))
                 .build();

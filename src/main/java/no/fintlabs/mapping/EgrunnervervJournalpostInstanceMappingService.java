@@ -174,29 +174,35 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
             String sourceApplicationInstanceId,
             EgrunnervervJournalpostDocument egrunnervervJournalpostDocument
     ) {
+        MediaType mediaType = MediaTypeFactory.getMediaType(egrunnervervJournalpostDocument.getFilnavn())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No media type found for fileName=" + egrunnervervJournalpostDocument.getFilnavn()
+                ));
         File file = toFile(
                 sourceApplicationId,
                 sourceApplicationInstanceId,
                 egrunnervervJournalpostDocument,
-                MediaType.APPLICATION_PDF // TODO eivindmorch 29/03/2023 : Parse from fileName ending
+                mediaType
         );
         return fileClient.postFile(file)
-                .map(fileId -> mapAttachmentDocumentAndFileIdToInstanceObject(egrunnervervJournalpostDocument, fileId));
+                .map(fileId -> mapAttachmentDocumentAndFileIdToInstanceObject(
+                        egrunnervervJournalpostDocument,
+                        mediaType,
+                        fileId));
     }
 
     private InstanceObject mapAttachmentDocumentAndFileIdToInstanceObject(
-            EgrunnervervJournalpostDocument egrunnervervJournalpostDocument, UUID fileId
+            EgrunnervervJournalpostDocument egrunnervervJournalpostDocument,
+            MediaType mediaType,
+            UUID fileId
     ) {
-        MediaType mediaType = MediaTypeFactory.getMediaType(egrunnervervJournalpostDocument.getFilnavn())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "No media type fround for fileName=" + egrunnervervJournalpostDocument.getFilnavn()
-                ));
+
         return InstanceObject
                 .builder()
                 .valuePerKey(Map.of(
-                                "tittel", Optional.ofNullable(egrunnervervJournalpostDocument.getTittel()).orElse(""),
-                                "filnavn", Optional.ofNullable(egrunnervervJournalpostDocument.getFilnavn()).orElse(""),
-                                "mediatype", mediaType.toString(),
+                        "tittel", Optional.ofNullable(egrunnervervJournalpostDocument.getTittel()).orElse(""),
+                        "filnavn", Optional.ofNullable(egrunnervervJournalpostDocument.getFilnavn()).orElse(""),
+                        "mediatype", mediaType.toString(),
                         "fil", fileId.toString()
                 ))
                 .build();

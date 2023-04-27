@@ -1,14 +1,14 @@
 package no.fintlabs.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.extern.jackson.Jacksonized;
+
 import javax.validation.constraints.NotNull;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
+
+@Getter
+@EqualsAndHashCode
+@Jacksonized
 @Builder
 public class EgrunnervervSimpleInstance {
     @NotNull

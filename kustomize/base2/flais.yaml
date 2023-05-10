@@ -22,6 +22,10 @@ spec:
   env:
     - name: JAVA_TOOL_OPTIONS
       value: '-XX:+ExitOnOutOfMemoryError -Xmx1840M'
+    - name: fint.flyt.resource-server.security.api.external.enabled
+      value: "true"
+    - name: fint.flyt.resource-server.security.api.external.authorized-client-ids
+      value: "2"
   resources:
     limits:
       memory: "2048Mi"

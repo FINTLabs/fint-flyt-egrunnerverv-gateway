@@ -7,4 +7,3 @@ resources:
   - ingress-route.yaml
   - config-map.yaml
   - oauth2-file-client.yaml
-  - oauth2-egrunnerverv-client.yaml

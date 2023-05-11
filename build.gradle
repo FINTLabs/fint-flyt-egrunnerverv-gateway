@@ -51,7 +51,7 @@ dependencies {
     implementation 'org.modelmapper:modelmapper:3.1.1'
 
     implementation 'no.fintlabs:fint-flyt-cache:1.0.0'
-    implementation 'no.fintlabs:fint-flyt-instance-gateway:4.1.0'
+    implementation 'no.fintlabs:fint-flyt-instance-gateway:4.1.1-rc-1'
 
     implementation 'no.fint:fint-model-resource:0.4.1'
     implementation "no.fint:fint-arkiv-resource-model-java:3.11.0"

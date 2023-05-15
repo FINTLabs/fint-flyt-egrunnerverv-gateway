@@ -23,7 +23,6 @@ spec:
         topic: 'no-permission'
   url:
     hostname: flyt.vigoiks.no
-    basePath: path
   ingress:
     enabled: true
     basePath: path

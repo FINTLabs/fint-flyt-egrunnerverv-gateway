@@ -17,9 +17,9 @@ patches:
       - op: replace
         path: "/spec/orgId"
         value: "trondelagfylke.no"
-      - op: replace
+      - op: add
         path: "/spec/url/basePath"
-        value: "/beta/trondelagfylke-no"
+        value: "/beta"
       - op: replace
         path: "/spec/ingress/basePath"
         value: "/beta/api/egrunnerverv/instances/817920632"

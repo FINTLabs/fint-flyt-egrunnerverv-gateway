@@ -17,8 +17,8 @@ import java.util.Map;
 @Service
 public class EgrunnervervSakInstanceMappingService implements InstanceMapper<EgrunnervervSakInstance> {
 
-    @Value("${fint.flyt.egrunnerverv.checkSaksansvarligEpost:false}")
-    private boolean checkSaksansvarligEpost;
+    @Value("${fint.flyt.egrunnerverv.checkSaksansvarligEpost:true}")
+    boolean checkSaksansvarligEpost;
     private final ResourceRepository resourceRepository;
 
     public EgrunnervervSakInstanceMappingService(ResourceRepository resourceRepository) {

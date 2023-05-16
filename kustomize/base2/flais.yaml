@@ -33,6 +33,8 @@ spec:
       value: "true"
     - name: fint.flyt.resource-server.security.api.external.authorized-client-ids
       value: "2"
+    - name: fint.flyt.egrunnerverv.checkSaksansvarligEpost
+      value: "true"
   resources:
     limits:
       memory: "2048Mi"

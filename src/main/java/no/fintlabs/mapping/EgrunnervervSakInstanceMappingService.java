@@ -7,6 +7,7 @@ import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.models.EgrunnervervSakInstance;
 import no.fintlabs.models.EgrunnervervSakKlassering;
 import no.fintlabs.models.EgrunnervervSaksPart;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -16,6 +17,8 @@ import java.util.Map;
 @Service
 public class EgrunnervervSakInstanceMappingService implements InstanceMapper<EgrunnervervSakInstance> {
 
+    @Value("${fint.flyt.egrunnerverv.checkSaksansvarligEpost:false}")
+    private boolean checkSaksansvarligEpost;
     private final ResourceRepository resourceRepository;
 
     public EgrunnervervSakInstanceMappingService(ResourceRepository resourceRepository) {
@@ -25,8 +28,11 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
     @Override
     public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervSakInstance egrunnervervSakInstance) {
 
-        String saksansvarlig = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervSakInstance.getSaksansvarligEpost())
-                .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervSakInstance.getSaksansvarligEpost()));
+        String saksansvarlig = "";
+        if (checkSaksansvarligEpost) {
+            saksansvarlig = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervSakInstance.getSaksansvarligEpost())
+                    .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervSakInstance.getSaksansvarligEpost()));
+        }
 
         Map<String, String> valuePerKey = new HashMap<>();
         valuePerKey.put("sys_id", egrunnervervSakInstance.getSysId());

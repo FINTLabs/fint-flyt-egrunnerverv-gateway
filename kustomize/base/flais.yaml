@@ -37,6 +37,9 @@ spec:
       value: "true"
     - name: fint.flyt.egrunnerverv.checkSaksbehandler
       value: "true"
+  envFrom:
+    - secretRef:
+        name: fint-flyt-file-oauth2-client
   resources:
     limits:
       memory: "2048Mi"

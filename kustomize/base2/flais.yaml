@@ -35,6 +35,8 @@ spec:
       value: "2"
     - name: fint.flyt.egrunnerverv.checkSaksansvarligEpost
       value: "true"
+    - name: fint.flyt.egrunnerverv.checkSaksbehandler
+      value: "true"
   resources:
     limits:
       memory: "2048Mi"

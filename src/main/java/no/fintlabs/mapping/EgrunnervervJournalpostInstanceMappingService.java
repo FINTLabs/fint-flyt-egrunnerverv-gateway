@@ -12,6 +12,7 @@ import no.fintlabs.models.EgrunnervervJournalpostDocument;
 import no.fintlabs.models.EgrunnervervJournalpostInstance;
 import no.fintlabs.models.EgrunnervervJournalpostInstanceBody;
 import no.fintlabs.models.EgrunnervervJournalpostReceiver;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,8 @@ import java.util.*;
 @Service
 public class EgrunnervervJournalpostInstanceMappingService implements InstanceMapper<EgrunnervervJournalpostInstance> {
 
+    @Value("${fint.flyt.egrunnerverv.checkSaksbehandler:true}")
+    boolean checkSaksbehandler;
     private final ArchiveCaseRequestService archiveCaseRequestService;
     private final FileClient fileClient;
 
@@ -78,8 +81,11 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                 )
                 .map((Tuple2<Map<String, String>, List<InstanceObject>> hovedDokumentValuePerKeyAndVedleggInstanceObjects) -> {
 
-                            String saksbehandler = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost())
-                                    .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost()));
+                            String saksbehandler = "";
+                            if (checkSaksbehandler) {
+                                saksbehandler = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost())
+                                        .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost()));
+                            }
 
                             HashMap<String, String> valuePerKey = new HashMap<>();
                             valuePerKey.put("saksnummer", Optional.ofNullable(egrunnervervJournalpostInstance.getSaksnummer()).orElse(""));

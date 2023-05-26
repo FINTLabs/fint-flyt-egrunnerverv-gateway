@@ -150,27 +150,38 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                 .collectList();
     }
 
+    private MediaType getMediaType(EgrunnervervJournalpostDocument egrunnervervJournalpostDocument) {
+        return MediaTypeFactory.getMediaType(egrunnervervJournalpostDocument.getFilnavn())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No media type found for fileName=" + egrunnervervJournalpostDocument.getFilnavn()
+                ));
+    }
+
     private Mono<Map<String, String>> mapHoveddokumentToInstanceValuePerKey(
             Long sourceApplicationId,
             String sourceApplicationInstanceId,
             EgrunnervervJournalpostDocument egrunnervervJournalpostDocument
     ) {
+        MediaType mediaType = getMediaType(egrunnervervJournalpostDocument);
         File file = toFile(
                 sourceApplicationId,
                 sourceApplicationInstanceId,
                 egrunnervervJournalpostDocument,
-                MediaType.APPLICATION_PDF
+                mediaType
         );
         return fileClient.postFile(file)
-                .map(fileId -> mapHoveddokumentAndFileIdToInstanceValuePerKey(egrunnervervJournalpostDocument, fileId));
+                .map(fileId -> mapHoveddokumentAndFileIdToInstanceValuePerKey(egrunnervervJournalpostDocument, mediaType, fileId));
     }
 
     private Map<String, String> mapHoveddokumentAndFileIdToInstanceValuePerKey(
-            EgrunnervervJournalpostDocument egrunnervervJournalpostDocument, UUID fileId
+            EgrunnervervJournalpostDocument egrunnervervJournalpostDocument,
+            MediaType mediaType,
+            UUID fileId
     ) {
         return Map.of(
                 "hoveddokumentTittel", Optional.ofNullable(egrunnervervJournalpostDocument.getTittel()).orElse(""),
                 "hoveddokumentFilnavn", Optional.ofNullable(egrunnervervJournalpostDocument.getFilnavn()).orElse(""),
+                "hoveddokumentMediatype", mediaType.toString(),
                 "hoveddokumentFil", fileId.toString()
         );
     }
@@ -180,10 +191,7 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
             String sourceApplicationInstanceId,
             EgrunnervervJournalpostDocument egrunnervervJournalpostDocument
     ) {
-        MediaType mediaType = MediaTypeFactory.getMediaType(egrunnervervJournalpostDocument.getFilnavn())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "No media type found for fileName=" + egrunnervervJournalpostDocument.getFilnavn()
-                ));
+        MediaType mediaType = getMediaType(egrunnervervJournalpostDocument);
         File file = toFile(
                 sourceApplicationId,
                 sourceApplicationInstanceId,

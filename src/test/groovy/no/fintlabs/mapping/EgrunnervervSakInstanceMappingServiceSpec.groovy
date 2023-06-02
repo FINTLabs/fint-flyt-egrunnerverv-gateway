@@ -159,6 +159,10 @@ class EgrunnervervSakInstanceMappingServiceSpec extends Specification {
     }
 
     def 'should map to instance'() {
+        given:
+        EgrunnervervSakInstanceMappingService egrunnervervSakInstanceMappingService = new EgrunnervervSakInstanceMappingService(resourceRepository)
+        egrunnervervSakInstanceMappingService.checkSaksansvarligEpost = true // Set the value of checkSaksansvarligEpost manually
+
         when:
         InstanceObject instanceObject = egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block()
 

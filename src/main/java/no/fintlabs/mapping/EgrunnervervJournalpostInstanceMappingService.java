@@ -12,7 +12,9 @@ import no.fintlabs.models.EgrunnervervJournalpostDocument;
 import no.fintlabs.models.EgrunnervervJournalpostInstance;
 import no.fintlabs.models.EgrunnervervJournalpostInstanceBody;
 import no.fintlabs.models.EgrunnervervJournalpostReceiver;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,6 +25,8 @@ import java.util.*;
 @Service
 public class EgrunnervervJournalpostInstanceMappingService implements InstanceMapper<EgrunnervervJournalpostInstance> {
 
+    @Value("${fint.flyt.egrunnerverv.checkSaksbehandler:true}")
+    boolean checkSaksbehandler;
     private final ArchiveCaseRequestService archiveCaseRequestService;
     private final FileClient fileClient;
 
@@ -77,8 +81,11 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                 )
                 .map((Tuple2<Map<String, String>, List<InstanceObject>> hovedDokumentValuePerKeyAndVedleggInstanceObjects) -> {
 
-                            String saksbehandler = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost())
-                                    .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost()));
+                            String saksbehandler = "";
+                            if (checkSaksbehandler) {
+                                saksbehandler = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost())
+                                        .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost()));
+                            }
 
                             HashMap<String, String> valuePerKey = new HashMap<>();
                             valuePerKey.put("saksnummer", Optional.ofNullable(egrunnervervJournalpostInstance.getSaksnummer()).orElse(""));
@@ -143,27 +150,38 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                 .collectList();
     }
 
+    private MediaType getMediaType(EgrunnervervJournalpostDocument egrunnervervJournalpostDocument) {
+        return MediaTypeFactory.getMediaType(egrunnervervJournalpostDocument.getFilnavn())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No media type found for fileName=" + egrunnervervJournalpostDocument.getFilnavn()
+                ));
+    }
+
     private Mono<Map<String, String>> mapHoveddokumentToInstanceValuePerKey(
             Long sourceApplicationId,
             String sourceApplicationInstanceId,
             EgrunnervervJournalpostDocument egrunnervervJournalpostDocument
     ) {
+        MediaType mediaType = getMediaType(egrunnervervJournalpostDocument);
         File file = toFile(
                 sourceApplicationId,
                 sourceApplicationInstanceId,
                 egrunnervervJournalpostDocument,
-                MediaType.APPLICATION_PDF
+                mediaType
         );
         return fileClient.postFile(file)
-                .map(fileId -> mapHoveddokumentAndFileIdToInstanceValuePerKey(egrunnervervJournalpostDocument, fileId));
+                .map(fileId -> mapHoveddokumentAndFileIdToInstanceValuePerKey(egrunnervervJournalpostDocument, mediaType, fileId));
     }
 
     private Map<String, String> mapHoveddokumentAndFileIdToInstanceValuePerKey(
-            EgrunnervervJournalpostDocument egrunnervervJournalpostDocument, UUID fileId
+            EgrunnervervJournalpostDocument egrunnervervJournalpostDocument,
+            MediaType mediaType,
+            UUID fileId
     ) {
         return Map.of(
                 "hoveddokumentTittel", Optional.ofNullable(egrunnervervJournalpostDocument.getTittel()).orElse(""),
                 "hoveddokumentFilnavn", Optional.ofNullable(egrunnervervJournalpostDocument.getFilnavn()).orElse(""),
+                "hoveddokumentMediatype", mediaType.toString(),
                 "hoveddokumentFil", fileId.toString()
         );
     }
@@ -173,24 +191,32 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
             String sourceApplicationInstanceId,
             EgrunnervervJournalpostDocument egrunnervervJournalpostDocument
     ) {
+        MediaType mediaType = getMediaType(egrunnervervJournalpostDocument);
         File file = toFile(
                 sourceApplicationId,
                 sourceApplicationInstanceId,
                 egrunnervervJournalpostDocument,
-                MediaType.APPLICATION_PDF // TODO eivindmorch 29/03/2023 : Parse from fileName ending
+                mediaType
         );
         return fileClient.postFile(file)
-                .map(fileId -> mapAttachmentDocumentAndFileIdToInstanceObject(egrunnervervJournalpostDocument, fileId));
+                .map(fileId -> mapAttachmentDocumentAndFileIdToInstanceObject(
+                        egrunnervervJournalpostDocument,
+                        mediaType,
+                        fileId));
     }
 
     private InstanceObject mapAttachmentDocumentAndFileIdToInstanceObject(
-            EgrunnervervJournalpostDocument egrunnervervJournalpostDocument, UUID fileId
+            EgrunnervervJournalpostDocument egrunnervervJournalpostDocument,
+            MediaType mediaType,
+            UUID fileId
     ) {
+
         return InstanceObject
                 .builder()
                 .valuePerKey(Map.of(
                         "tittel", Optional.ofNullable(egrunnervervJournalpostDocument.getTittel()).orElse(""),
                         "filnavn", Optional.ofNullable(egrunnervervJournalpostDocument.getFilnavn()).orElse(""),
+                        "mediatype", mediaType.toString(),
                         "fil", fileId.toString()
                 ))
                 .build();

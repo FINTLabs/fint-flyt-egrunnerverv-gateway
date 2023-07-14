@@ -179,7 +179,7 @@ class EgrunnervervSakInstanceMappingServiceTest {
     }
 
     @Test
-    public void givenArkiressursHrefForSaksanvarlig_shouldReturnMappedInstanceAsExpected() {
+    public void givenArkivressursHrefForSaksanvarlig_shouldReturnMappedInstanceAsExpected() {
         when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.of("testSaksansvarlig"));
 
         egrunnervervSakInstanceMappingService = new EgrunnervervSakInstanceMappingService(resourceRepository);

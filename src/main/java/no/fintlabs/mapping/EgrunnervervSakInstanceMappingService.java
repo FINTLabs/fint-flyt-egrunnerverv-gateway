@@ -2,6 +2,7 @@ package no.fintlabs.mapping;
 
 import no.fintlabs.ResourceRepository;
 import no.fintlabs.exceptions.ArchiveResourceNotFoundException;
+import no.fintlabs.exceptions.NonMatchingDomainWithOrgIdException;
 import no.fintlabs.gateway.instance.InstanceMapper;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.models.EgrunnervervSakInstance;
@@ -19,7 +20,13 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
 
     @Value("${fint.flyt.egrunnerverv.checkSaksansvarligEpost:true}")
     boolean checkSaksansvarligEpost;
+
+    @Value("${fint.flyt.egrunnerverv.checkDomain:true}")
+    boolean checkDomain;
     private final ResourceRepository resourceRepository;
+
+    @Value("${fint.org-id}")
+    private String orgId;
 
     public EgrunnervervSakInstanceMappingService(ResourceRepository resourceRepository) {
         this.resourceRepository = resourceRepository;
@@ -34,6 +41,32 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
                     .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervSakInstance.getSaksansvarligEpost()));
         }
 
+        if (checkDomain) {
+            String domain = extractDomain(egrunnervervSakInstance.getSaksansvarligEpost());
+            if (!domain.equals(orgId)) {
+                throw new NonMatchingDomainWithOrgIdException(domain, orgId);
+            }
+        }
+
+        Map<String, String> valuePerKey = getStringStringMap(egrunnervervSakInstance, saksansvarlig);
+        return Mono.just(
+                InstanceObject.builder()
+                        .valuePerKey(valuePerKey)
+                        .objectCollectionPerKey(Map.of(
+                                "saksparter", egrunnervervSakInstance.getSaksparter()
+                                        .stream()
+                                        .map(this::toInstanceObject)
+                                        .toList(),
+                                "klasseringer", egrunnervervSakInstance.getKlasseringer()
+                                        .stream()
+                                        .map(this::toInstanceObject)
+                                        .toList()
+                        ))
+                        .build()
+        );
+    }
+
+    private static Map<String, String> getStringStringMap(EgrunnervervSakInstance egrunnervervSakInstance, String saksansvarlig) {
         Map<String, String> valuePerKey = new HashMap<>();
         valuePerKey.put("sys_id", egrunnervervSakInstance.getSysId());
         valuePerKey.put("knr", egrunnervervSakInstance.getKnr());
@@ -51,21 +84,7 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
         valuePerKey.put("kommunenavn", egrunnervervSakInstance.getKommunenavn());
         valuePerKey.put("adresse", egrunnervervSakInstance.getAdresse());
         valuePerKey.put("saksansvarlig", saksansvarlig);
-        return Mono.just(
-                InstanceObject.builder()
-                        .valuePerKey(valuePerKey)
-                        .objectCollectionPerKey(Map.of(
-                                "saksparter", egrunnervervSakInstance.getSaksparter()
-                                        .stream()
-                                        .map(this::toInstanceObject)
-                                        .toList(),
-                                "klasseringer", egrunnervervSakInstance.getKlasseringer()
-                                        .stream()
-                                        .map(this::toInstanceObject)
-                                        .toList()
-                        ))
-                        .build()
-        );
+        return valuePerKey;
     }
 
     private InstanceObject toInstanceObject(EgrunnervervSaksPart egrunnervervSaksPart) {
@@ -94,5 +113,12 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
                         "untattOffentlighet", egrunnervervSakKlassering.getUntattOffentlighet()
                 ))
                 .build();
+    }
+
+    private String extractDomain(String email) {
+        if (email == null || !email.contains("@")) {
+            return "Invalid email";
+        }
+        return email.substring(email.indexOf("@") + 1).toLowerCase();
     }
 }

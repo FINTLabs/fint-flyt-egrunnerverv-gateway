@@ -38,6 +38,8 @@ spec:
       value: "true"
     - name: fint.flyt.egrunnerverv.checkSaksbehandler
       value: "true"
+    - name: fint.flyt.egrunnerverv.checkDomain
+      value: "true"
   envFrom:
     - secretRef:
         name: fint-flyt-file-oauth2-client

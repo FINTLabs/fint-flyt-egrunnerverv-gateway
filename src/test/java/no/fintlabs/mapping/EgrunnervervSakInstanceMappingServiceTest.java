@@ -2,6 +2,7 @@ package no.fintlabs.mapping;
 
 import no.fintlabs.ResourceRepository;
 import no.fintlabs.exceptions.ArchiveResourceNotFoundException;
+import no.fintlabs.exceptions.NonMatchingDomainWithOrgIdException;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.models.EgrunnervervSakInstance;
 import no.fintlabs.models.EgrunnervervSakKlassering;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +39,8 @@ class EgrunnervervSakInstanceMappingServiceTest {
     @BeforeEach
     public void setUp() {
 
+        egrunnervervSakInstanceMappingService = new EgrunnervervSakInstanceMappingService(resourceRepository);
+        egrunnervervSakInstanceMappingService.checkSaksansvarligEpost = true;
 
         egrunnervervSakInstance = EgrunnervervSakInstance
                 .builder()
@@ -48,7 +52,7 @@ class EgrunnervervSakInstanceMappingServiceTest {
                 .snr("testSnr")
                 .takstnummer("testTakstnummer")
                 .tittel("testTittel")
-                .saksansvarligEpost("testSaksansvarligEpost")
+                .saksansvarligEpost("testSaksansvarligEpost@fintlabs.no")
                 .eierforholdsnavn("testEierforholdsnavn")
                 .eierforholdskode("")
                 .prosjektnr(null)
@@ -107,7 +111,7 @@ class EgrunnervervSakInstanceMappingServiceTest {
         valuePerKey.put("snr", "testSnr");
         valuePerKey.put("takstnummer", "testTakstnummer");
         valuePerKey.put("tittel", "testTittel");
-        valuePerKey.put("saksansvarligEpost", "testSaksansvarligEpost");
+        valuePerKey.put("saksansvarligEpost", "testSaksansvarligEpost@fintlabs.no");
         valuePerKey.put("eierforholdsnavn", "testEierforholdsnavn");
         valuePerKey.put("eierforholdskode", "");
         valuePerKey.put("prosjektnr", null);
@@ -174,16 +178,14 @@ class EgrunnervervSakInstanceMappingServiceTest {
                                 )
                         )
                 ).build();
-
-
     }
 
     @Test
     public void givenArkivressursHrefForSaksanvarlig_shouldReturnMappedInstanceAsExpected() {
-        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.of("testSaksansvarlig"));
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost@fintlabs.no"))
+                .thenReturn(Optional.of("testSaksansvarlig"));
 
-        egrunnervervSakInstanceMappingService = new EgrunnervervSakInstanceMappingService(resourceRepository);
-        egrunnervervSakInstanceMappingService.checkSaksansvarligEpost = true;
+        egrunnervervSakInstanceMappingService.checkDomain = false;
 
         InstanceObject instanceObject = egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block();
         assertThat(instanceObject).isEqualTo(expectedInstance);
@@ -191,15 +193,36 @@ class EgrunnervervSakInstanceMappingServiceTest {
 
     @Test
     public void givenNoArkivressursHrefForSaksansvarlig_shouldThrowArchiveResourceNotFoundException() {
-        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost"))
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost@fintlabs.no"))
                 .thenReturn(Optional.empty());
 
-        egrunnervervSakInstanceMappingService = new EgrunnervervSakInstanceMappingService(resourceRepository);
-        egrunnervervSakInstanceMappingService.checkSaksansvarligEpost = true;
+        egrunnervervSakInstanceMappingService.checkDomain = false;
 
-        assertThrows(ArchiveResourceNotFoundException.class, () -> {
-            egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block();
-        });
+        assertThrows(ArchiveResourceNotFoundException.class, () -> egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block());
     }
+
+    @Test
+    public void givenMatchingEmailDomainWhenCheckDomainIsTrue_shouldReturnMappedInstanceAsExpected() {
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost@fintlabs.no"))
+                .thenReturn(Optional.of("testSaksansvarlig"));
+
+        egrunnervervSakInstanceMappingService.checkDomain = true;
+
+        ReflectionTestUtils.setField(egrunnervervSakInstanceMappingService, "orgId", "fintlabs.no");
+
+        InstanceObject instanceObject = egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block();
+        assertThat(instanceObject).isEqualTo(expectedInstance);
+    }
+
+    @Test
+    public void givenNonMatchingDomain_shouldThrowNonMatchingDomainWithOrgIdException() {
+        egrunnervervSakInstanceMappingService.checkSaksansvarligEpost = false;
+        egrunnervervSakInstanceMappingService.checkDomain = true;
+
+        ReflectionTestUtils.setField(egrunnervervSakInstanceMappingService, "orgId", "vlfk.no");
+
+        assertThrows(NonMatchingDomainWithOrgIdException.class, () -> egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block());
+    }
+
 
 }

@@ -42,7 +42,7 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
         }
 
         if (checkDomain) {
-            String domain = extractDomain(egrunnervervSakInstance.getSaksansvarligEpost());
+            String domain = extractEmailDomain(egrunnervervSakInstance.getSaksansvarligEpost());
             if (!domain.equals(orgId)) {
                 throw new NonMatchingDomainWithOrgIdException(domain, orgId);
             }
@@ -115,7 +115,7 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
                 .build();
     }
 
-    private String extractDomain(String email) {
+    private String extractEmailDomain(String email) {
         if (email == null || !email.contains("@")) {
             return "Invalid email";
         }

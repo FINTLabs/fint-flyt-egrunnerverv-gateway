@@ -2,6 +2,8 @@ package no.fintlabs.mapping;
 
 import no.fint.model.resource.arkiv.noark.SakResource;
 import no.fintlabs.ResourceRepository;
+import no.fintlabs.exceptions.ArchiveCaseNotFoundException;
+import no.fintlabs.exceptions.ArchiveResourceNotFoundException;
 import no.fintlabs.gateway.instance.kafka.ArchiveCaseRequestService;
 import no.fintlabs.gateway.instance.model.File;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
@@ -21,6 +23,7 @@ import reactor.core.publisher.Mono;
 import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
@@ -228,6 +231,56 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
         verifyNoMoreInteractions(fileClient);
 
 
+    }
+
+    @Test
+    public void givenSaksnummerThatDoesntExistInArchiveSystem_shouldThrowArchiveCaseNotFoundException() {
+        when(archiveCaseRequestService.getByArchiveCaseId(anyString())).thenReturn(Optional.empty());
+
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(archiveCaseRequestService, fileClient, resourceRepository);
+
+        assertThrows(ArchiveCaseNotFoundException.class, () -> egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block());
+    }
+
+    @Test
+    public void givenNoArkivressursHrefForSaksansvarlig_shouldThrowArchiveResourceNotFoundException() {
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.empty());
+        when(archiveCaseRequestService.getByArchiveCaseId("testSaksnummer")).thenReturn(Optional.of(sakResource));
+
+        ArgumentMatcher<File> argumentMatcherHoveddokument = file ->
+                "testHoveddokumentFilnavn.pdf".equals(file.getName()) &&
+                        "UTF-8".equals(file.getEncoding()) &&
+                        "application/pdf".equals(String.valueOf(file.getType())) &&
+                        "2".equals(String.valueOf(file.getSourceApplicationId())) &&
+                        "testSysId".equals(file.getSourceApplicationInstanceId()) &&
+                        "SG92ZWRkb2t1bWVudA==".equals(file.getBase64Contents());
+        doReturn(Mono.just(UUID.fromString("251bfa61-6c0e-47d0-a479-643c40c3e766")))
+                .when(fileClient).postFile(argThat(argumentMatcherHoveddokument));
+
+        ArgumentMatcher<File> argumentMatcherVedlegg1 = file ->
+                "testVedlegg1Filnavn.pdf".equals(file.getName()) &&
+                        "UTF-8".equals(file.getEncoding()) &&
+                        "application/pdf".equals(String.valueOf(file.getType())) &&
+                        "2".equals(String.valueOf(file.getSourceApplicationId())) &&
+                        "testSysId".equals(file.getSourceApplicationInstanceId()) &&
+                        "VmVkbGVnZzE=".equals(file.getBase64Contents());
+        doReturn(Mono.just(UUID.fromString("251bfa61-6c0e-47d0-a479-643c40c3e767")))
+                .when(fileClient).postFile(argThat(argumentMatcherVedlegg1));
+
+        ArgumentMatcher<File> argumentMatcherVedlegg2 = file ->
+                "testVedlegg2Filnavn.pdf".equals(file.getName()) &&
+                        "UTF-8".equals(file.getEncoding()) &&
+                        "application/pdf".equals(String.valueOf(file.getType())) &&
+                        "2".equals(String.valueOf(file.getSourceApplicationId())) &&
+                        "testSysId".equals(file.getSourceApplicationInstanceId()) &&
+                        "VmVkbGVnZzI=".equals(file.getBase64Contents());
+        doReturn(Mono.just(UUID.fromString("251bfa61-6c0e-47d0-a479-643c40c3e768")))
+                .when(fileClient).postFile(argThat(argumentMatcherVedlegg2));
+
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(archiveCaseRequestService, fileClient, resourceRepository);
+        egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
+
+        assertThrows(ArchiveResourceNotFoundException.class, () -> egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block());
     }
 
 }

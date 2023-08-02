@@ -109,28 +109,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                 )
                 .build();
 
-        HashMap<String, String> expectedInstanceValuePerKey = new HashMap<>();
-        expectedInstanceValuePerKey.put("tittel", "testTittel");
-        expectedInstanceValuePerKey.put("dokumentNavn", "testDokumentNavn");
-        expectedInstanceValuePerKey.put("dokumentDato", "testDokumentDato");
-        expectedInstanceValuePerKey.put("forsendelsesmaate", "testForsendelsesmaate");
-        expectedInstanceValuePerKey.put("kommunenavn", "testKommunenavn");
-        expectedInstanceValuePerKey.put("knr", "testKnr");
-        expectedInstanceValuePerKey.put("gnr", "testGnr");
-        expectedInstanceValuePerKey.put("bnr", "testBnr");
-        expectedInstanceValuePerKey.put("fnr", "testFnr");
-        expectedInstanceValuePerKey.put("snr", "testSnr");
-        expectedInstanceValuePerKey.put("eierforhold", "testEierforhold");
-        expectedInstanceValuePerKey.put("id", "testId");
-        expectedInstanceValuePerKey.put("maltittel", "testMaltittel");
-        expectedInstanceValuePerKey.put("prosjektnavn", "testProsjektnavn");
-        expectedInstanceValuePerKey.put("saksbehandlerEpost", "testSaksansvarligEpost");
-        expectedInstanceValuePerKey.put("saksnummer", "testSaksnummer");
-        expectedInstanceValuePerKey.put("hoveddokumentFil", "251bfa61-6c0e-47d0-a479-643c40c3e766");
-        expectedInstanceValuePerKey.put("hoveddokumentTittel", "testHoveddokumentTittel");
-        expectedInstanceValuePerKey.put("hoveddokumentFilnavn", "testHoveddokumentFilnavn.pdf");
-        expectedInstanceValuePerKey.put("hoveddokumentMediatype", "application/pdf");
-        expectedInstanceValuePerKey.put("saksbehandler", "testSaksansvarlig");
+        HashMap<String, String> expectedInstanceValuePerKey = getStringStringHashMap();
 
         expectedInstance = InstanceObject
                 .builder()
@@ -174,6 +153,32 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                         )
                 )
                 .build();
+    }
+
+    private static HashMap<String, String> getStringStringHashMap() {
+        HashMap<String, String> expectedInstanceValuePerKey = new HashMap<>();
+        expectedInstanceValuePerKey.put("tittel", "testTittel");
+        expectedInstanceValuePerKey.put("dokumentNavn", "testDokumentNavn");
+        expectedInstanceValuePerKey.put("dokumentDato", "testDokumentDato");
+        expectedInstanceValuePerKey.put("forsendelsesmaate", "testForsendelsesmaate");
+        expectedInstanceValuePerKey.put("kommunenavn", "testKommunenavn");
+        expectedInstanceValuePerKey.put("knr", "testKnr");
+        expectedInstanceValuePerKey.put("gnr", "testGnr");
+        expectedInstanceValuePerKey.put("bnr", "testBnr");
+        expectedInstanceValuePerKey.put("fnr", "testFnr");
+        expectedInstanceValuePerKey.put("snr", "testSnr");
+        expectedInstanceValuePerKey.put("eierforhold", "testEierforhold");
+        expectedInstanceValuePerKey.put("id", "testId");
+        expectedInstanceValuePerKey.put("maltittel", "testMaltittel");
+        expectedInstanceValuePerKey.put("prosjektnavn", "testProsjektnavn");
+        expectedInstanceValuePerKey.put("saksbehandlerEpost", "testSaksansvarligEpost");
+        expectedInstanceValuePerKey.put("saksnummer", "testSaksnummer");
+        expectedInstanceValuePerKey.put("hoveddokumentFil", "251bfa61-6c0e-47d0-a479-643c40c3e766");
+        expectedInstanceValuePerKey.put("hoveddokumentTittel", "testHoveddokumentTittel");
+        expectedInstanceValuePerKey.put("hoveddokumentFilnavn", "testHoveddokumentFilnavn.pdf");
+        expectedInstanceValuePerKey.put("hoveddokumentMediatype", "application/pdf");
+        expectedInstanceValuePerKey.put("saksbehandler", "testSaksansvarlig");
+        return expectedInstanceValuePerKey;
     }
 
     @Test

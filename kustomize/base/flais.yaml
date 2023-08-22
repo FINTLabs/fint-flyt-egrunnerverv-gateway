@@ -38,7 +38,7 @@ spec:
       value: "true"
     - name: fint.flyt.egrunnerverv.checkSaksbehandler
       value: "true"
-    - name: fint.flyt.egrunnerverv.checkDomain
+    - name: fint.flyt.egrunnerverv.checkEmailDomain
       value: "true"
   envFrom:
     - secretRef:

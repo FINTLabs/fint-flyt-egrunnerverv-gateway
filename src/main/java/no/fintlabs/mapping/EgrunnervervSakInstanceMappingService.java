@@ -2,7 +2,7 @@ package no.fintlabs.mapping;
 
 import no.fintlabs.ResourceRepository;
 import no.fintlabs.exceptions.ArchiveResourceNotFoundException;
-import no.fintlabs.exceptions.NonMatchingDomainWithOrgIdException;
+import no.fintlabs.exceptions.NonMatchingEmailDomainWithOrgIdException;
 import no.fintlabs.gateway.instance.InstanceMapper;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.models.EgrunnervervSakInstance;
@@ -21,14 +21,16 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
     @Value("${fint.flyt.egrunnerverv.checkSaksansvarligEpost:true}")
     boolean checkSaksansvarligEpost;
 
-    @Value("${fint.flyt.egrunnerverv.checkDomain:true}")
-    boolean checkDomain;
+    @Value("${fint.flyt.egrunnerverv.checkEmailDomain:true}")
+    boolean checkEmailDomain;
     private final ResourceRepository resourceRepository;
 
     @Value("${fint.org-id}")
     private String orgId;
 
-    public EgrunnervervSakInstanceMappingService(ResourceRepository resourceRepository) {
+    public EgrunnervervSakInstanceMappingService(
+            ResourceRepository resourceRepository
+    ) {
         this.resourceRepository = resourceRepository;
     }
 
@@ -41,10 +43,10 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
                     .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervSakInstance.getSaksansvarligEpost()));
         }
 
-        if (checkDomain) {
-            String domain = extractDomain(egrunnervervSakInstance.getSaksansvarligEpost());
+        if (checkEmailDomain) {
+            String domain = extractEmailDomain(egrunnervervSakInstance.getSaksansvarligEpost());
             if (!domain.equals(orgId)) {
-                throw new NonMatchingDomainWithOrgIdException(domain, orgId);
+                throw new NonMatchingEmailDomainWithOrgIdException(domain, orgId);
             }
         }
 
@@ -115,7 +117,7 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
                 .build();
     }
 
-    private String extractDomain(String email) {
+    private String extractEmailDomain(String email) {
         if (email == null || !email.contains("@")) {
             return "Invalid email";
         }

@@ -37,17 +37,17 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
     @Override
     public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervSakInstance egrunnervervSakInstance) {
 
-        String saksansvarlig = "";
-        if (checkSaksansvarligEpost) {
-            saksansvarlig = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervSakInstance.getSaksansvarligEpost())
-                    .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervSakInstance.getSaksansvarligEpost()));
-        }
-
         if (checkEmailDomain) {
             String domain = extractEmailDomain(egrunnervervSakInstance.getSaksansvarligEpost());
             if (!domain.equals(orgId)) {
                 throw new NonMatchingEmailDomainWithOrgIdException(domain, orgId);
             }
+        }
+
+        String saksansvarlig = "";
+        if (checkSaksansvarligEpost) {
+            saksansvarlig = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervSakInstance.getSaksansvarligEpost())
+                    .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervSakInstance.getSaksansvarligEpost()));
         }
 
         Map<String, String> valuePerKey = getStringStringMap(egrunnervervSakInstance, saksansvarlig);

@@ -65,9 +65,6 @@ public class EgrunnervervInstanceController {
             @RequestParam("id") String saksnummer,
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
-
-        log.debug("table=" + egrunnervervJournalpostInstanceBody.getTable());
-
         EgrunnervervJournalpostInstance egrunnervervJournalpostInstance = EgrunnervervJournalpostInstance.builder()
                 .egrunnervervJournalpostInstanceBody(egrunnervervJournalpostInstanceBody)
                 .saksnummer(saksnummer)

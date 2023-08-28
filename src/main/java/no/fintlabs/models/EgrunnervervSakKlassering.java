@@ -22,4 +22,9 @@ public class EgrunnervervSakKlassering {
     private final String sortering;
     @NotNull
     private final String untattOffentlighet;
+
+    @Override
+    public String toString() {
+        return "Sensitive data omitted";
+    }
 }

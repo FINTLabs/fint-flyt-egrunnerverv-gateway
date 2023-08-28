@@ -16,4 +16,9 @@ public class EgrunnervervJournalpostInstance {
     private final EgrunnervervJournalpostInstanceBody egrunnervervJournalpostInstanceBody;
     @NotNull
     private final String saksnummer;
+
+    @Override
+    public String toString() {
+        return "Sensitive data omitted";
+    }
 }

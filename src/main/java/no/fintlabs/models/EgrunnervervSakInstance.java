@@ -53,4 +53,9 @@ public class EgrunnervervSakInstance {
 
     private final List<@Valid @NotNull EgrunnervervSaksPart> saksparter;
     private final List<@Valid @NotNull EgrunnervervSakKlassering> klasseringer;
+
+    @Override
+    public String toString() {
+        return "Sensitive data omitted";
+    }
 }

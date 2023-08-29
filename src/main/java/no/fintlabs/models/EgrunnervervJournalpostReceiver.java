@@ -26,4 +26,9 @@ public class EgrunnervervJournalpostReceiver {
     private final String postnummer;
     @NotNull
     private final String poststed;
+
+    @Override
+    public String toString() {
+        return "Sensitive data omitted";
+    }
 }

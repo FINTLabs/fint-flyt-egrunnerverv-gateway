@@ -24,12 +24,6 @@ patches:
         path: "/spec/ingress/basePath"
         value: "/beta/api/egrunnerverv/instances/999999999"
       - op: replace
-        path: "/spec/env/3/value"
-        value: "false"
-      - op: replace
-        path: "/spec/env/4/value"
-        value: "false"
-      - op: replace
         path: "/spec/env/5/value"
         value: "false"
     target:

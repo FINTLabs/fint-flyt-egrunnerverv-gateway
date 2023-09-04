@@ -15,4 +15,9 @@ public class EgrunnervervSimpleInstance {
     private String sysId;
     @NotNull
     private String tableName;
+
+    @Override
+    public String toString() {
+        return "Sensitive data omitted";
+    }
 }

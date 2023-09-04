@@ -1,6 +1,8 @@
 package no.fintlabs.exceptions;
 
-public class ArchiveCaseNotFoundException extends RuntimeException {
+import no.fintlabs.gateway.instance.AbstractInstanceRejectedException;
+
+public class ArchiveCaseNotFoundException extends AbstractInstanceRejectedException {
     public ArchiveCaseNotFoundException(String caseId) {
         super("No archive case found for caseId='" + caseId + "'");
     }

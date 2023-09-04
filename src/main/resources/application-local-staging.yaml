@@ -8,6 +8,8 @@ fint:
           external:
             enabled: true
             authorized-client-ids: 2
+    egrunnerverv:
+      checkSaksansvarligEpost: false
   kafka:
     default-replicas: 1
 spring:

@@ -2,7 +2,7 @@ package no.fintlabs.mapping;
 
 import no.fintlabs.ResourceRepository;
 import no.fintlabs.exceptions.ArchiveResourceNotFoundException;
-import no.fintlabs.exceptions.NonMatchingDomainWithOrgIdException;
+import no.fintlabs.exceptions.NonMatchingEmailDomainWithOrgIdException;
 import no.fintlabs.gateway.instance.InstanceMapper;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.models.EgrunnervervSakInstance;
@@ -21,31 +21,33 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
     @Value("${fint.flyt.egrunnerverv.checkSaksansvarligEpost:true}")
     boolean checkSaksansvarligEpost;
 
-    @Value("${fint.flyt.egrunnerverv.checkDomain:true}")
-    boolean checkDomain;
+    @Value("${fint.flyt.egrunnerverv.checkEmailDomain:true}")
+    boolean checkEmailDomain;
     private final ResourceRepository resourceRepository;
 
     @Value("${fint.org-id}")
     private String orgId;
 
-    public EgrunnervervSakInstanceMappingService(ResourceRepository resourceRepository) {
+    public EgrunnervervSakInstanceMappingService(
+            ResourceRepository resourceRepository
+    ) {
         this.resourceRepository = resourceRepository;
     }
 
     @Override
     public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervSakInstance egrunnervervSakInstance) {
 
+        if (checkEmailDomain) {
+            String domain = extractEmailDomain(egrunnervervSakInstance.getSaksansvarligEpost());
+            if (!domain.equals(orgId)) {
+                throw new NonMatchingEmailDomainWithOrgIdException(domain, orgId);
+            }
+        }
+
         String saksansvarlig = "";
         if (checkSaksansvarligEpost) {
             saksansvarlig = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervSakInstance.getSaksansvarligEpost())
                     .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervSakInstance.getSaksansvarligEpost()));
-        }
-
-        if (checkDomain) {
-            String domain = extractEmailDomain(egrunnervervSakInstance.getSaksansvarligEpost());
-            if (!domain.equals(orgId)) {
-                throw new NonMatchingDomainWithOrgIdException(domain, orgId);
-            }
         }
 
         Map<String, String> valuePerKey = getStringStringMap(egrunnervervSakInstance, saksansvarlig);

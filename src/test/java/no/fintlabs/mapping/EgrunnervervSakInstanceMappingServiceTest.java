@@ -2,7 +2,7 @@ package no.fintlabs.mapping;
 
 import no.fintlabs.ResourceRepository;
 import no.fintlabs.exceptions.ArchiveResourceNotFoundException;
-import no.fintlabs.exceptions.NonMatchingDomainWithOrgIdException;
+import no.fintlabs.exceptions.NonMatchingEmailDomainWithOrgIdException;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.models.EgrunnervervSakInstance;
 import no.fintlabs.models.EgrunnervervSakKlassering;
@@ -185,7 +185,7 @@ class EgrunnervervSakInstanceMappingServiceTest {
         when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost@fintlabs.no"))
                 .thenReturn(Optional.of("testSaksansvarlig"));
 
-        egrunnervervSakInstanceMappingService.checkDomain = false;
+        egrunnervervSakInstanceMappingService.checkEmailDomain = false;
 
         InstanceObject instanceObject = egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block();
         assertThat(instanceObject).isEqualTo(expectedInstance);
@@ -196,7 +196,7 @@ class EgrunnervervSakInstanceMappingServiceTest {
         when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost@fintlabs.no"))
                 .thenReturn(Optional.empty());
 
-        egrunnervervSakInstanceMappingService.checkDomain = false;
+        egrunnervervSakInstanceMappingService.checkEmailDomain = false;
 
         assertThrows(ArchiveResourceNotFoundException.class, () -> egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block());
     }
@@ -206,7 +206,7 @@ class EgrunnervervSakInstanceMappingServiceTest {
         when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost@fintlabs.no"))
                 .thenReturn(Optional.of("testSaksansvarlig"));
 
-        egrunnervervSakInstanceMappingService.checkDomain = true;
+        egrunnervervSakInstanceMappingService.checkEmailDomain = true;
 
         ReflectionTestUtils.setField(egrunnervervSakInstanceMappingService, "orgId", "fintlabs.no");
 
@@ -217,11 +217,11 @@ class EgrunnervervSakInstanceMappingServiceTest {
     @Test
     public void givenNonMatchingDomain_shouldThrowNonMatchingDomainWithOrgIdException() {
         egrunnervervSakInstanceMappingService.checkSaksansvarligEpost = false;
-        egrunnervervSakInstanceMappingService.checkDomain = true;
+        egrunnervervSakInstanceMappingService.checkEmailDomain = true;
 
         ReflectionTestUtils.setField(egrunnervervSakInstanceMappingService, "orgId", "vlfk.no");
 
-        assertThrows(NonMatchingDomainWithOrgIdException.class, () -> egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block());
+        assertThrows(NonMatchingEmailDomainWithOrgIdException.class, () -> egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block());
     }
 
 

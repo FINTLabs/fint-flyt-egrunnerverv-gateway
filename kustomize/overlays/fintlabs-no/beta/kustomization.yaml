@@ -23,6 +23,9 @@ patches:
       - op: replace
         path: "/spec/ingress/basePath"
         value: "/beta/api/egrunnerverv/instances/999999999"
+      - op: replace
+        path: "/spec/env/5/value"
+        value: "false"
     target:
       kind: Application
       name: fint-flyt-egrunnerverv-instance-gateway

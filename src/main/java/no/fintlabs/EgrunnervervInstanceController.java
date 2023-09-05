@@ -5,7 +5,6 @@ import no.fintlabs.gateway.instance.InstanceProcessor;
 import no.fintlabs.models.EgrunnervervJournalpostInstance;
 import no.fintlabs.models.EgrunnervervJournalpostInstanceBody;
 import no.fintlabs.models.EgrunnervervSakInstance;
-import no.fintlabs.models.EgrunnervervSimpleInstance;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,17 +21,13 @@ public class EgrunnervervInstanceController {
 
     private final InstanceProcessor<EgrunnervervSakInstance> sakInstanceProcessor;
     private final InstanceProcessor<EgrunnervervJournalpostInstance> journalpostInstanceProcessor;
-    private final EgrunnervervSimpleInstanceProducerService egrunnervervSimpleInstanceProducerService;
-
 
     public EgrunnervervInstanceController(
             InstanceProcessor<EgrunnervervSakInstance> sakInstanceProcessor,
-            InstanceProcessor<EgrunnervervJournalpostInstance> journalpostInstanceProcessor,
-            EgrunnervervSimpleInstanceProducerService egrunnervervSimpleInstanceProducerService
+            InstanceProcessor<EgrunnervervJournalpostInstance> journalpostInstanceProcessor
     ) {
         this.sakInstanceProcessor = sakInstanceProcessor;
         this.journalpostInstanceProcessor = journalpostInstanceProcessor;
-        this.egrunnervervSimpleInstanceProducerService = egrunnervervSimpleInstanceProducerService;
     }
 
 
@@ -43,19 +38,9 @@ public class EgrunnervervInstanceController {
     ) {
         return authenticationMono.flatMap(
                 authentication -> sakInstanceProcessor.processInstance(
-                                authentication,
-                                egrunnervervSakInstance
-                        )
-                        .doOnNext(responseEntity -> {
-                            if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                                egrunnervervSimpleInstanceProducerService.publishSimpleSakInstance(
-                                        EgrunnervervSimpleInstance.builder()
-                                                .sysId(egrunnervervSakInstance.getSysId())
-                                                .tableName(egrunnervervSakInstance.getTable())
-                                                .build()
-                                );
-                            }
-                        })
+                        authentication,
+                        egrunnervervSakInstance
+                )
         );
     }
 
@@ -74,16 +59,7 @@ public class EgrunnervervInstanceController {
                 authentication -> journalpostInstanceProcessor.processInstance(
                         authentication,
                         egrunnervervJournalpostInstance
-                ).doOnNext(responseEntity -> {
-                    if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                        egrunnervervSimpleInstanceProducerService.publishSimpleJournalpostInstance(
-                                EgrunnervervSimpleInstance.builder()
-                                        .sysId(egrunnervervJournalpostInstanceBody.getSysId())
-                                        .tableName(egrunnervervJournalpostInstanceBody.getTable())
-                                        .build()
-                        );
-                    }
-                })
+                )
         );
     }
 

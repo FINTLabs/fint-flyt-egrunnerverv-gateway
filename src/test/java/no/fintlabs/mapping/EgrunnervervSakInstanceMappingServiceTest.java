@@ -54,7 +54,7 @@ class EgrunnervervSakInstanceMappingServiceTest {
                 .tittel("testTittel")
                 .saksansvarligEpost("testSaksansvarligEpost@fintlabs.no")
                 .eierforholdsnavn("testEierforholdsnavn")
-                .eierforholdskode("")
+                .eierforholdskode("testEierforholdskode")
                 .prosjektnr(null)
                 .prosjektnavn("testProsjektnavn")
                 .kommunenavn("testKommunenavn")
@@ -113,7 +113,7 @@ class EgrunnervervSakInstanceMappingServiceTest {
         valuePerKey.put("tittel", "testTittel");
         valuePerKey.put("saksansvarligEpost", "testSaksansvarligEpost@fintlabs.no");
         valuePerKey.put("eierforholdsnavn", "testEierforholdsnavn");
-        valuePerKey.put("eierforholdskode", "");
+        valuePerKey.put("eierforholdskode", "testEierforholdskode");
         valuePerKey.put("prosjektnr", null);
         valuePerKey.put("prosjektnavn", "testProsjektnavn");
         valuePerKey.put("kommunenavn", "testKommunenavn");

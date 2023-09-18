@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: nfk-no
+
+resources:
+  - ../../../base
+
+commonLabels:
+  app.kubernetes.io/instance: fint-flyt-egrunnerverv-instance-gateway_nfk_no
+  fintlabs.no/org-id: nfk.no
+
+patches:
+  - patch: |-
+      - op: replace
+        path: "/spec/kafka/acls/0/topic"
+        value: "nfk-no.flyt.*"
+      - op: replace
+        path: "/spec/orgId"
+        value: "nfk.no"
+      - op: add
+        path: "/spec/url/basePath"
+        value: "/beta"
+      - op: replace
+        path: "/spec/ingress/basePath"
+        value: "/beta/api/egrunnerverv/instances/964982953"
+    target:
+      kind: Application
+      name: fint-flyt-egrunnerverv-instance-gateway
+

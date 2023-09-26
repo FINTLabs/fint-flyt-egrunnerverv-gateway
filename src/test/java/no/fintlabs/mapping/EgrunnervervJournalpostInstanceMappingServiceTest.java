@@ -12,7 +12,6 @@ import no.fintlabs.models.EgrunnervervJournalpostDocument;
 import no.fintlabs.models.EgrunnervervJournalpostInstance;
 import no.fintlabs.models.EgrunnervervJournalpostInstanceBody;
 import no.fintlabs.models.EgrunnervervJournalpostReceiver;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
@@ -34,8 +33,10 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
 
     EgrunnervervJournalpostInstanceMappingService egrunnervervJournalpostInstanceMappingService;
 
-    EgrunnervervJournalpostInstance egrunnervervJournalpostInstance;
-    InstanceObject expectedInstance;
+    ArgumentMatcher<File> argumentMatcherHoveddokument;
+    ArgumentMatcher<File> argumentMatcherVedlegg1;
+    ArgumentMatcher<File> argumentMatcherVedlegg2;
+
     @Mock
     ResourceRepository resourceRepository;
 
@@ -48,10 +49,8 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
     @Mock
     SakResource sakResource;
 
-
-    @BeforeEach
-    public void setUp() {
-        egrunnervervJournalpostInstance = EgrunnervervJournalpostInstance
+    private EgrunnervervJournalpostInstance createTestJournalpostInstance(String organisasjonsnummer) {
+        return EgrunnervervJournalpostInstance
                 .builder()
                 .saksnummer("testSaksnummer")
                 .egrunnervervJournalpostInstanceBody(
@@ -77,7 +76,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                                         EgrunnervervJournalpostReceiver
                                                 .builder()
                                                 .navn("testNavn")
-                                                .organisasjonsnummer("testOrganisasjonsnummer")
+                                                .organisasjonsnummer(organisasjonsnummer)
                                                 .epost("testEpost")
                                                 .telefon("testTelefon")
                                                 .postadresse("testPostadresse")
@@ -111,10 +110,11 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                                 .build()
                 )
                 .build();
+    }
 
+    private InstanceObject createInstance(String organisasjonsnummer, String fodselsnummer) {
         HashMap<String, String> expectedInstanceValuePerKey = getStringStringHashMap();
-
-        expectedInstance = InstanceObject
+        return InstanceObject
                 .builder()
                 .valuePerKey(expectedInstanceValuePerKey)
                 .objectCollectionPerKey(
@@ -124,7 +124,8 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                                                 .builder()
                                                 .valuePerKey(Map.of(
                                                         "navn", "testNavn",
-                                                        "organisasjonsnummer", "testOrganisasjonsnummer",
+                                                        "organisasjonsnummer", organisasjonsnummer,
+                                                        "fodselsnummer", fodselsnummer,
                                                         "epost", "testEpost",
                                                         "telefon", "testTelefon",
                                                         "postadresse", "testPostadresse",
@@ -133,7 +134,8 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                                                 ))
                                                 .build()
                                 ),
-                                "vedlegg", List.of(
+                                "vedlegg",
+                                List.of(
                                         InstanceObject
                                                 .builder()
                                                 .valuePerKey(Map.of(
@@ -184,12 +186,8 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
         return expectedInstanceValuePerKey;
     }
 
-    @Test
-    public void givenJournalpostWithHoveddokumentAndVedlegg_shouldReturnMappedInstanceAsExpected() {
-        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.of("testSaksansvarlig"));
-        when(archiveCaseRequestService.getByArchiveCaseId("testSaksnummer")).thenReturn(Optional.of(sakResource));
-
-        ArgumentMatcher<File> argumentMatcherHoveddokument = file ->
+    public void setUpFileClientMock() {
+        argumentMatcherHoveddokument = file ->
                 "testHoveddokumentFilnavn.pdf".equals(file.getName()) &&
                         "UTF-8".equals(file.getEncoding()) &&
                         "application/pdf".equals(String.valueOf(file.getType())) &&
@@ -199,7 +197,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
         doReturn(Mono.just(UUID.fromString("251bfa61-6c0e-47d0-a479-643c40c3e766")))
                 .when(fileClient).postFile(argThat(argumentMatcherHoveddokument));
 
-        ArgumentMatcher<File> argumentMatcherVedlegg1 = file ->
+        argumentMatcherVedlegg1 = file ->
                 "testVedlegg1Filnavn.pdf".equals(file.getName()) &&
                         "UTF-8".equals(file.getEncoding()) &&
                         "application/pdf".equals(String.valueOf(file.getType())) &&
@@ -209,7 +207,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
         doReturn(Mono.just(UUID.fromString("251bfa61-6c0e-47d0-a479-643c40c3e767")))
                 .when(fileClient).postFile(argThat(argumentMatcherVedlegg1));
 
-        ArgumentMatcher<File> argumentMatcherVedlegg2 = file ->
+        argumentMatcherVedlegg2 = file ->
                 "testVedlegg2Filnavn.pdf".equals(file.getName()) &&
                         "UTF-8".equals(file.getEncoding()) &&
                         "application/pdf".equals(String.valueOf(file.getType())) &&
@@ -218,6 +216,66 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                         "VmVkbGVnZzI=".equals(file.getBase64Contents());
         doReturn(Mono.just(UUID.fromString("251bfa61-6c0e-47d0-a479-643c40c3e768")))
                 .when(fileClient).postFile(argThat(argumentMatcherVedlegg2));
+    }
+
+    @Test
+    public void givenJournalpostWithOrganisasjonsnummerWithNineDigits_shouldReturnMappedInstanceWithOrganisasjonsnummer() {
+        EgrunnervervJournalpostInstance egrunnervervJournalpostInstance = createTestJournalpostInstance(
+                "123456789"
+        );
+        InstanceObject expectedInstance = createInstance(
+                "123456789",
+                ""
+        );
+
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.of("testSaksansvarlig"));
+        when(archiveCaseRequestService.getByArchiveCaseId("testSaksnummer")).thenReturn(Optional.of(sakResource));
+
+        setUpFileClientMock();
+
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(archiveCaseRequestService, fileClient, resourceRepository);
+        egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
+
+        InstanceObject instanceObject = egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block();
+        assertThat(instanceObject).isEqualTo(expectedInstance);
+    }
+
+    @Test
+    public void givenJournalpostWithOrganisasjonsnummerWithElevenDigits_shouldReturnMappedInstanceWithFodselsnummer() {
+        EgrunnervervJournalpostInstance egrunnervervJournalpostInstance = createTestJournalpostInstance(
+                "01234567890"
+        );
+        InstanceObject expectedInstance = createInstance(
+                "",
+                "01234567890"
+        );
+
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.of("testSaksansvarlig"));
+        when(archiveCaseRequestService.getByArchiveCaseId("testSaksnummer")).thenReturn(Optional.of(sakResource));
+
+        setUpFileClientMock();
+
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(archiveCaseRequestService, fileClient, resourceRepository);
+        egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
+
+        InstanceObject instanceObject = egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block();
+        assertThat(instanceObject).isEqualTo(expectedInstance);
+    }
+
+    @Test
+    public void givenJournalpostWithHoveddokumentAndVedlegg_shouldReturnMappedInstanceAsExpected() {
+        EgrunnervervJournalpostInstance egrunnervervJournalpostInstance = createTestJournalpostInstance(
+                "123456789"
+        );
+        InstanceObject expectedInstance = createInstance(
+                "123456789",
+                ""
+        );
+
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.of("testSaksansvarlig"));
+        when(archiveCaseRequestService.getByArchiveCaseId("testSaksnummer")).thenReturn(Optional.of(sakResource));
+
+        setUpFileClientMock();
 
         egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(archiveCaseRequestService, fileClient, resourceRepository);
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
@@ -229,12 +287,14 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
         verify(fileClient, times(1)).postFile(argThat(argumentMatcherVedlegg1));
         verify(fileClient, times(1)).postFile(argThat(argumentMatcherVedlegg2));
         verifyNoMoreInteractions(fileClient);
-
-
     }
 
     @Test
     public void givenSaksnummerThatDoesntExistInArchiveSystem_shouldThrowArchiveCaseNotFoundException() {
+        EgrunnervervJournalpostInstance egrunnervervJournalpostInstance = createTestJournalpostInstance(
+                "123456789"
+        );
+
         when(archiveCaseRequestService.getByArchiveCaseId(anyString())).thenReturn(Optional.empty());
 
         egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(archiveCaseRequestService, fileClient, resourceRepository);
@@ -244,38 +304,14 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
 
     @Test
     public void givenNoArkivressursHrefForSaksansvarlig_shouldThrowArchiveResourceNotFoundException() {
+        EgrunnervervJournalpostInstance egrunnervervJournalpostInstance = createTestJournalpostInstance(
+                "123456789"
+        );
+
         when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.empty());
         when(archiveCaseRequestService.getByArchiveCaseId("testSaksnummer")).thenReturn(Optional.of(sakResource));
 
-        ArgumentMatcher<File> argumentMatcherHoveddokument = file ->
-                "testHoveddokumentFilnavn.pdf".equals(file.getName()) &&
-                        "UTF-8".equals(file.getEncoding()) &&
-                        "application/pdf".equals(String.valueOf(file.getType())) &&
-                        "2".equals(String.valueOf(file.getSourceApplicationId())) &&
-                        "testSysId".equals(file.getSourceApplicationInstanceId()) &&
-                        "SG92ZWRkb2t1bWVudA==".equals(file.getBase64Contents());
-        doReturn(Mono.just(UUID.fromString("251bfa61-6c0e-47d0-a479-643c40c3e766")))
-                .when(fileClient).postFile(argThat(argumentMatcherHoveddokument));
-
-        ArgumentMatcher<File> argumentMatcherVedlegg1 = file ->
-                "testVedlegg1Filnavn.pdf".equals(file.getName()) &&
-                        "UTF-8".equals(file.getEncoding()) &&
-                        "application/pdf".equals(String.valueOf(file.getType())) &&
-                        "2".equals(String.valueOf(file.getSourceApplicationId())) &&
-                        "testSysId".equals(file.getSourceApplicationInstanceId()) &&
-                        "VmVkbGVnZzE=".equals(file.getBase64Contents());
-        doReturn(Mono.just(UUID.fromString("251bfa61-6c0e-47d0-a479-643c40c3e767")))
-                .when(fileClient).postFile(argThat(argumentMatcherVedlegg1));
-
-        ArgumentMatcher<File> argumentMatcherVedlegg2 = file ->
-                "testVedlegg2Filnavn.pdf".equals(file.getName()) &&
-                        "UTF-8".equals(file.getEncoding()) &&
-                        "application/pdf".equals(String.valueOf(file.getType())) &&
-                        "2".equals(String.valueOf(file.getSourceApplicationId())) &&
-                        "testSysId".equals(file.getSourceApplicationInstanceId()) &&
-                        "VmVkbGVnZzI=".equals(file.getBase64Contents());
-        doReturn(Mono.just(UUID.fromString("251bfa61-6c0e-47d0-a479-643c40c3e768")))
-                .when(fileClient).postFile(argThat(argumentMatcherVedlegg2));
+        setUpFileClientMock();
 
         egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(archiveCaseRequestService, fileClient, resourceRepository);
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;

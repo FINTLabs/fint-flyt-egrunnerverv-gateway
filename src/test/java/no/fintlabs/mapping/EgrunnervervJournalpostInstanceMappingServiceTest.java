@@ -1,10 +1,7 @@
 package no.fintlabs.mapping;
 
-import no.fint.model.resource.arkiv.noark.SakResource;
 import no.fintlabs.ResourceRepository;
-import no.fintlabs.exceptions.ArchiveCaseNotFoundException;
 import no.fintlabs.exceptions.ArchiveResourceNotFoundException;
-import no.fintlabs.gateway.instance.kafka.ArchiveCaseRequestService;
 import no.fintlabs.gateway.instance.model.File;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.gateway.instance.web.FileClient;
@@ -41,13 +38,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
     ResourceRepository resourceRepository;
 
     @Mock
-    ArchiveCaseRequestService archiveCaseRequestService;
-
-    @Mock
     FileClient fileClient;
-
-    @Mock
-    SakResource sakResource;
 
     private EgrunnervervJournalpostInstance createTestJournalpostInstance(String organisasjonsnummer) {
         return EgrunnervervJournalpostInstance
@@ -229,11 +220,10 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
         );
 
         when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.of("testSaksansvarlig"));
-        when(archiveCaseRequestService.getByArchiveCaseId("testSaksnummer")).thenReturn(Optional.of(sakResource));
 
         setUpFileClientMock();
 
-        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(archiveCaseRequestService, fileClient, resourceRepository);
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository);
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
         InstanceObject instanceObject = egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block();
@@ -251,11 +241,10 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
         );
 
         when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.of("testSaksansvarlig"));
-        when(archiveCaseRequestService.getByArchiveCaseId("testSaksnummer")).thenReturn(Optional.of(sakResource));
 
         setUpFileClientMock();
 
-        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(archiveCaseRequestService, fileClient, resourceRepository);
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository);
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
         InstanceObject instanceObject = egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block();
@@ -273,11 +262,10 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
         );
 
         when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.of("testSaksansvarlig"));
-        when(archiveCaseRequestService.getByArchiveCaseId("testSaksnummer")).thenReturn(Optional.of(sakResource));
 
         setUpFileClientMock();
 
-        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(archiveCaseRequestService, fileClient, resourceRepository);
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository);
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
         InstanceObject instanceObject = egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block();
@@ -290,30 +278,16 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
     }
 
     @Test
-    public void givenSaksnummerThatDoesntExistInArchiveSystem_shouldThrowArchiveCaseNotFoundException() {
-        EgrunnervervJournalpostInstance egrunnervervJournalpostInstance = createTestJournalpostInstance(
-                "123456789"
-        );
-
-        when(archiveCaseRequestService.getByArchiveCaseId(anyString())).thenReturn(Optional.empty());
-
-        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(archiveCaseRequestService, fileClient, resourceRepository);
-
-        assertThrows(ArchiveCaseNotFoundException.class, () -> egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block());
-    }
-
-    @Test
     public void givenNoArkivressursHrefForSaksansvarlig_shouldThrowArchiveResourceNotFoundException() {
         EgrunnervervJournalpostInstance egrunnervervJournalpostInstance = createTestJournalpostInstance(
                 "123456789"
         );
 
         when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.empty());
-        when(archiveCaseRequestService.getByArchiveCaseId("testSaksnummer")).thenReturn(Optional.of(sakResource));
 
         setUpFileClientMock();
 
-        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(archiveCaseRequestService, fileClient, resourceRepository);
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository);
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
         assertThrows(ArchiveResourceNotFoundException.class, () -> egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block());

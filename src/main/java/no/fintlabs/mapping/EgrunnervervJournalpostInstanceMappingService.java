@@ -1,10 +1,8 @@
 package no.fintlabs.mapping;
 
 import no.fintlabs.ResourceRepository;
-import no.fintlabs.exceptions.ArchiveCaseNotFoundException;
 import no.fintlabs.exceptions.ArchiveResourceNotFoundException;
 import no.fintlabs.gateway.instance.InstanceMapper;
-import no.fintlabs.gateway.instance.kafka.ArchiveCaseRequestService;
 import no.fintlabs.gateway.instance.model.File;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.gateway.instance.web.FileClient;
@@ -27,26 +25,19 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
 
     @Value("${fint.flyt.egrunnerverv.checkSaksbehandler:true}")
     boolean checkSaksbehandler;
-    private final ArchiveCaseRequestService archiveCaseRequestService;
     private final FileClient fileClient;
 
     private final ResourceRepository resourceRepository;
 
-
     public EgrunnervervJournalpostInstanceMappingService(
-            ArchiveCaseRequestService archiveCaseRequestService,
             FileClient fileClient,
             ResourceRepository resourceRepository) {
-        this.archiveCaseRequestService = archiveCaseRequestService;
         this.fileClient = fileClient;
         this.resourceRepository = resourceRepository;
     }
 
     @Override
     public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervJournalpostInstance egrunnervervJournalpostInstance) {
-
-        archiveCaseRequestService.getByArchiveCaseId(egrunnervervJournalpostInstance.getSaksnummer())
-                .orElseThrow(() -> new ArchiveCaseNotFoundException(egrunnervervJournalpostInstance.getSaksnummer()));
 
         EgrunnervervJournalpostInstanceBody egrunnervervJournalpostInstanceBody =
                 egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody();

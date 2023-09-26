@@ -128,7 +128,12 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                 .builder()
                 .valuePerKey(Map.of(
                         "navn", Optional.ofNullable(egrunnervervJournalpostReceiver.getNavn()).orElse(""),
-                        "organisasjonsnummer", Optional.ofNullable(egrunnervervJournalpostReceiver.getOrganisasjonsnummer()).orElse(""),
+                        "organisasjonsnummer", Optional.ofNullable(egrunnervervJournalpostReceiver.getOrganisasjonsnummer())
+                                .filter(this::isOrganisasjonsnummer)
+                                .orElse(""),
+                        "fodselsnummer", Optional.ofNullable(egrunnervervJournalpostReceiver.getOrganisasjonsnummer())
+                                .filter(this::isFodselsnummer)
+                                .orElse(""),
                         "epost", Optional.ofNullable(egrunnervervJournalpostReceiver.getEpost()).orElse(""),
                         "telefon", Optional.ofNullable(egrunnervervJournalpostReceiver.getTelefon()).orElse(""),
                         "postadresse", Optional.ofNullable(egrunnervervJournalpostReceiver.getPostadresse()).orElse(""),
@@ -136,6 +141,14 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                         "poststed", Optional.ofNullable(egrunnervervJournalpostReceiver.getPoststed()).orElse("")
                 ))
                 .build();
+    }
+
+    private boolean isFodselsnummer(String number) {
+        return number.length() == 11;
+    }
+
+    private boolean isOrganisasjonsnummer(String number) {
+        return !isFodselsnummer(number);
     }
 
     private Mono<List<InstanceObject>> mapAttachmentDocumentsToInstanceObjects(

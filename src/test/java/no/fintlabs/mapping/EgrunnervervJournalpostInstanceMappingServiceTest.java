@@ -285,8 +285,6 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
 
         when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.empty());
 
-        setUpFileClientMock();
-
         egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository);
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 

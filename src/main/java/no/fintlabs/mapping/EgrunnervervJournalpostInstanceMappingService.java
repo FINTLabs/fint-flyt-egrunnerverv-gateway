@@ -42,6 +42,14 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
         EgrunnervervJournalpostInstanceBody egrunnervervJournalpostInstanceBody =
                 egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody();
 
+        String saksbehandler;
+        if (checkSaksbehandler) {
+            saksbehandler = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost())
+                    .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost()));
+        } else {
+            saksbehandler = "";
+        }
+
         EgrunnervervJournalpostDocument hoveddokument = egrunnervervJournalpostInstanceBody
                 .getDokumenter()
                 .stream()
@@ -71,12 +79,6 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                         vedleggInstanceObjectsMono
                 )
                 .map((Tuple2<Map<String, String>, List<InstanceObject>> hovedDokumentValuePerKeyAndVedleggInstanceObjects) -> {
-
-                            String saksbehandler = "";
-                            if (checkSaksbehandler) {
-                                saksbehandler = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost())
-                                        .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost()));
-                            }
 
                             HashMap<String, String> valuePerKey = new HashMap<>();
                             valuePerKey.put("saksnummer", Optional.ofNullable(egrunnervervJournalpostInstance.getSaksnummer()).orElse(""));

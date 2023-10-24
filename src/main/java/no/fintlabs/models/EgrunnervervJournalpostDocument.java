@@ -20,9 +20,4 @@ public class EgrunnervervJournalpostDocument {
     private final String filnavn;
     @NotNull
     private final String dokumentBase64;
-
-    @Override
-    public String toString() {
-        return "Sensitive data omitted";
-    }
 }

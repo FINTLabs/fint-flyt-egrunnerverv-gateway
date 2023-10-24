@@ -57,9 +57,4 @@ public class EgrunnervervJournalpostInstanceBody {
 
     private final List<@Valid @NotNull EgrunnervervJournalpostReceiver> mottakere;
     private final List<@Valid @NotNull EgrunnervervJournalpostDocument> dokumenter;
-
-    @Override
-    public String toString() {
-        return "Sensitive data omitted";
-    }
 }

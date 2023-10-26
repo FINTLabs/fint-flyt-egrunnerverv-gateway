@@ -1,6 +1,6 @@
 package no.fintlabs.exceptions;
 
-import no.fintlabs.gateway.instance.AbstractInstanceRejectedException;
+import no.fintlabs.gateway.instance.exception.AbstractInstanceRejectedException;
 
 public class ArchiveResourceNotFoundException extends AbstractInstanceRejectedException {
     public ArchiveResourceNotFoundException(String email) {

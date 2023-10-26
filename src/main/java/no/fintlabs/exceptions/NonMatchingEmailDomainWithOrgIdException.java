@@ -1,6 +1,6 @@
 package no.fintlabs.exceptions;
 
-import no.fintlabs.gateway.instance.AbstractInstanceRejectedException;
+import no.fintlabs.gateway.instance.exception.AbstractInstanceRejectedException;
 
 public class NonMatchingEmailDomainWithOrgIdException extends AbstractInstanceRejectedException {
     public NonMatchingEmailDomainWithOrgIdException(String domain, String orgId) {

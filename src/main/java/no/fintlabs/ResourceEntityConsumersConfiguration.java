@@ -23,7 +23,7 @@ public class ResourceEntityConsumersConfiguration {
     @Bean
     public ConcurrentMessageListenerContainer<String, ArkivressursResource> arkivressursResourceEntityConsumer(
     ) {
-        return entityConsumerFactoryService.createFactory(
+        return entityConsumerFactoryService.createRecordConsumerFactory(
                 ArkivressursResource.class,
                 consumerRecord -> resourceRepository.updateArkivRessurs(consumerRecord.value())
         ).createContainer(EntityTopicNameParameters.builder().resource("arkiv.noark.arkivressurs").build());
@@ -32,7 +32,7 @@ public class ResourceEntityConsumersConfiguration {
     @Bean
     public ConcurrentMessageListenerContainer<String, PersonalressursResource> personalressursResourceEntityConsumer(
     ) {
-        return entityConsumerFactoryService.createFactory(
+        return entityConsumerFactoryService.createRecordConsumerFactory(
                 PersonalressursResource.class,
                 consumerRecord -> resourceRepository.updatePersonalRessurs(consumerRecord.value())
         ).createContainer(EntityTopicNameParameters.builder().resource("administrasjon.personal.personalressurs").build());

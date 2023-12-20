@@ -44,13 +44,13 @@ dependencies {
     implementation 'org.hibernate.validator:hibernate-validator'
 
     implementation 'org.springframework.kafka:spring-kafka'
-    implementation 'no.fintlabs:fint-kafka:2.4.1'
-    implementation 'no.fintlabs:fint-flyt-kafka:2.4.2'
+    implementation 'no.fintlabs:fint-kafka:4.0.1'
+    implementation 'no.fintlabs:fint-flyt-kafka:3.0.2'
 
     implementation 'org.modelmapper:modelmapper:3.1.1'
 
     implementation 'no.fintlabs:fint-flyt-cache:1.2.0'
-    implementation 'no.fintlabs:fint-flyt-instance-gateway:5.0.1'
+    implementation 'no.fintlabs:fint-flyt-instance-gateway:5.0.2'
 
     implementation 'no.fint:fint-model-resource:0.4.1'
     implementation "no.fint:fint-arkiv-resource-model-java:${apiVersion}"

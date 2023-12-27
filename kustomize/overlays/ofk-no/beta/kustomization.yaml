@@ -1,28 +1,28 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: vlfk-no
+namespace: ofk-no
 
 resources:
   - ../../../base
 
 commonLabels:
-  app.kubernetes.io/instance: fint-flyt-egrunnerverv-instance-gateway_vlfk_no
-  fintlabs.no/org-id: vlfk.no
+  app.kubernetes.io/instance: fint-flyt-egrunnerverv-instance-gateway_ofk_no
+  fintlabs.no/org-id: ofk.no
 
 patches:
   - patch: |-
       - op: replace
         path: "/spec/kafka/acls/0/topic"
-        value: "vlfk-no.flyt.*"
+        value: "ofk-no.flyt.*"
       - op: replace
         path: "/spec/orgId"
-        value: "vlfk.no"
+        value: "ofk.no"
       - op: add
         path: "/spec/url/basePath"
-        value: "/alpha"
+        value: "/beta"
       - op: replace
         path: "/spec/ingress/basePath"
-        value: "/alpha/api/egrunnerverv/instances/821311632"
+        value: "/beta/api/egrunnerverv/instances/974644584"
     target:
       kind: Application
       name: fint-flyt-egrunnerverv-instance-gateway

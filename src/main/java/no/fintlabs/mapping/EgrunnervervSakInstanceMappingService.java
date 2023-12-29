@@ -15,6 +15,8 @@ import reactor.core.publisher.Mono;
 import java.util.HashMap;
 import java.util.Map;
 
+import static no.fintlabs.mapping.EmailUtils.extractEmailDomain;
+
 @Service
 public class EgrunnervervSakInstanceMappingService implements InstanceMapper<EgrunnervervSakInstance> {
 
@@ -36,36 +38,37 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
 
     @Override
     public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervSakInstance egrunnervervSakInstance) {
-
-        if (checkEmailDomain) {
-            String domain = extractEmailDomain(egrunnervervSakInstance.getSaksansvarligEpost());
-            if (!domain.equals(orgId)) {
-                throw new NonMatchingEmailDomainWithOrgIdException(domain, orgId);
+        return Mono.defer(() -> {
+            if (checkEmailDomain) {
+                String domain = extractEmailDomain(egrunnervervSakInstance.getSaksansvarligEpost());
+                if (!domain.equals(orgId)) {
+                    throw new NonMatchingEmailDomainWithOrgIdException(domain, orgId);
+                }
             }
-        }
 
-        String saksansvarlig = "";
-        if (checkSaksansvarligEpost) {
-            saksansvarlig = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervSakInstance.getSaksansvarligEpost())
-                    .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervSakInstance.getSaksansvarligEpost()));
-        }
+            String saksansvarlig = "";
+            if (checkSaksansvarligEpost) {
+                saksansvarlig = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervSakInstance.getSaksansvarligEpost())
+                        .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervSakInstance.getSaksansvarligEpost()));
+            }
 
-        Map<String, String> valuePerKey = getStringStringMap(egrunnervervSakInstance, saksansvarlig);
-        return Mono.just(
-                InstanceObject.builder()
-                        .valuePerKey(valuePerKey)
-                        .objectCollectionPerKey(Map.of(
-                                "saksparter", egrunnervervSakInstance.getSaksparter()
-                                        .stream()
-                                        .map(this::toInstanceObject)
-                                        .toList(),
-                                "klasseringer", egrunnervervSakInstance.getKlasseringer()
-                                        .stream()
-                                        .map(this::toInstanceObject)
-                                        .toList()
-                        ))
-                        .build()
-        );
+            Map<String, String> valuePerKey = getStringStringMap(egrunnervervSakInstance, saksansvarlig);
+            return Mono.just(
+                    InstanceObject.builder()
+                            .valuePerKey(valuePerKey)
+                            .objectCollectionPerKey(Map.of(
+                                    "saksparter", egrunnervervSakInstance.getSaksparter()
+                                            .stream()
+                                            .map(this::toInstanceObject)
+                                            .toList(),
+                                    "klasseringer", egrunnervervSakInstance.getKlasseringer()
+                                            .stream()
+                                            .map(this::toInstanceObject)
+                                            .toList()
+                            ))
+                            .build()
+            );
+        });
     }
 
     private static Map<String, String> getStringStringMap(EgrunnervervSakInstance egrunnervervSakInstance, String saksansvarlig) {
@@ -117,10 +120,4 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
                 .build();
     }
 
-    private String extractEmailDomain(String email) {
-        if (email == null || !email.contains("@")) {
-            return "Invalid email";
-        }
-        return email.substring(email.indexOf("@") + 1).toLowerCase();
-    }
 }

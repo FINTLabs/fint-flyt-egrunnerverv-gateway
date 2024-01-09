@@ -49,7 +49,7 @@ dependencies {
 
     implementation 'org.modelmapper:modelmapper:3.1.1'
 
-    implementation 'no.fintlabs:fint-flyt-cache:1.2.0'
+    implementation 'no.fintlabs:fint-flyt-cache:1.2.3'
     implementation 'no.fintlabs:fint-flyt-instance-gateway:5.0.3'
 
     implementation 'no.fint:fint-model-resource:0.4.1'

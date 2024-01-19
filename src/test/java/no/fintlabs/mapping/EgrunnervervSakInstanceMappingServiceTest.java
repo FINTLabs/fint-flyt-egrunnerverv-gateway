@@ -27,7 +27,6 @@ import static org.mockito.Mockito.when;
 class EgrunnervervSakInstanceMappingServiceTest {
     public static final long egrunnervervSourceApplicationId = 2;
 
-
     EgrunnervervSakInstanceMappingService egrunnervervSakInstanceMappingService;
 
     EgrunnervervSakInstance egrunnervervSakInstance;

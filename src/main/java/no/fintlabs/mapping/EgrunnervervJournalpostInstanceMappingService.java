@@ -7,10 +7,7 @@ import no.fintlabs.gateway.instance.InstanceMapper;
 import no.fintlabs.gateway.instance.model.File;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.gateway.instance.web.FileClient;
-import no.fintlabs.models.EgrunnervervJournalpostDocument;
-import no.fintlabs.models.EgrunnervervJournalpostInstance;
-import no.fintlabs.models.EgrunnervervJournalpostInstanceBody;
-import no.fintlabs.models.EgrunnervervJournalpostReceiver;
+import no.fintlabs.models.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
@@ -49,11 +46,32 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
     @Override
     public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervJournalpostInstance egrunnervervJournalpostInstance) {
         return Mono.defer(() -> {
-            EgrunnervervJournalpostInstanceBody egrunnervervJournalpostInstanceBody =
-                    egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody();
+            EgrunnervervJournalpostInstancePrepared egrunnervervJournalpostInstancePrepared =
+                    EgrunnervervJournalpostInstancePrepared
+                            .builder()
+                            .saksnummer(egrunnervervJournalpostInstance.getSaksnummer())
+                            .sysId(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getSysId())
+                            .tittel(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getTittel())
+                            .dokumentNavn(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getDokumentNavn())
+                            .dokumentDato(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getDokumentDato())
+                            .forsendelsesMate(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getForsendelsesMate())
+                            .kommunenavn(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getKommunenavn())
+                            .knr(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getKnr())
+                            .gnr(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getGnr())
+                            .bnr(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getBnr())
+                            .fnr(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getFnr())
+                            .snr(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getSnr())
+                            .eierforhold(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getEierforhold())
+                            .id(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getId())
+                            .maltittel(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getMaltittel())
+                            .prosjektnavn(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getProsjektnavn())
+                            .saksbehandlerEpost(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getSaksbehandlerEpost().trim())
+                            .mottakere(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getMottakere())
+                            .dokumenter(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getDokumenter())
+                            .build();
 
             if (checkEmailDomain) {
-                String domain = extractEmailDomain(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost());
+                String domain = extractEmailDomain(egrunnervervJournalpostInstancePrepared.getSaksbehandlerEpost());
                 if (!domain.equals(orgId)) {
                     throw new NonMatchingEmailDomainWithOrgIdException(domain, orgId);
                 }
@@ -61,20 +79,22 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
 
             String saksbehandler;
             if (checkSaksbehandler) {
-                saksbehandler = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost())
-                        .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost()));
+                saksbehandler = resourceRepository.getArkivressursHrefFromPersonEmail(egrunnervervJournalpostInstancePrepared.getSaksbehandlerEpost())
+                        .orElseThrow(() -> new ArchiveResourceNotFoundException(egrunnervervJournalpostInstancePrepared.getSaksbehandlerEpost()));
             } else {
                 saksbehandler = "";
             }
 
-            EgrunnervervJournalpostDocument hoveddokument = egrunnervervJournalpostInstanceBody
+            egrunnervervJournalpostInstancePrepared.setSaksbehandler(saksbehandler);
+
+            EgrunnervervJournalpostDocument hoveddokument = egrunnervervJournalpostInstancePrepared
                     .getDokumenter()
                     .stream()
                     .filter(EgrunnervervJournalpostDocument::getHoveddokument)
                     .findFirst()
                     .orElseThrow(() -> new IllegalStateException("No hoveddokument"));
 
-            List<EgrunnervervJournalpostDocument> vedlegg = egrunnervervJournalpostInstanceBody
+            List<EgrunnervervJournalpostDocument> vedlegg = egrunnervervJournalpostInstancePrepared
                     .getDokumenter()
                     .stream()
                     .filter(dokument -> !dokument.getHoveddokument())
@@ -82,12 +102,12 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
 
             Mono<Map<String, String>> hoveddokumentInstanceValuePerKeyMono = mapHoveddokumentToInstanceValuePerKey(
                     sourceApplicationId,
-                    egrunnervervJournalpostInstanceBody.getSysId(),
+                    egrunnervervJournalpostInstancePrepared.getSysId(),
                     hoveddokument
             );
             Mono<List<InstanceObject>> vedleggInstanceObjectsMono = mapAttachmentDocumentsToInstanceObjects(
                     sourceApplicationId,
-                    egrunnervervJournalpostInstanceBody.getSysId(),
+                    egrunnervervJournalpostInstancePrepared.getSysId(),
                     vedlegg
             );
 
@@ -98,30 +118,30 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                     .map((Tuple2<Map<String, String>, List<InstanceObject>> hovedDokumentValuePerKeyAndVedleggInstanceObjects) -> {
 
                                 HashMap<String, String> valuePerKey = new HashMap<>();
-                                valuePerKey.put("saksnummer", Optional.ofNullable(egrunnervervJournalpostInstance.getSaksnummer()).orElse(""));
-                                valuePerKey.put("tittel", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getTittel()).orElse(""));
-                                valuePerKey.put("dokumentNavn", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getDokumentNavn()).orElse(""));
-                                valuePerKey.put("dokumentDato", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getDokumentDato()).orElse(""));
-                                valuePerKey.put("forsendelsesmaate", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getForsendelsesMate()).orElse(""));
-                                valuePerKey.put("kommunenavn", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getKommunenavn()).orElse(""));
-                                valuePerKey.put("knr", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getKnr()).orElse(""));
-                                valuePerKey.put("gnr", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getGnr()).orElse(""));
-                                valuePerKey.put("bnr", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getBnr()).orElse(""));
-                                valuePerKey.put("fnr", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getFnr()).orElse(""));
-                                valuePerKey.put("snr", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getSnr()).orElse(""));
-                                valuePerKey.put("eierforhold", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getEierforhold()).orElse(""));
-                                valuePerKey.put("id", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getId()).orElse(""));
-                                valuePerKey.put("maltittel", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getMaltittel()).orElse(""));
-                                valuePerKey.put("prosjektnavn", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getProsjektnavn()).orElse(""));
-                                valuePerKey.put("saksbehandlerEpost", Optional.ofNullable(egrunnervervJournalpostInstanceBody.getSaksbehandlerEpost()).orElse(""));
-                                valuePerKey.put("saksbehandler", Optional.ofNullable(saksbehandler).orElse(""));
+                                valuePerKey.put("saksnummer", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getSaksnummer()).orElse(""));
+                                valuePerKey.put("tittel", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getTittel()).orElse(""));
+                                valuePerKey.put("dokumentNavn", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getDokumentNavn()).orElse(""));
+                                valuePerKey.put("dokumentDato", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getDokumentDato()).orElse(""));
+                                valuePerKey.put("forsendelsesmaate", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getForsendelsesMate()).orElse(""));
+                                valuePerKey.put("kommunenavn", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getKommunenavn()).orElse(""));
+                                valuePerKey.put("knr", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getKnr()).orElse(""));
+                                valuePerKey.put("gnr", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getGnr()).orElse(""));
+                                valuePerKey.put("bnr", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getBnr()).orElse(""));
+                                valuePerKey.put("fnr", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getFnr()).orElse(""));
+                                valuePerKey.put("snr", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getSnr()).orElse(""));
+                                valuePerKey.put("eierforhold", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getEierforhold()).orElse(""));
+                                valuePerKey.put("id", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getId()).orElse(""));
+                                valuePerKey.put("maltittel", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getMaltittel()).orElse(""));
+                                valuePerKey.put("prosjektnavn", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getProsjektnavn()).orElse(""));
+                                valuePerKey.put("saksbehandlerEpost", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getSaksbehandlerEpost()).orElse(""));
+                                valuePerKey.put("saksbehandler", Optional.ofNullable(egrunnervervJournalpostInstancePrepared.getSaksbehandler()).orElse(""));
 
                                 valuePerKey.putAll(hovedDokumentValuePerKeyAndVedleggInstanceObjects.getT1());
                                 return InstanceObject.builder()
                                         .valuePerKey(valuePerKey)
                                         .objectCollectionPerKey(
                                                 Map.of(
-                                                        "mottakere", egrunnervervJournalpostInstanceBody.getMottakere()
+                                                        "mottakere", egrunnervervJournalpostInstancePrepared.getMottakere()
                                                                 .stream()
                                                                 .map(this::toInstanceObject)
                                                                 .toList(),

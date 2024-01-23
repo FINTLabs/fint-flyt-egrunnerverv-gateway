@@ -27,7 +27,6 @@ import static org.mockito.Mockito.*;
 class EgrunnervervJournalpostInstanceMappingServiceTest {
     public static final long egrunnervervSourceApplicationId = 2;
 
-
     EgrunnervervJournalpostInstanceMappingService egrunnervervJournalpostInstanceMappingService;
 
     ArgumentMatcher<File> argumentMatcherHoveddokument;

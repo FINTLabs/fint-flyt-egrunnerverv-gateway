@@ -10,6 +10,7 @@ import no.fintlabs.models.EgrunnervervSakInstance;
 import no.fintlabs.models.EgrunnervervSakInstancePrepared;
 import no.fintlabs.models.EgrunnervervSakKlassering;
 import no.fintlabs.models.EgrunnervervSaksPart;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -57,7 +58,7 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
                     .eierforholdskode(egrunnervervSakInstance.getEierforholdskode())
                     .prosjektnr(egrunnervervSakInstance.getProsjektnr())
                     .prosjektnavn(egrunnervervSakInstance.getProsjektnavn())
-                    .kommunenavn(egrunnervervSakInstance.getKommunenavn())
+                    .kommunenavn(StringUtils.capitalize(egrunnervervSakInstance.getKommunenavn().toLowerCase()))
                     .adresse(egrunnervervSakInstance.getAdresse())
                     .saksparter(egrunnervervSakInstance.getSaksparter())
                     .klasseringer(egrunnervervSakInstance.getKlasseringer())

@@ -50,7 +50,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                                 .dokumentNavn("testDokumentNavn")
                                 .dokumentDato("testDokumentDato")
                                 .forsendelsesMate("testForsendelsesmaate")
-                                .kommunenavn("testKommunenavn")
+                                .kommunenavn("TESTKOMMUNENAVN")
                                 .knr("testKnr")
                                 .gnr("testGnr")
                                 .bnr("testBnr")
@@ -156,7 +156,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
         expectedInstanceValuePerKey.put("dokumentNavn", "testDokumentNavn");
         expectedInstanceValuePerKey.put("dokumentDato", "testDokumentDato");
         expectedInstanceValuePerKey.put("forsendelsesmaate", "testForsendelsesmaate");
-        expectedInstanceValuePerKey.put("kommunenavn", "testKommunenavn");
+        expectedInstanceValuePerKey.put("kommunenavn", "Testkommunenavn");
         expectedInstanceValuePerKey.put("knr", "testKnr");
         expectedInstanceValuePerKey.put("gnr", "testGnr");
         expectedInstanceValuePerKey.put("bnr", "testBnr");

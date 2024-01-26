@@ -1,25 +1,25 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: innlandetfylke-no
+namespace: rogfk-no
 
 resources:
   - ../../../base
 
 commonLabels:
-  app.kubernetes.io/instance: fint-flyt-egrunnerverv-instance-gateway_innlandetfylke_no
-  fintlabs.no/org-id: innlandetfylke.no
+  app.kubernetes.io/instance: fint-flyt-egrunnerverv-instance-gateway_rogfk_no
+  fintlabs.no/org-id: rogfk.no
 
 patches:
   - patch: |-
       - op: replace
         path: "/spec/kafka/acls/0/topic"
-        value: "innlandetfylke-no.flyt.*"
+        value: "rogfk-no.flyt.*"
       - op: replace
         path: "/spec/orgId"
-        value: "innlandetfylke.no"
+        value: "rogfk.no"
       - op: replace
         path: "/spec/ingress/basePath"
-        value: "/api/egrunnerverv/instances/920717152"
+        value: "/api/egrunnerverv/instances/971045698"
     target:
       kind: Application
       name: fint-flyt-egrunnerverv-instance-gateway

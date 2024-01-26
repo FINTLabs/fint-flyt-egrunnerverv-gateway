@@ -56,7 +56,7 @@ class EgrunnervervSakInstanceMappingServiceTest {
                 .eierforholdskode("")
                 .prosjektnr(null)
                 .prosjektnavn("testProsjektnavn")
-                .kommunenavn("testKommunenavn")
+                .kommunenavn("TESTKOMMUNENAVN")
                 .adresse("testAdresse")
                 .saksparter(List.of(
                         EgrunnervervSaksPart
@@ -115,7 +115,7 @@ class EgrunnervervSakInstanceMappingServiceTest {
         valuePerKey.put("eierforholdskode", "");
         valuePerKey.put("prosjektnr", null);
         valuePerKey.put("prosjektnavn", "testProsjektnavn");
-        valuePerKey.put("kommunenavn", "testKommunenavn");
+        valuePerKey.put("kommunenavn", "Testkommunenavn");
         valuePerKey.put("adresse", "testAdresse");
         valuePerKey.put("saksansvarlig", "testSaksansvarlig");
 

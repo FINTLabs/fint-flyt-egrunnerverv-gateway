@@ -8,6 +8,7 @@ import no.fintlabs.gateway.instance.model.File;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.gateway.instance.web.FileClient;
 import no.fintlabs.models.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
@@ -55,7 +56,7 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                             .dokumentNavn(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getDokumentNavn())
                             .dokumentDato(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getDokumentDato())
                             .forsendelsesMate(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getForsendelsesMate())
-                            .kommunenavn(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getKommunenavn())
+                            .kommunenavn(StringUtils.capitalize(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getKommunenavn().toLowerCase()))
                             .knr(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getKnr())
                             .gnr(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getGnr())
                             .bnr(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getBnr())

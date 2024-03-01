@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -18,6 +19,6 @@ public class EgrunnervervJournalpostDocument {
     private final Boolean hoveddokument;
     @NotNull
     private final String filnavn;
-    @NotNull
+    @NotEmpty
     private final String dokumentBase64;
 }

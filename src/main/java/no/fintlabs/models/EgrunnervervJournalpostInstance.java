@@ -12,7 +12,6 @@ import javax.validation.constraints.NotNull;
 @EqualsAndHashCode
 @Builder
 public class EgrunnervervJournalpostInstance {
-
     @NotNull
     private final EgrunnervervJournalpostInstanceBody egrunnervervJournalpostInstanceBody;
     @NotNull

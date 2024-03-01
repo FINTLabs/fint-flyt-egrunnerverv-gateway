@@ -43,7 +43,7 @@ public class EgrunnervervJournalpostInstanceBody {
     private final String fnr;
     @NotNull
     private final String snr;
-    @NotNull
+//    @NotNull
     private final String eierforhold;
     @NotNull
     private final String id;

@@ -7,18 +7,14 @@ import no.fintlabs.exceptions.NonMatchingEmailDomainWithOrgIdException;
 import no.fintlabs.gateway.instance.InstanceMapper;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.models.EgrunnervervSakInstance;
-import no.fintlabs.models.EgrunnervervSakInstancePrepared;
 import no.fintlabs.models.EgrunnervervSakKlassering;
 import no.fintlabs.models.EgrunnervervSaksPart;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static no.fintlabs.mapping.EmailUtils.extractEmailDomain;
 
 @Service
 @Slf4j
@@ -34,38 +30,24 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
     @Value("${fint.org-id}")
     private String orgId;
 
+    private final FormattingUtilsService formattingUtilsService;
+
     public EgrunnervervSakInstanceMappingService(
-            ResourceRepository resourceRepository
+            ResourceRepository resourceRepository,
+            FormattingUtilsService formattingUtilsService
     ) {
         this.resourceRepository = resourceRepository;
+        this.formattingUtilsService = formattingUtilsService;
     }
 
     @Override
     public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervSakInstance egrunnervervSakInstance) {
         return Mono.defer(() -> {
-            EgrunnervervSakInstancePrepared egrunnervervSakInstancePrepared = EgrunnervervSakInstancePrepared
-                    .builder()
-                    .sysId(egrunnervervSakInstance.getSysId())
-                    .knr(egrunnervervSakInstance.getKnr())
-                    .gnr(egrunnervervSakInstance.getGnr())
-                    .bnr(egrunnervervSakInstance.getBnr())
-                    .fnr(egrunnervervSakInstance.getFnr())
-                    .snr(egrunnervervSakInstance.getSnr())
-                    .takstnummer(egrunnervervSakInstance.getTakstnummer())
-                    .tittel(egrunnervervSakInstance.getTittel())
-                    .saksansvarligEpost(egrunnervervSakInstance.getSaksansvarligEpost().trim())
-                    .eierforholdsnavn(egrunnervervSakInstance.getEierforholdsnavn())
-                    .eierforholdskode(egrunnervervSakInstance.getEierforholdskode())
-                    .prosjektnr(egrunnervervSakInstance.getProsjektnr())
-                    .prosjektnavn(egrunnervervSakInstance.getProsjektnavn())
-                    .kommunenavn(StringUtils.capitalize(egrunnervervSakInstance.getKommunenavn().toLowerCase()))
-                    .adresse(egrunnervervSakInstance.getAdresse())
-                    .saksparter(egrunnervervSakInstance.getSaksparter())
-                    .klasseringer(egrunnervervSakInstance.getKlasseringer())
-                    .build();
+
+            String saksansvarligEpostTrimmed = egrunnervervSakInstance.getSaksansvarligEpost().trim();
 
             if (checkEmailDomain) {
-                String domain = extractEmailDomain(egrunnervervSakInstancePrepared.getSaksansvarligEpost());
+                String domain = formattingUtilsService.extractEmailDomain(saksansvarligEpostTrimmed);
                 if (!domain.equals(orgId)) {
                     throw new NonMatchingEmailDomainWithOrgIdException(domain, orgId);
                 }
@@ -75,25 +57,40 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
 
             if (checkSaksansvarligEpost) {
                 saksansvarlig = resourceRepository
-                        .getArkivressursHrefFromPersonEmail(egrunnervervSakInstancePrepared.getSaksansvarligEpost())
+                        .getArkivressursHrefFromPersonEmail(saksansvarligEpostTrimmed)
                         .orElseThrow(() -> new ArchiveResourceNotFoundException(
-                                        egrunnervervSakInstancePrepared.getSaksansvarligEpost()
+                                        saksansvarligEpostTrimmed
                                 )
                         );
             }
 
-            egrunnervervSakInstancePrepared.setSaksansvarlig(saksansvarlig);
+            Map<String, String> valuePerKey = new HashMap<>();
+            valuePerKey.put("sys_id", egrunnervervSakInstance.getSysId());
+            valuePerKey.put("knr", egrunnervervSakInstance.getKnr());
+            valuePerKey.put("gnr", egrunnervervSakInstance.getGnr());
+            valuePerKey.put("bnr", egrunnervervSakInstance.getBnr());
+            valuePerKey.put("fnr", egrunnervervSakInstance.getFnr());
+            valuePerKey.put("snr", egrunnervervSakInstance.getSnr());
+            valuePerKey.put("takstnummer", egrunnervervSakInstance.getTakstnummer());
+            valuePerKey.put("tittel", egrunnervervSakInstance.getTittel());
+            valuePerKey.put("saksansvarligEpost", saksansvarligEpostTrimmed);
+            valuePerKey.put("saksansvarlig", saksansvarlig);
+            valuePerKey.put("eierforholdsnavn", egrunnervervSakInstance.getEierforholdsnavn());
+            valuePerKey.put("eierforholdskode", egrunnervervSakInstance.getEierforholdskode());
+            valuePerKey.put("prosjektnr", egrunnervervSakInstance.getProsjektnr());
+            valuePerKey.put("prosjektnavn", egrunnervervSakInstance.getProsjektnavn());
+            valuePerKey.put("kommunenavn", formattingUtilsService.formatKommunenavn(egrunnervervSakInstance.getKommunenavn()));
+            valuePerKey.put("adresse", egrunnervervSakInstance.getAdresse());
 
-            Map<String, String> valuePerKey = getStringStringMap(egrunnervervSakInstancePrepared);
             return Mono.just(
                     InstanceObject.builder()
                             .valuePerKey(valuePerKey)
                             .objectCollectionPerKey(Map.of(
-                                    "saksparter", egrunnervervSakInstancePrepared.getSaksparter()
+                                    "saksparter", egrunnervervSakInstance.getSaksparter()
                                             .stream()
                                             .map(this::toInstanceObject)
                                             .toList(),
-                                    "klasseringer", egrunnervervSakInstancePrepared.getKlasseringer()
+                                    "klasseringer", egrunnervervSakInstance.getKlasseringer()
                                             .stream()
                                             .map(this::toInstanceObject)
                                             .toList()
@@ -101,27 +98,6 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
                             .build()
             );
         });
-    }
-
-    private static Map<String, String> getStringStringMap(EgrunnervervSakInstancePrepared egrunnervervSakInstancePrepared) {
-        Map<String, String> valuePerKey = new HashMap<>();
-        valuePerKey.put("sys_id", egrunnervervSakInstancePrepared.getSysId());
-        valuePerKey.put("knr", egrunnervervSakInstancePrepared.getKnr());
-        valuePerKey.put("gnr", egrunnervervSakInstancePrepared.getGnr());
-        valuePerKey.put("bnr", egrunnervervSakInstancePrepared.getBnr());
-        valuePerKey.put("fnr", egrunnervervSakInstancePrepared.getFnr());
-        valuePerKey.put("snr", egrunnervervSakInstancePrepared.getSnr());
-        valuePerKey.put("takstnummer", egrunnervervSakInstancePrepared.getTakstnummer());
-        valuePerKey.put("tittel", egrunnervervSakInstancePrepared.getTittel());
-        valuePerKey.put("saksansvarligEpost", egrunnervervSakInstancePrepared.getSaksansvarligEpost());
-        valuePerKey.put("saksansvarlig", egrunnervervSakInstancePrepared.getSaksansvarlig());
-        valuePerKey.put("eierforholdsnavn", egrunnervervSakInstancePrepared.getEierforholdsnavn());
-        valuePerKey.put("eierforholdskode", egrunnervervSakInstancePrepared.getEierforholdskode());
-        valuePerKey.put("prosjektnr", egrunnervervSakInstancePrepared.getProsjektnr());
-        valuePerKey.put("prosjektnavn", egrunnervervSakInstancePrepared.getProsjektnavn());
-        valuePerKey.put("kommunenavn", egrunnervervSakInstancePrepared.getKommunenavn());
-        valuePerKey.put("adresse", egrunnervervSakInstancePrepared.getAdresse());
-        return valuePerKey;
     }
 
     private InstanceObject toInstanceObject(EgrunnervervSaksPart egrunnervervSaksPart) {

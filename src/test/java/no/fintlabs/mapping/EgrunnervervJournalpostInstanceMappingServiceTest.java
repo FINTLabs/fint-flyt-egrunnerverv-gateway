@@ -33,11 +33,17 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
     ArgumentMatcher<File> argumentMatcherVedlegg1;
     ArgumentMatcher<File> argumentMatcherVedlegg2;
 
+    private final FormattingUtilsService formattingUtilsService;
+
     @Mock
     ResourceRepository resourceRepository;
 
     @Mock
     FileClient fileClient;
+
+    EgrunnervervJournalpostInstanceMappingServiceTest(FormattingUtilsService formattingUtilsService) {
+        this.formattingUtilsService = formattingUtilsService;
+    }
 
     private EgrunnervervJournalpostInstance createTestJournalpostInstance(String organisasjonsnummer) {
         return EgrunnervervJournalpostInstance
@@ -222,7 +228,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
 
         setUpFileClientMock();
 
-        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository);
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository, formattingUtilsService);
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
         InstanceObject instanceObject = egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block();
@@ -243,7 +249,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
 
         setUpFileClientMock();
 
-        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository);
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository, formattingUtilsService);
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
         InstanceObject instanceObject = egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block();
@@ -264,7 +270,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
 
         setUpFileClientMock();
 
-        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository);
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository, formattingUtilsService);
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
         InstanceObject instanceObject = egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block();
@@ -284,7 +290,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
 
         when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.empty());
 
-        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository);
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository, formattingUtilsService);
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
         assertThrows(ArchiveResourceNotFoundException.class, () -> egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block());

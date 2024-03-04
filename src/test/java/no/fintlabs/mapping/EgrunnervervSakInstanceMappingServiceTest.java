@@ -33,12 +33,16 @@ class EgrunnervervSakInstanceMappingServiceTest {
 
     InstanceObject expectedInstance;
     @Mock
+    FormattingUtilsService formattingUtilsService;
+    @Mock
     ResourceRepository resourceRepository;
 
     @BeforeEach
     public void setUp() {
 
-        egrunnervervSakInstanceMappingService = new EgrunnervervSakInstanceMappingService(resourceRepository);
+//        when(formattingUtilsService.formatKommunenavn("TESTKOMMUNENAVN")).thenReturn("Testkommunenavn");
+
+        egrunnervervSakInstanceMappingService = new EgrunnervervSakInstanceMappingService(resourceRepository, formattingUtilsService);
         egrunnervervSakInstanceMappingService.checkSaksansvarligEpost = true;
 
         egrunnervervSakInstance = EgrunnervervSakInstance
@@ -183,6 +187,7 @@ class EgrunnervervSakInstanceMappingServiceTest {
     public void givenArkivressursHrefForSaksanvarlig_shouldReturnMappedInstanceAsExpected() {
         when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost@fintlabs.no"))
                 .thenReturn(Optional.of("testSaksansvarlig"));
+        when(formattingUtilsService.formatKommunenavn("TESTKOMMUNENAVN")).thenReturn("Testkommunenavn");
 
         egrunnervervSakInstanceMappingService.checkEmailDomain = false;
 
@@ -204,10 +209,15 @@ class EgrunnervervSakInstanceMappingServiceTest {
     public void givenMatchingEmailDomainWhenCheckDomainIsTrue_shouldReturnMappedInstanceAsExpected() {
         when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost@fintlabs.no"))
                 .thenReturn(Optional.of("testSaksansvarlig"));
+        when(formattingUtilsService.extractEmailDomain("testSaksansvarligEpost@fintlabs.no"))
+                .thenReturn("fintlabs.no");
+        when(formattingUtilsService.formatKommunenavn("TESTKOMMUNENAVN")).thenReturn("Testkommunenavn");
 
         egrunnervervSakInstanceMappingService.checkEmailDomain = true;
 
         ReflectionTestUtils.setField(egrunnervervSakInstanceMappingService, "orgId", "fintlabs.no");
+
+
 
         InstanceObject instanceObject = egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block();
         assertThat(instanceObject).isEqualTo(expectedInstance);
@@ -215,6 +225,9 @@ class EgrunnervervSakInstanceMappingServiceTest {
 
     @Test
     public void givenNonMatchingDomain_shouldThrowNonMatchingDomainWithOrgIdException() {
+        when(formattingUtilsService.extractEmailDomain("testSaksansvarligEpost@fintlabs.no"))
+                .thenReturn("fintlabs.no");
+
         egrunnervervSakInstanceMappingService.checkSaksansvarligEpost = false;
         egrunnervervSakInstanceMappingService.checkEmailDomain = true;
 

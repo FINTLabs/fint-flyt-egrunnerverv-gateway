@@ -5,6 +5,11 @@ import org.apache.commons.lang3.StringUtils;
 
 @Service
 public class FormattingUtilsService {
+
+    public String formatEmail(String email) {
+        return email.trim().toLowerCase();
+    }
+
     public String extractEmailDomain(String email) {
         if (email == null || !email.contains("@")) {
             return "Invalid email";

@@ -9,6 +9,7 @@ import no.fintlabs.models.EgrunnervervJournalpostDocument;
 import no.fintlabs.models.EgrunnervervJournalpostInstance;
 import no.fintlabs.models.EgrunnervervJournalpostInstanceBody;
 import no.fintlabs.models.EgrunnervervJournalpostReceiver;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
@@ -33,7 +34,8 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
     ArgumentMatcher<File> argumentMatcherVedlegg1;
     ArgumentMatcher<File> argumentMatcherVedlegg2;
 
-    private final FormattingUtilsService formattingUtilsService;
+    @Mock
+    FormattingUtilsService formattingUtilsService;
 
     @Mock
     ResourceRepository resourceRepository;
@@ -41,8 +43,9 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
     @Mock
     FileClient fileClient;
 
-    EgrunnervervJournalpostInstanceMappingServiceTest(FormattingUtilsService formattingUtilsService) {
-        this.formattingUtilsService = formattingUtilsService;
+    @BeforeEach
+    public void setUp() {
+        when(formattingUtilsService.formatEmail(" testSaksansvarligEpost@fintlabs.no ")).thenReturn("testsaksansvarligepost@fintlabs.no");
     }
 
     private EgrunnervervJournalpostInstance createTestJournalpostInstance(String organisasjonsnummer) {
@@ -67,7 +70,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                                 .id("testId")
                                 .maltittel("testMaltittel")
                                 .prosjektnavn("testProsjektnavn")
-                                .saksbehandlerEpost("testSaksansvarligEpost")
+                                .saksbehandlerEpost(" testSaksansvarligEpost@fintlabs.no ")
                                 .mottakere(List.of(
                                         EgrunnervervJournalpostReceiver
                                                 .builder()
@@ -172,7 +175,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
         expectedInstanceValuePerKey.put("id", "testId");
         expectedInstanceValuePerKey.put("maltittel", "testMaltittel");
         expectedInstanceValuePerKey.put("prosjektnavn", "testProsjektnavn");
-        expectedInstanceValuePerKey.put("saksbehandlerEpost", "testSaksansvarligEpost");
+        expectedInstanceValuePerKey.put("saksbehandlerEpost", "testsaksansvarligepost@fintlabs.no");
         expectedInstanceValuePerKey.put("saksnummer", "testSaksnummer");
         expectedInstanceValuePerKey.put("hoveddokumentFil", "251bfa61-6c0e-47d0-a479-643c40c3e766");
         expectedInstanceValuePerKey.put("hoveddokumentTittel", "testHoveddokumentTittel");
@@ -224,7 +227,10 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                 ""
         );
 
-        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.of("testSaksansvarlig"));
+        when(formattingUtilsService.formatEmail(" testSaksansvarligEpost@fintlabs.no ")).thenReturn("testsaksansvarligepost@fintlabs.no");
+
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no")).thenReturn(Optional.of("testSaksansvarlig"));
+        when(formattingUtilsService.formatKommunenavn("TESTKOMMUNENAVN")).thenReturn("Testkommunenavn");
 
         setUpFileClientMock();
 
@@ -245,7 +251,8 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                 "01234567890"
         );
 
-        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.of("testSaksansvarlig"));
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no")).thenReturn(Optional.of("testSaksansvarlig"));
+        when(formattingUtilsService.formatKommunenavn("TESTKOMMUNENAVN")).thenReturn("Testkommunenavn");
 
         setUpFileClientMock();
 
@@ -266,7 +273,8 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                 ""
         );
 
-        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.of("testSaksansvarlig"));
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no")).thenReturn(Optional.of("testSaksansvarlig"));
+        when(formattingUtilsService.formatKommunenavn("TESTKOMMUNENAVN")).thenReturn("Testkommunenavn");
 
         setUpFileClientMock();
 
@@ -288,7 +296,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                 "123456789"
         );
 
-        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost")).thenReturn(Optional.empty());
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no")).thenReturn(Optional.empty());
 
         egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository, formattingUtilsService);
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;

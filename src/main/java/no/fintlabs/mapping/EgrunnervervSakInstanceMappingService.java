@@ -44,10 +44,10 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
     public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervSakInstance egrunnervervSakInstance) {
         return Mono.defer(() -> {
 
-            String saksansvarligEpostTrimmed = egrunnervervSakInstance.getSaksansvarligEpost().trim();
+            String saksansvarligEpostFormatted = formattingUtilsService.formatEmail(egrunnervervSakInstance.getSaksansvarligEpost());
 
             if (checkEmailDomain) {
-                String domain = formattingUtilsService.extractEmailDomain(saksansvarligEpostTrimmed);
+                String domain = formattingUtilsService.extractEmailDomain(saksansvarligEpostFormatted);
                 if (!domain.equals(orgId)) {
                     throw new NonMatchingEmailDomainWithOrgIdException(domain, orgId);
                 }
@@ -57,9 +57,9 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
 
             if (checkSaksansvarligEpost) {
                 saksansvarlig = resourceRepository
-                        .getArkivressursHrefFromPersonEmail(saksansvarligEpostTrimmed)
+                        .getArkivressursHrefFromPersonEmail(saksansvarligEpostFormatted)
                         .orElseThrow(() -> new ArchiveResourceNotFoundException(
-                                        saksansvarligEpostTrimmed
+                                        saksansvarligEpostFormatted
                                 )
                         );
             }
@@ -73,7 +73,7 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
             valuePerKey.put("snr", egrunnervervSakInstance.getSnr());
             valuePerKey.put("takstnummer", egrunnervervSakInstance.getTakstnummer());
             valuePerKey.put("tittel", egrunnervervSakInstance.getTittel());
-            valuePerKey.put("saksansvarligEpost", saksansvarligEpostTrimmed);
+            valuePerKey.put("saksansvarligEpost", saksansvarligEpostFormatted);
             valuePerKey.put("saksansvarlig", saksansvarlig);
             valuePerKey.put("eierforholdsnavn", egrunnervervSakInstance.getEierforholdsnavn());
             valuePerKey.put("eierforholdskode", egrunnervervSakInstance.getEierforholdskode());

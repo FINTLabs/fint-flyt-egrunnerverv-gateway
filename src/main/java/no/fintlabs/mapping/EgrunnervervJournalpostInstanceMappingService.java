@@ -50,10 +50,10 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
     public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervJournalpostInstance egrunnervervJournalpostInstance) {
         return Mono.defer(() -> {
 
-            String saksbehandlerEpostTrimmed = egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getSaksbehandlerEpost().trim();
+            String saksbehandlerEpostFormatted = formattingUtilsService.formatEmail(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getSaksbehandlerEpost());
 
             if (checkEmailDomain) {
-                String domain = formattingUtilsService.extractEmailDomain(saksbehandlerEpostTrimmed);
+                String domain = formattingUtilsService.extractEmailDomain(saksbehandlerEpostFormatted);
                 if (!domain.equals(orgId)) {
                     throw new NonMatchingEmailDomainWithOrgIdException(domain, orgId);
                 }
@@ -61,8 +61,8 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
 
             String saksbehandler;
             if (checkSaksbehandler) {
-                saksbehandler = resourceRepository.getArkivressursHrefFromPersonEmail(saksbehandlerEpostTrimmed)
-                        .orElseThrow(() -> new ArchiveResourceNotFoundException(saksbehandlerEpostTrimmed));
+                saksbehandler = resourceRepository.getArkivressursHrefFromPersonEmail(saksbehandlerEpostFormatted)
+                        .orElseThrow(() -> new ArchiveResourceNotFoundException(saksbehandlerEpostFormatted));
             } else {
                 saksbehandler = "";
             }
@@ -107,7 +107,7 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
             valuePerKey.put("id", Optional.ofNullable(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getId()).orElse(""));
             valuePerKey.put("maltittel", Optional.ofNullable(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getMaltittel()).orElse(""));
             valuePerKey.put("prosjektnavn", Optional.ofNullable(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getProsjektnavn()).orElse(""));
-            valuePerKey.put("saksbehandlerEpost", Optional.ofNullable(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getSaksbehandlerEpost()).orElse(""));
+            valuePerKey.put("saksbehandlerEpost", Optional.ofNullable(saksbehandlerEpostFormatted).orElse(""));
             valuePerKey.put("saksbehandler", Optional.ofNullable(saksbehandler).orElse(""));
 
             return Mono.zip(

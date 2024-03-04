@@ -24,7 +24,7 @@ public class EgrunnervervJournalpostInstanceBody {
     private final String table;
     @NotNull
     private final String tittel;
-    @NotNull
+//    @NotNull
     private final String dokumentNavn;
     @NotNull
     private final String dokumentDato;

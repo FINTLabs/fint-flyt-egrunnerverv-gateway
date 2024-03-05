@@ -33,13 +33,17 @@ class EgrunnervervSakInstanceMappingServiceTest {
 
     InstanceObject expectedInstance;
     @Mock
+    FormattingUtilsService formattingUtilsService;
+    @Mock
     ResourceRepository resourceRepository;
 
     @BeforeEach
     public void setUp() {
 
-        egrunnervervSakInstanceMappingService = new EgrunnervervSakInstanceMappingService(resourceRepository);
+        egrunnervervSakInstanceMappingService = new EgrunnervervSakInstanceMappingService(resourceRepository, formattingUtilsService);
         egrunnervervSakInstanceMappingService.checkSaksansvarligEpost = true;
+
+        when(formattingUtilsService.formatEmail(" testSaksansvarligEpost@fintlabs.no ")).thenReturn("testsaksansvarligepost@fintlabs.no");
 
         egrunnervervSakInstance = EgrunnervervSakInstance
                 .builder()
@@ -51,7 +55,7 @@ class EgrunnervervSakInstanceMappingServiceTest {
                 .snr("testSnr")
                 .takstnummer("testTakstnummer")
                 .tittel("testTittel")
-                .saksansvarligEpost("testSaksansvarligEpost@fintlabs.no")
+                .saksansvarligEpost(" testSaksansvarligEpost@fintlabs.no ")
                 .eierforholdsnavn("testEierforholdsnavn")
                 .eierforholdskode("")
                 .prosjektnr(null)
@@ -110,7 +114,7 @@ class EgrunnervervSakInstanceMappingServiceTest {
         valuePerKey.put("snr", "testSnr");
         valuePerKey.put("takstnummer", "testTakstnummer");
         valuePerKey.put("tittel", "testTittel");
-        valuePerKey.put("saksansvarligEpost", "testSaksansvarligEpost@fintlabs.no");
+        valuePerKey.put("saksansvarligEpost", "testsaksansvarligepost@fintlabs.no");
         valuePerKey.put("eierforholdsnavn", "testEierforholdsnavn");
         valuePerKey.put("eierforholdskode", "");
         valuePerKey.put("prosjektnr", null);
@@ -181,8 +185,9 @@ class EgrunnervervSakInstanceMappingServiceTest {
 
     @Test
     public void givenArkivressursHrefForSaksanvarlig_shouldReturnMappedInstanceAsExpected() {
-        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost@fintlabs.no"))
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no"))
                 .thenReturn(Optional.of("testSaksansvarlig"));
+        when(formattingUtilsService.formatKommunenavn("TESTKOMMUNENAVN")).thenReturn("Testkommunenavn");
 
         egrunnervervSakInstanceMappingService.checkEmailDomain = false;
 
@@ -192,7 +197,7 @@ class EgrunnervervSakInstanceMappingServiceTest {
 
     @Test
     public void givenNoArkivressursHrefForSaksansvarlig_shouldThrowArchiveResourceNotFoundException() {
-        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost@fintlabs.no"))
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no"))
                 .thenReturn(Optional.empty());
 
         egrunnervervSakInstanceMappingService.checkEmailDomain = false;
@@ -202,8 +207,11 @@ class EgrunnervervSakInstanceMappingServiceTest {
 
     @Test
     public void givenMatchingEmailDomainWhenCheckDomainIsTrue_shouldReturnMappedInstanceAsExpected() {
-        when(resourceRepository.getArkivressursHrefFromPersonEmail("testSaksansvarligEpost@fintlabs.no"))
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no"))
                 .thenReturn(Optional.of("testSaksansvarlig"));
+        when(formattingUtilsService.extractEmailDomain("testsaksansvarligepost@fintlabs.no"))
+                .thenReturn("fintlabs.no");
+        when(formattingUtilsService.formatKommunenavn("TESTKOMMUNENAVN")).thenReturn("Testkommunenavn");
 
         egrunnervervSakInstanceMappingService.checkEmailDomain = true;
 
@@ -215,6 +223,9 @@ class EgrunnervervSakInstanceMappingServiceTest {
 
     @Test
     public void givenNonMatchingDomain_shouldThrowNonMatchingDomainWithOrgIdException() {
+        when(formattingUtilsService.extractEmailDomain("testsaksansvarligepost@fintlabs.no"))
+                .thenReturn("fintlabs.no");
+
         egrunnervervSakInstanceMappingService.checkSaksansvarligEpost = false;
         egrunnervervSakInstanceMappingService.checkEmailDomain = true;
 

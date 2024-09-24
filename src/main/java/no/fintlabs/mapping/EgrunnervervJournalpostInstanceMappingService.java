@@ -6,7 +6,6 @@ import no.fintlabs.exceptions.NonMatchingEmailDomainWithOrgIdException;
 import no.fintlabs.gateway.instance.InstanceMapper;
 import no.fintlabs.gateway.instance.model.File;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
-import no.fintlabs.gateway.instance.web.FileClient;
 import no.fintlabs.models.EgrunnervervJournalpostDocument;
 import no.fintlabs.models.EgrunnervervJournalpostInstance;
 import no.fintlabs.models.EgrunnervervJournalpostReceiver;
@@ -19,6 +18,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 import java.util.*;
+import java.util.function.Function;
 
 
 @Service
@@ -29,7 +29,6 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
 
     @Value("${fint.flyt.egrunnerverv.checkEmailDomain:true}")
     boolean checkEmailDomain;
-    private final FileClient fileClient;
     private final ResourceRepository resourceRepository;
     private final FormattingUtilsService formattingUtilsService;
 
@@ -37,17 +36,19 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
     private String orgId;
 
     public EgrunnervervJournalpostInstanceMappingService(
-            FileClient fileClient,
             ResourceRepository resourceRepository,
             FormattingUtilsService formattingUtilsService
     ) {
-        this.fileClient = fileClient;
         this.resourceRepository = resourceRepository;
         this.formattingUtilsService = formattingUtilsService;
     }
 
     @Override
-    public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervJournalpostInstance egrunnervervJournalpostInstance) {
+    public Mono<InstanceObject> map(
+            Long sourceApplicationId,
+            EgrunnervervJournalpostInstance egrunnervervJournalpostInstance,
+            Function<File, Mono<UUID>> persistFile
+    ) {
         return Mono.defer(() -> {
 
             String saksbehandlerEpostFormatted = formattingUtilsService.formatEmail(egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getSaksbehandlerEpost());
@@ -81,11 +82,13 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                     .toList();
 
             Mono<Map<String, String>> hoveddokumentInstanceValuePerKeyMono = mapHoveddokumentToInstanceValuePerKey(
+                    persistFile,
                     sourceApplicationId,
                     egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getSysId(),
                     hoveddokument
             );
             Mono<List<InstanceObject>> vedleggInstanceObjectsMono = mapAttachmentDocumentsToInstanceObjects(
+                    persistFile,
                     sourceApplicationId,
                     egrunnervervJournalpostInstance.getEgrunnervervJournalpostInstanceBody().getSysId(),
                     vedlegg
@@ -163,13 +166,17 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
     }
 
     private Mono<List<InstanceObject>> mapAttachmentDocumentsToInstanceObjects(
+            Function<File, Mono<UUID>> persistFile,
             Long sourceApplicationId,
             String sourceApplicationInstanceId,
             List<EgrunnervervJournalpostDocument> egrunnervervJournalpostDocuments
     ) {
         return Flux.fromIterable(egrunnervervJournalpostDocuments)
                 .flatMap(egrunnervervJournalpostDocument -> mapAttachmentDocumentToInstanceObject(
-                        sourceApplicationId, sourceApplicationInstanceId, egrunnervervJournalpostDocument
+                        persistFile,
+                        sourceApplicationId,
+                        sourceApplicationInstanceId,
+                        egrunnervervJournalpostDocument
                 ))
                 .collectList();
     }
@@ -182,6 +189,7 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
     }
 
     private Mono<Map<String, String>> mapHoveddokumentToInstanceValuePerKey(
+            Function<File, Mono<UUID>> persistFile,
             Long sourceApplicationId,
             String sourceApplicationInstanceId,
             EgrunnervervJournalpostDocument egrunnervervJournalpostDocument
@@ -193,7 +201,7 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                 egrunnervervJournalpostDocument,
                 mediaType
         );
-        return fileClient.postFile(file)
+        return persistFile.apply(file)
                 .map(fileId -> mapHoveddokumentAndFileIdToInstanceValuePerKey(egrunnervervJournalpostDocument, mediaType, fileId));
     }
 
@@ -211,6 +219,7 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
     }
 
     private Mono<InstanceObject> mapAttachmentDocumentToInstanceObject(
+            Function<File, Mono<UUID>> persistFile,
             Long sourceApplicationId,
             String sourceApplicationInstanceId,
             EgrunnervervJournalpostDocument egrunnervervJournalpostDocument
@@ -222,7 +231,7 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
                 egrunnervervJournalpostDocument,
                 mediaType
         );
-        return fileClient.postFile(file)
+        return persistFile.apply(file)
                 .map(fileId -> mapAttachmentDocumentAndFileIdToInstanceObject(
                         egrunnervervJournalpostDocument,
                         mediaType,

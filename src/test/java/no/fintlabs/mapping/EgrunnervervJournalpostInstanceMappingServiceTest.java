@@ -4,7 +4,6 @@ import no.fintlabs.ResourceRepository;
 import no.fintlabs.exceptions.ArchiveResourceNotFoundException;
 import no.fintlabs.gateway.instance.model.File;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
-import no.fintlabs.gateway.instance.web.FileClient;
 import no.fintlabs.models.EgrunnervervJournalpostDocument;
 import no.fintlabs.models.EgrunnervervJournalpostInstance;
 import no.fintlabs.models.EgrunnervervJournalpostInstanceBody;
@@ -18,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -41,7 +41,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
     ResourceRepository resourceRepository;
 
     @Mock
-    FileClient fileClient;
+    Function<File, Mono<UUID>> persistFile;
 
     @BeforeEach
     public void setUp() {
@@ -185,7 +185,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
         return expectedInstanceValuePerKey;
     }
 
-    public void setUpFileClientMock() {
+    public void setUpFileFunctionMock() {
         argumentMatcherHoveddokument = file ->
                 "testHoveddokumentFilnavn.pdf".equals(file.getName()) &&
                         "UTF-8".equals(file.getEncoding()) &&
@@ -194,7 +194,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                         "testSysId".equals(file.getSourceApplicationInstanceId()) &&
                         "SG92ZWRkb2t1bWVudA==".equals(file.getBase64Contents());
         doReturn(Mono.just(UUID.fromString("251bfa61-6c0e-47d0-a479-643c40c3e766")))
-                .when(fileClient).postFile(argThat(argumentMatcherHoveddokument));
+                .when(persistFile).apply(argThat(argumentMatcherHoveddokument));
 
         argumentMatcherVedlegg1 = file ->
                 "testVedlegg1Filnavn.pdf".equals(file.getName()) &&
@@ -204,7 +204,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                         "testSysId".equals(file.getSourceApplicationInstanceId()) &&
                         "VmVkbGVnZzE=".equals(file.getBase64Contents());
         doReturn(Mono.just(UUID.fromString("251bfa61-6c0e-47d0-a479-643c40c3e767")))
-                .when(fileClient).postFile(argThat(argumentMatcherVedlegg1));
+                .when(persistFile).apply(argThat(argumentMatcherVedlegg1));
 
         argumentMatcherVedlegg2 = file ->
                 "testVedlegg2Filnavn.pdf".equals(file.getName()) &&
@@ -214,7 +214,7 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                         "testSysId".equals(file.getSourceApplicationInstanceId()) &&
                         "VmVkbGVnZzI=".equals(file.getBase64Contents());
         doReturn(Mono.just(UUID.fromString("251bfa61-6c0e-47d0-a479-643c40c3e768")))
-                .when(fileClient).postFile(argThat(argumentMatcherVedlegg2));
+                .when(persistFile).apply(argThat(argumentMatcherVedlegg2));
     }
 
     @Test
@@ -227,17 +227,26 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                 ""
         );
 
-        when(formattingUtilsService.formatEmail(" testSaksansvarligEpost@fintlabs.no ")).thenReturn("testsaksansvarligepost@fintlabs.no");
+        when(formattingUtilsService.formatEmail(" testSaksansvarligEpost@fintlabs.no "))
+                .thenReturn("testsaksansvarligepost@fintlabs.no");
 
-        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no")).thenReturn(Optional.of("testSaksansvarlig"));
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no"))
+                .thenReturn(Optional.of("testSaksansvarlig"));
         when(formattingUtilsService.formatKommunenavn("TESTKOMMUNENAVN")).thenReturn("Testkommunenavn");
 
-        setUpFileClientMock();
+        setUpFileFunctionMock();
 
-        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository, formattingUtilsService);
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(
+                resourceRepository,
+                formattingUtilsService
+        );
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
-        InstanceObject instanceObject = egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block();
+        InstanceObject instanceObject = egrunnervervJournalpostInstanceMappingService.map(
+                egrunnervervSourceApplicationId,
+                egrunnervervJournalpostInstance,
+                persistFile
+        ).block();
         assertThat(instanceObject).isEqualTo(expectedInstance);
     }
 
@@ -251,15 +260,23 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                 "01234567890"
         );
 
-        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no")).thenReturn(Optional.of("testSaksansvarlig"));
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no"))
+                .thenReturn(Optional.of("testSaksansvarlig"));
         when(formattingUtilsService.formatKommunenavn("TESTKOMMUNENAVN")).thenReturn("Testkommunenavn");
 
-        setUpFileClientMock();
+        setUpFileFunctionMock();
 
-        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository, formattingUtilsService);
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(
+                resourceRepository,
+                formattingUtilsService
+        );
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
-        InstanceObject instanceObject = egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block();
+        InstanceObject instanceObject = egrunnervervJournalpostInstanceMappingService.map(
+                egrunnervervSourceApplicationId,
+                egrunnervervJournalpostInstance,
+                persistFile
+        ).block();
         assertThat(instanceObject).isEqualTo(expectedInstance);
     }
 
@@ -273,21 +290,29 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                 ""
         );
 
-        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no")).thenReturn(Optional.of("testSaksansvarlig"));
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no"))
+                .thenReturn(Optional.of("testSaksansvarlig"));
         when(formattingUtilsService.formatKommunenavn("TESTKOMMUNENAVN")).thenReturn("Testkommunenavn");
 
-        setUpFileClientMock();
+        setUpFileFunctionMock();
 
-        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository, formattingUtilsService);
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(
+                resourceRepository,
+                formattingUtilsService
+        );
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
-        InstanceObject instanceObject = egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block();
+        InstanceObject instanceObject = egrunnervervJournalpostInstanceMappingService.map(
+                egrunnervervSourceApplicationId,
+                egrunnervervJournalpostInstance,
+                persistFile
+        ).block();
         assertThat(instanceObject).isEqualTo(expectedInstance);
 
-        verify(fileClient, times(1)).postFile(argThat(argumentMatcherHoveddokument));
-        verify(fileClient, times(1)).postFile(argThat(argumentMatcherVedlegg1));
-        verify(fileClient, times(1)).postFile(argThat(argumentMatcherVedlegg2));
-        verifyNoMoreInteractions(fileClient);
+        verify(persistFile, times(1)).apply(argThat(argumentMatcherHoveddokument));
+        verify(persistFile, times(1)).apply(argThat(argumentMatcherVedlegg1));
+        verify(persistFile, times(1)).apply(argThat(argumentMatcherVedlegg2));
+        verifyNoMoreInteractions(persistFile);
     }
 
     @Test
@@ -296,12 +321,22 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                 "123456789"
         );
 
-        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no")).thenReturn(Optional.empty());
+        when(resourceRepository.getArkivressursHrefFromPersonEmail("testsaksansvarligepost@fintlabs.no"))
+                .thenReturn(Optional.empty());
 
-        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(fileClient, resourceRepository, formattingUtilsService);
+        egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(
+                resourceRepository,
+                formattingUtilsService
+        );
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
-        assertThrows(ArchiveResourceNotFoundException.class, () -> egrunnervervJournalpostInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervJournalpostInstance).block());
+        assertThrows(
+                ArchiveResourceNotFoundException.class,
+                () -> egrunnervervJournalpostInstanceMappingService.map(
+                        egrunnervervSourceApplicationId,
+                        egrunnervervJournalpostInstance,
+                        persistFile
+                ).block());
     }
 
 }

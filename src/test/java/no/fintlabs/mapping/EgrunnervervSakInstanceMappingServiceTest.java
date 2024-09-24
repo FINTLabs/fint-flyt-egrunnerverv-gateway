@@ -3,6 +3,7 @@ package no.fintlabs.mapping;
 import no.fintlabs.ResourceRepository;
 import no.fintlabs.exceptions.ArchiveResourceNotFoundException;
 import no.fintlabs.exceptions.NonMatchingEmailDomainWithOrgIdException;
+import no.fintlabs.gateway.instance.model.File;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.models.EgrunnervervSakInstance;
 import no.fintlabs.models.EgrunnervervSakKlassering;
@@ -13,11 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,6 +36,9 @@ class EgrunnervervSakInstanceMappingServiceTest {
     FormattingUtilsService formattingUtilsService;
     @Mock
     ResourceRepository resourceRepository;
+
+    @Mock
+    Function<File, Mono<UUID>> persistFile;
 
     @BeforeEach
     public void setUp() {
@@ -191,7 +194,11 @@ class EgrunnervervSakInstanceMappingServiceTest {
 
         egrunnervervSakInstanceMappingService.checkEmailDomain = false;
 
-        InstanceObject instanceObject = egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block();
+        InstanceObject instanceObject = egrunnervervSakInstanceMappingService.map(
+                egrunnervervSourceApplicationId,
+                egrunnervervSakInstance,
+                persistFile
+        ).block();
         assertThat(instanceObject).isEqualTo(expectedInstance);
     }
 
@@ -202,7 +209,12 @@ class EgrunnervervSakInstanceMappingServiceTest {
 
         egrunnervervSakInstanceMappingService.checkEmailDomain = false;
 
-        assertThrows(ArchiveResourceNotFoundException.class, () -> egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block());
+        assertThrows(ArchiveResourceNotFoundException.class, () -> egrunnervervSakInstanceMappingService.map(
+                        egrunnervervSourceApplicationId,
+                        egrunnervervSakInstance,
+                        persistFile
+                )
+                .block());
     }
 
     @Test
@@ -217,7 +229,11 @@ class EgrunnervervSakInstanceMappingServiceTest {
 
         ReflectionTestUtils.setField(egrunnervervSakInstanceMappingService, "orgId", "fintlabs.no");
 
-        InstanceObject instanceObject = egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block();
+        InstanceObject instanceObject = egrunnervervSakInstanceMappingService.map(
+                egrunnervervSourceApplicationId,
+                egrunnervervSakInstance,
+                persistFile
+        ).block();
         assertThat(instanceObject).isEqualTo(expectedInstance);
     }
 
@@ -231,7 +247,11 @@ class EgrunnervervSakInstanceMappingServiceTest {
 
         ReflectionTestUtils.setField(egrunnervervSakInstanceMappingService, "orgId", "vlfk.no");
 
-        assertThrows(NonMatchingEmailDomainWithOrgIdException.class, () -> egrunnervervSakInstanceMappingService.map(egrunnervervSourceApplicationId, egrunnervervSakInstance).block());
+        assertThrows(NonMatchingEmailDomainWithOrgIdException.class, () -> egrunnervervSakInstanceMappingService.map(
+                egrunnervervSourceApplicationId,
+                egrunnervervSakInstance,
+                persistFile
+        ).block());
     }
 
 

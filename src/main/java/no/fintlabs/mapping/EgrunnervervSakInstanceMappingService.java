@@ -5,6 +5,7 @@ import no.fintlabs.ResourceRepository;
 import no.fintlabs.exceptions.ArchiveResourceNotFoundException;
 import no.fintlabs.exceptions.NonMatchingEmailDomainWithOrgIdException;
 import no.fintlabs.gateway.instance.InstanceMapper;
+import no.fintlabs.gateway.instance.model.File;
 import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.models.EgrunnervervSakInstance;
 import no.fintlabs.models.EgrunnervervSakKlassering;
@@ -15,6 +16,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
 
 @Service
 @Slf4j
@@ -41,7 +44,11 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
     }
 
     @Override
-    public Mono<InstanceObject> map(Long sourceApplicationId, EgrunnervervSakInstance egrunnervervSakInstance) {
+    public Mono<InstanceObject> map(
+            Long sourceApplicationId,
+            EgrunnervervSakInstance egrunnervervSakInstance,
+            Function<File, Mono<UUID>> persistFile
+    ) {
         return Mono.defer(() -> {
 
             String saksansvarligEpostFormatted = formattingUtilsService.formatEmail(egrunnervervSakInstance.getSaksansvarligEpost());

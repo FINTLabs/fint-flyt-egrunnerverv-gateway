@@ -81,8 +81,6 @@ jobs:
             cluster: aks-beta-fint-2021-11-23
           - org: bfk-no
             cluster: aks-beta-fint-2021-11-23
-          - org: ffk-no
-            cluster: aks-beta-fint-2021-11-23
           - org: innlandetfylke-no
             cluster: aks-beta-fint-2021-11-23
           - org: mrfylke-no

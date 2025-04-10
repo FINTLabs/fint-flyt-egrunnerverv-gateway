@@ -1,7 +1,10 @@
 package no.fintlabs.mapping;
 
-import org.springframework.stereotype.Service;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Service
 public class FormattingUtilsService {
@@ -18,6 +21,13 @@ public class FormattingUtilsService {
     }
 
     public String formatKommunenavn(String kommunenavn) {
-        return StringUtils.capitalize(kommunenavn.toLowerCase());
+
+        if (kommunenavn == null || kommunenavn.isEmpty()) {
+            return kommunenavn;
+        }
+
+        return Arrays.stream(kommunenavn.toLowerCase().split("-"))
+                .map(StringUtils::capitalize)
+                .collect(Collectors.joining("-"));
     }
 }

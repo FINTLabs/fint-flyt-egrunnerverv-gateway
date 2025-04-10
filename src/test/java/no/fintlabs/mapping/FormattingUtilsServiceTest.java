@@ -64,11 +64,19 @@ class FormattingUtilsServiceTest {
     }
 
     @Test
-    public void givenUpperCaseStringWithOneDashBetweenWordsShouldReturnCapitalizedFirstLetterOnBothWords() {
+    public void givenUpperCaseStringWithOneDashBetweenWordsShouldReturnCapitalizedFirstLetterOnEachWord() {
         String kommunenavn = "NORD-ODAL";
         String formattedKommunenavn = formattingUtilsService.formatKommunenavn(kommunenavn);
 
         assertThat(formattedKommunenavn).isEqualTo("Nord-Odal");
+    }
+
+    @Test
+    public void givenUpperCaseStringWithMultipleDashesBetweenWordsShouldReturnCapitalizedFirstLetterOnEachWord() {
+        String kommunenavn = "NORD-ODAL-DONALD";
+        String formattedKommunenavn = formattingUtilsService.formatKommunenavn(kommunenavn);
+
+        assertThat(formattedKommunenavn).isEqualTo("Nord-Odal-Donald");
     }
 
 }

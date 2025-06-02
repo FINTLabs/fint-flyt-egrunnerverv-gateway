@@ -40,6 +40,8 @@ spec:
       value: "true"
     - name: fint.flyt.egrunnerverv.checkEmailDomain
       value: "true"
+  onePassword:
+    itemPath: path
   envFrom:
     - secretRef:
         name: fint-flyt-file-oauth2-client

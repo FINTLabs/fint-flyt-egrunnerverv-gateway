@@ -10,6 +10,7 @@ import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.models.EgrunnervervSakInstance;
 import no.fintlabs.models.EgrunnervervSakKlassering;
 import no.fintlabs.models.EgrunnervervSaksPart;
+import no.fintlabs.slack.SlackAlertService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -35,12 +36,16 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
 
     private final FormattingUtilsService formattingUtilsService;
 
+    private final SlackAlertService slackAlertService;
+
     public EgrunnervervSakInstanceMappingService(
             ResourceRepository resourceRepository,
-            FormattingUtilsService formattingUtilsService
+            FormattingUtilsService formattingUtilsService,
+            SlackAlertService slackAlertService
     ) {
         this.resourceRepository = resourceRepository;
         this.formattingUtilsService = formattingUtilsService;
+        this.slackAlertService = slackAlertService;
     }
 
     @Override
@@ -66,7 +71,8 @@ public class EgrunnervervSakInstanceMappingService implements InstanceMapper<Egr
                 saksansvarlig = resourceRepository
                         .getArkivressursHrefFromPersonEmail(saksansvarligEpostFormatted)
                         .orElseThrow(() -> new ArchiveResourceNotFoundException(
-                                        saksansvarligEpostFormatted
+                                        saksansvarligEpostFormatted,
+                                        slackAlertService
                                 )
                         );
             }

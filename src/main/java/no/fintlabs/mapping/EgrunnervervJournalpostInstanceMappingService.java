@@ -9,6 +9,7 @@ import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.models.EgrunnervervJournalpostDocument;
 import no.fintlabs.models.EgrunnervervJournalpostInstance;
 import no.fintlabs.models.EgrunnervervJournalpostReceiver;
+import no.fintlabs.slack.SlackAlertService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
@@ -35,12 +36,16 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
     @Value("${fint.org-id}")
     private String orgId;
 
+    private final SlackAlertService slackAlertService;
+
     public EgrunnervervJournalpostInstanceMappingService(
             ResourceRepository resourceRepository,
-            FormattingUtilsService formattingUtilsService
+            FormattingUtilsService formattingUtilsService,
+            SlackAlertService slackAlertService
     ) {
         this.resourceRepository = resourceRepository;
         this.formattingUtilsService = formattingUtilsService;
+        this.slackAlertService = slackAlertService;
     }
 
     @Override
@@ -63,7 +68,10 @@ public class EgrunnervervJournalpostInstanceMappingService implements InstanceMa
             String saksbehandler;
             if (checkSaksbehandler) {
                 saksbehandler = resourceRepository.getArkivressursHrefFromPersonEmail(saksbehandlerEpostFormatted)
-                        .orElseThrow(() -> new ArchiveResourceNotFoundException(saksbehandlerEpostFormatted));
+                        .orElseThrow(() -> new ArchiveResourceNotFoundException(
+                                saksbehandlerEpostFormatted,
+                                slackAlertService
+                        ));
             } else {
                 saksbehandler = "";
             }

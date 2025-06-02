@@ -26,6 +26,9 @@ patches:
       - op: replace
         path: "/spec/env/5/value"
         value: "false"
+      - op: replace
+        path: "/spec/onePassword/itemPath"
+        value: "vaults/aks-beta-vault/items/fint-flyt-v1-slack-webhook"
     target:
       kind: Application
       name: fint-flyt-egrunnerverv-instance-gateway

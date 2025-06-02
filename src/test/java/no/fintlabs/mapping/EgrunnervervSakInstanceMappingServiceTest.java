@@ -8,6 +8,7 @@ import no.fintlabs.gateway.instance.model.instance.InstanceObject;
 import no.fintlabs.models.EgrunnervervSakInstance;
 import no.fintlabs.models.EgrunnervervSakKlassering;
 import no.fintlabs.models.EgrunnervervSaksPart;
+import no.fintlabs.slack.SlackAlertService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +37,8 @@ class EgrunnervervSakInstanceMappingServiceTest {
     FormattingUtilsService formattingUtilsService;
     @Mock
     ResourceRepository resourceRepository;
+    @Mock
+    SlackAlertService slackAlertService;
 
     @Mock
     Function<File, Mono<UUID>> persistFile;
@@ -43,7 +46,11 @@ class EgrunnervervSakInstanceMappingServiceTest {
     @BeforeEach
     public void setUp() {
 
-        egrunnervervSakInstanceMappingService = new EgrunnervervSakInstanceMappingService(resourceRepository, formattingUtilsService);
+        egrunnervervSakInstanceMappingService = new EgrunnervervSakInstanceMappingService(
+                resourceRepository,
+                formattingUtilsService,
+                slackAlertService
+        );
         egrunnervervSakInstanceMappingService.checkSaksansvarligEpost = true;
 
         when(formattingUtilsService.formatEmail(" testSaksansvarligEpost@fintlabs.no ")).thenReturn("testsaksansvarligepost@fintlabs.no");

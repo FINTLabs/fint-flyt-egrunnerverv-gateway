@@ -8,6 +8,7 @@ import no.fintlabs.models.EgrunnervervJournalpostDocument;
 import no.fintlabs.models.EgrunnervervJournalpostInstance;
 import no.fintlabs.models.EgrunnervervJournalpostInstanceBody;
 import no.fintlabs.models.EgrunnervervJournalpostReceiver;
+import no.fintlabs.slack.SlackAlertService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +40,8 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
 
     @Mock
     ResourceRepository resourceRepository;
+    @Mock
+    SlackAlertService slackAlertService;
 
     @Mock
     Function<File, Mono<UUID>> persistFile;
@@ -238,7 +241,8 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
 
         egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(
                 resourceRepository,
-                formattingUtilsService
+                formattingUtilsService,
+                slackAlertService
         );
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
@@ -268,7 +272,8 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
 
         egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(
                 resourceRepository,
-                formattingUtilsService
+                formattingUtilsService,
+                slackAlertService
         );
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
@@ -298,7 +303,8 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
 
         egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(
                 resourceRepository,
-                formattingUtilsService
+                formattingUtilsService,
+                slackAlertService
         );
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 
@@ -326,7 +332,8 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
 
         egrunnervervJournalpostInstanceMappingService = new EgrunnervervJournalpostInstanceMappingService(
                 resourceRepository,
-                formattingUtilsService
+                formattingUtilsService,
+                slackAlertService
         );
         egrunnervervJournalpostInstanceMappingService.checkSaksbehandler = true;
 

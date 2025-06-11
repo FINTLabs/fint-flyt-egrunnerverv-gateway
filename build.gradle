@@ -56,7 +56,7 @@ dependencies {
     implementation "no.fint:fint-arkiv-resource-model-java:${apiVersion}"
     implementation "no.fint:fint-administrasjon-resource-model-java:${apiVersion}"
 
-    implementation 'no.fintlabs:fint-flyt-resource-server:5.0.0'
+    implementation 'no.fintlabs:fint-flyt-resource-server:5.1.0'
 
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'org.apache.commons:commons-collections4:4.4'

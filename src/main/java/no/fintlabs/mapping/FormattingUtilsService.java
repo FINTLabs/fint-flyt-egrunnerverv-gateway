@@ -1,10 +1,8 @@
 package no.fintlabs.mapping;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class FormattingUtilsService {
@@ -22,24 +20,11 @@ public class FormattingUtilsService {
 
 
     public String formatKommunenavn(String kommunenavn) {
-        if (kommunenavn == null || kommunenavn.isEmpty()) {
+        if (kommunenavn == null || kommunenavn.isBlank()) {
             return kommunenavn;
         }
 
-        kommunenavn = kommunenavn.replaceAll("\\s+", " ").toLowerCase();
-
-        Matcher matcher = Pattern.compile("[^- ]+|[- ]").matcher(kommunenavn);
-        StringBuilder result = new StringBuilder();
-
-        while (matcher.find()) {
-            String token = matcher.group();
-            if (token.equals(" ") || token.equals("-")) {
-                result.append(token);
-            } else {
-                result.append(StringUtils.capitalize(token));
-            }
-        }
-
-        return result.toString();
+        String normalized = kommunenavn.replaceAll("\\s+", " ").trim();
+        return WordUtils.capitalizeFully(normalized, ' ', '-');
     }
 }

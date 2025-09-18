@@ -72,11 +72,54 @@ class FormattingUtilsServiceTest {
     }
 
     @Test
-    public void givenUpperCaseStringWithMultipleDashesBetweenWordsShouldReturnCapitalizedFirstLetterOnEachWord() {
+    public void givenUpperCaseStringWithMultipleDashesBetweenWordsShouldReturnCapitalizedFirstLetterOnEachWordWIthDashesInBetweenWords() {
         String kommunenavn = "NORD-ODAL-DONALD";
         String formattedKommunenavn = formattingUtilsService.formatKommunenavn(kommunenavn);
 
         assertThat(formattedKommunenavn).isEqualTo("Nord-Odal-Donald");
+    }
+
+    @Test
+    public void givenUpperCaseStringWithMultipleSpacesBetweenWordsShouldReturnCapitalizedFirstLetterOnEachWordWIthSpacesInBetweenWords() {
+        String kommunenavn = "NORD ODAL DONALD";
+        String formattedKommunenavn = formattingUtilsService.formatKommunenavn(kommunenavn);
+
+        assertThat(formattedKommunenavn).isEqualTo("Nord Odal Donald");
+    }
+
+    @Test
+    public void givenStringWithTabsBetweenWordsShouldNormalizeToSpaces() {
+        String kommunenavn = "NORD\tODAL\tDONALD";
+        String formatted = formattingUtilsService.formatKommunenavn(kommunenavn);
+        assertThat(formatted).isEqualTo("Nord Odal Donald");
+    }
+
+    @Test
+    public void givenStringWithNewlinesBetweenWordsShouldNormalizeToSpaces() {
+        String kommunenavn = "NORD\nODAL\nDONALD";
+        String formatted = formattingUtilsService.formatKommunenavn(kommunenavn);
+        assertThat(formatted).isEqualTo("Nord Odal Donald");
+    }
+
+    @Test
+    public void givenStringWithCarriageReturnsBetweenWordsShouldNormalizeToSpaces() {
+        String kommunenavn = "NORD\rODAL\rDONALD";
+        String formatted = formattingUtilsService.formatKommunenavn(kommunenavn);
+        assertThat(formatted).isEqualTo("Nord Odal Donald");
+    }
+
+    @Test
+    public void givenStringWithFormFeedBetweenWordsShouldNormalizeToSpaces() {
+        String kommunenavn = "NORD\fODAL\fDONALD";
+        String formatted = formattingUtilsService.formatKommunenavn(kommunenavn);
+        assertThat(formatted).isEqualTo("Nord Odal Donald");
+    }
+
+    @Test
+    public void givenStringWithMixedSeparatorsShouldPreserveDashesAndNormalizeSpaces() {
+        String kommunenavn = "NORD-ODAL\tDONALD\nDUCK";
+        String formatted = formattingUtilsService.formatKommunenavn(kommunenavn);
+        assertThat(formatted).isEqualTo("Nord-Odal Donald Duck");
     }
 
 }

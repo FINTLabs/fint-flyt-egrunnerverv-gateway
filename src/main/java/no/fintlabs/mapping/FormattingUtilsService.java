@@ -1,10 +1,8 @@
 package no.fintlabs.mapping;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 @Service
 public class FormattingUtilsService {
@@ -20,14 +18,13 @@ public class FormattingUtilsService {
         return email.substring(email.indexOf("@") + 1).toLowerCase();
     }
 
-    public String formatKommunenavn(String kommunenavn) {
 
-        if (kommunenavn == null || kommunenavn.isEmpty()) {
+    public String formatKommunenavn(String kommunenavn) {
+        if (kommunenavn == null || kommunenavn.isBlank()) {
             return kommunenavn;
         }
 
-        return Arrays.stream(kommunenavn.toLowerCase().split("-"))
-                .map(StringUtils::capitalize)
-                .collect(Collectors.joining("-"));
+        String normalized = kommunenavn.replaceAll("\\s+", " ").trim();
+        return WordUtils.capitalizeFully(normalized, ' ', '-');
     }
 }

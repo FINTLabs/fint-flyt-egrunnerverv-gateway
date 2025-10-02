@@ -1,5 +1,5 @@
 fint:
-  application-id: fint-flyt-egrunnerverv-instance-gateway
+  application-id: fint-flyt-egrunnerverv-gateway
   cache:
     defaultCacheEntryTimeToLiveMillis: 518400000
     defaultCacheHeapSize: 1000000
@@ -16,9 +16,22 @@ server:
 spring:
   codec:
     max-in-memory-size: 100MB
+  security:
+    oauth2:
+      client:
+        provider:
+          fint-idp:
+            token-uri: ${fint.flyt.egrunnerverv.token-uri}
+        registration:
+          egrunnerverv:
+            authorization-grant-type: password
+            provider: fint-idp
+            client-id: ${fint.flyt.egrunnerverv.client-id}
+            client-secret: ${fint.flyt.egrunnerverv.client-secret}
   profiles:
     include:
       - flyt-kafka
       - flyt-logging
+      - flyt-postgres
       - flyt-resource-server
       - flyt-file-client

@@ -1,1 +1,1 @@
-# FINT Flyt egrunnerverv instance gateway
+# FINT Flyt egrunnerverv gateway

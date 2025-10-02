@@ -7,7 +7,7 @@ resources:
 
 labels:
   - pairs:
-      app.kubernetes.io/instance: fint-flyt-egrunnerverv-instance-gateway_ffk_no
+      app.kubernetes.io/instance: fint-flyt-egrunnerverv-gateway_ffk_no
       fintlabs.no/org-id: ffk.no
 
 patches:
@@ -27,10 +27,7 @@ patches:
       - op: replace
         path: "/spec/env/4/value"
         value: "false"
-      - op: replace
-        path: "/spec/onePassword/itemPath"
-        value: "vaults/aks-api-vault/items/fint-flyt-v1-slack-webhook"
     target:
       kind: Application
-      name: fint-flyt-egrunnerverv-instance-gateway
+      name: fint-flyt-egrunnerverv-gateway
 

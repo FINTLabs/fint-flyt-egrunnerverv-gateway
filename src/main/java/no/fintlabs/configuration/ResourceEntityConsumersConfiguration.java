@@ -1,4 +1,4 @@
-package no.fintlabs.dispatch.kafka;
+package no.fintlabs.configuration;
 
 import no.fint.model.resource.FintLinks;
 import no.fint.model.resource.administrasjon.personal.PersonalressursResource;

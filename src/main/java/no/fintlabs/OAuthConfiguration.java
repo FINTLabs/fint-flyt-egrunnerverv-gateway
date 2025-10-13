@@ -4,6 +4,7 @@ import io.netty.channel.ChannelOption;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +28,7 @@ import java.util.Map;
 @Setter
 @Configuration
 @Component
-@ConfigurationProperties(prefix = "fint.flyt.egrunnerverv")
+@ConfigurationProperties(prefix = "fint.flyt.egrunnerverv.dispatch")
 public class OAuthConfiguration {
 
     private String baseUrl;
@@ -48,19 +49,37 @@ public class OAuthConfiguration {
         return authorizedClientManager;
     }
 
-    @Bean
-    public ClientHttpConnector clientHttpConnector() {
-        return new ReactorClientHttpConnector(HttpClient.create(ConnectionProvider.builder("laidback").maxConnections(25).pendingAcquireMaxCount(-1).pendingAcquireTimeout(Duration.ofMinutes(15)).maxLifeTime(Duration.ofMinutes(30)).maxIdleTime(Duration.ofMinutes(5)).build()).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 900000).responseTimeout(Duration.ofMinutes(10)));
+    @Bean(name = "dispatchClientHttpConnector")
+    public ClientHttpConnector dispatchClientHttpConnector() {
+        return new ReactorClientHttpConnector(
+                HttpClient.create(
+                                ConnectionProvider.builder("laidback")
+                                        .maxConnections(25)
+                                        .pendingAcquireMaxCount(-1)
+                                        .pendingAcquireTimeout(Duration.ofMinutes(15))
+                                        .maxLifeTime(Duration.ofMinutes(30))
+                                        .maxIdleTime(Duration.ofMinutes(5))
+                                        .build())
+                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 900000)
+                        .responseTimeout(Duration.ofMinutes(10))
+        );
     }
 
     @Bean
-    public WebClient webClient(WebClient.Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, ClientHttpConnector clientHttpConnector) {
-        ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder().codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(-1)).build();
+    public WebClient webClient(
+            WebClient.Builder builder,
+            ReactiveOAuth2AuthorizedClientManager authorizedClientManager,
+            @Qualifier("dispatchClientHttpConnector") ClientHttpConnector clientHttpConnector) {
 
-        ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Client = new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
+        ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
+                .codecs(c -> c.defaultCodecs().maxInMemorySize(-1))
+                .build();
+
+        var oauth2Client = new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
         oauth2Client.setDefaultClientRegistrationId(registrationId);
 
-        return builder.clientConnector(clientHttpConnector)
+        return builder
+                .clientConnector(clientHttpConnector)
                 .exchangeStrategies(exchangeStrategies)
                 .filter(oauth2Client)
                 .baseUrl(baseUrl)

@@ -6,13 +6,14 @@ fint:
   flyt:
     egrunnerverv:
       retentionTimeInDays: 30
-      username:
-      password:
-      registrationId: egrunnerverv
-      instance-dispatch-initial-delay: 120000
-      instance-dispatch-fixed-delay: 300000
-      tablenameSak: "x_nvas_grunnerverv_grunnerverv"
-      tablenameJournalpost: "x_nvas_grunnerverv_dokumenter"
+      dispatch:
+        tablenameSak: "x_nvas_grunnerverv_grunnerverv"
+        tablenameJournalpost: "x_nvas_grunnerverv_dokumenter"
+        instance-initial-delay: 120000
+        instance-fixed-delay: 300000
+        username:
+        password:
+        registrationId: egrunnerverv
 logging:
   level:
     no.fintlabs.cache.ehcache.FintEhCacheEventLogger: WARN

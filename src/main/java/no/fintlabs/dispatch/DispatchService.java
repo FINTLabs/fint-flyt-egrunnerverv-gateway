@@ -66,8 +66,8 @@ public class DispatchService {
     }
 
     @Scheduled(
-            initialDelayString = "${fint.flyt.egrunnerverv.instance-dispatch-initial-delay}",
-            fixedDelayString = "${fint.flyt.egrunnerverv.instance-dispatch-fixed-delay}"
+            initialDelayString = "${fint.flyt.egrunnerverv.dispatch.instance-initial-delay}",
+            fixedDelayString = "${fint.flyt.egrunnerverv.dispatch.instance-fixed-delay}"
     )
     private synchronized void dispatchAll() {
         List<InstanceHeadersEntity> instanceHeaders = instanceHeadersRepository.findAll();

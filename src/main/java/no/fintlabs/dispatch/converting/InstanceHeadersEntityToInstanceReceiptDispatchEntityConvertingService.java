@@ -28,8 +28,8 @@ public class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServi
 
 
     public InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingService(
-            @Value("${fint.flyt.egrunnerverv.tablenameSak}") String tablenameSak,
-            @Value("${fint.flyt.egrunnerverv.tablenameJournalpost}") String tablenameJournalpost,
+            @Value("${fint.flyt.egrunnerverv.dispatch.tablenameSak}") String tablenameSak,
+            @Value("${fint.flyt.egrunnerverv.dispatch.tablenameJournalpost}") String tablenameJournalpost,
             CaseRequestService caseRequestService,
             ObjectMapper objectMapper,
             JournalpostToInstanceReceiptDispatchEntityConvertingService journalpostToInstanceReceiptDispatchEntityConvertingService

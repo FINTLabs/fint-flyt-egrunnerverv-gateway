@@ -34,7 +34,7 @@ patches:
   - patch: |-
       - op: replace
         path: "/spec/itemPath"
-        value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-dispatch-gateway-out"
+        value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-gateway-out"
     target:
       kind: OnePasswordItem
       name: fint-flyt-egrunnerverv-dispatch-oauth2-client

@@ -30,6 +30,12 @@ patches:
       - op: replace
         path: "/spec/probes/readiness/path"
         value: "/beta/actuator/health"
+      - op: replace
+        path: "/spec/env/6/value"
+        value: "https://vigoiks.service-now.com/api/now/table"
+      - op: replace
+        path: "/spec/env/7/value"
+        value: "https://vigoiks.service-now.com/oauth_token.do"
     target:
       kind: Application
       name: fint-flyt-egrunnerverv-gateway

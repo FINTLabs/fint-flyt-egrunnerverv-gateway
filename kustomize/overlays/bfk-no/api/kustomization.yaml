@@ -21,6 +21,12 @@ patches:
       - op: replace
         path: "/spec/ingress/basePath"
         value: "/api/egrunnerverv/instances/930580260"
+      - op: replace
+        path: "/spec/env/6/value"
+        value: "https://vigoiks.service-now.com/api/now/table"
+      - op: replace
+        path: "/spec/env/7/value"
+        value: "https://vigoiks.service-now.com/oauth_token.do"
     target:
       kind: Application
       name: fint-flyt-egrunnerverv-gateway

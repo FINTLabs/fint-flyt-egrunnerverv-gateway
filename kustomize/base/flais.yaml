@@ -43,9 +43,9 @@ spec:
     - name: fint.flyt.egrunnerverv.checkEmailDomain
       value: "true"
     - name: fint.flyt.egrunnerverv.base-url
-      value: baseUrl
+      value: "https://vigoikstest.service-now.com/api/now/table"
     - name: fint.flyt.egrunnerverv.token-uri
-      value: tokenUrl
+      value: "https://vigoikstest.service-now.com/oauth_token.do"
   envFrom:
     - secretRef:
         name: fint-flyt-egrunnerverv-dispatch-oauth2-client

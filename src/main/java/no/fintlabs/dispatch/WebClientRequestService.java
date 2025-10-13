@@ -35,6 +35,7 @@ public class WebClientRequestService {
                 .body(Mono.just(instanceToDispatch), instanceReceiptDispatchEntity.getClassType())
                 .retrieve()
                 .bodyToMono(String.class)
+                .doOnSubscribe(sub -> log.info("Dispatching to URI: {}", instanceReceiptDispatchEntity.getUri()))
                 .doOnSuccess(response -> log.info("success {}", response))
                 .doOnError(error -> log.error("Error msg from webclient: {}", error.getMessage()))
                 .thenReturn(instanceReceiptDispatchEntity);

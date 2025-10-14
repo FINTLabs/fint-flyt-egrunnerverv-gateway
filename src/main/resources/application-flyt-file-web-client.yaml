@@ -8,9 +8,9 @@ spring:
         registration:
           file-service:
             authorization-grant-type: client_credentials
+            provider: fint-idp
             client-id: ${fint.sso.client-id}
             client-secret: ${fint.sso.client-secret}
-            provider: fint-idp
 fint:
   flyt:
     file-service-url: 'http://fint-flyt-file-service:8080'

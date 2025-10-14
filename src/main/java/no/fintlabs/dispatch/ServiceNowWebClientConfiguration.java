@@ -1,4 +1,4 @@
-package no.fintlabs;
+package no.fintlabs.dispatch;
 
 import io.netty.channel.ChannelOption;
 import lombok.Getter;
@@ -29,7 +29,7 @@ import java.util.Map;
 @Configuration
 @Component
 @ConfigurationProperties(prefix = "fint.flyt.egrunnerverv.dispatch")
-public class OAuthConfiguration {
+public class ServiceNowWebClientConfiguration {
 
     private String baseUrl;
     private String username;

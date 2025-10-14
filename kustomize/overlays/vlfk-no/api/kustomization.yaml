@@ -7,7 +7,7 @@ resources:
 
 labels:
   - pairs:
-      app.kubernetes.io/instance: fint-flyt-egrunnerverv-instance-gateway_vlfk_no
+      app.kubernetes.io/instance: fint-flyt-egrunnerverv-gateway_vlfk_no
       fintlabs.no/org-id: vlfk.no
 
 patches:
@@ -22,9 +22,12 @@ patches:
         path: "/spec/ingress/basePath"
         value: "/api/egrunnerverv/instances/821311632"
       - op: replace
-        path: "/spec/onePassword/itemPath"
-        value: "vaults/aks-api-vault/items/fint-flyt-v1-slack-webhook"
+        path: "/spec/env/6/value"
+        value: "https://vigoiks.service-now.com/api/now/table"
+      - op: replace
+        path: "/spec/env/7/value"
+        value: "https://vigoiks.service-now.com/oauth_token.do"
     target:
       kind: Application
-      name: fint-flyt-egrunnerverv-instance-gateway
+      name: fint-flyt-egrunnerverv-gateway
 

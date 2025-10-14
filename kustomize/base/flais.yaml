@@ -1,11 +1,11 @@
 apiVersion: fintlabs.no/v1alpha1
 kind: Application
 metadata:
-  name: fint-flyt-egrunnerverv-instance-gateway
+  name: fint-flyt-egrunnerverv-gateway
   namespace: fintlabs-no
   labels:
-    app.kubernetes.io/name: fint-flyt-egrunnerverv-instance-gateway
-    app.kubernetes.io/instance: fint-flyt-egrunnerverv-instance-gateway_fintlabs_no
+    app.kubernetes.io/name: fint-flyt-egrunnerverv-gateway
+    app.kubernetes.io/instance: fint-flyt-egrunnerverv-gateway_fintlabs_no
     app.kubernetes.io/version: latest
     app.kubernetes.io/component: backend
     app.kubernetes.io/part-of: fint-flyt
@@ -15,12 +15,14 @@ spec:
   port: 8080
   imagePullPolicy: Always
   orgId: fintlabs.no
-  image: ghcr.io/fintlabs/fint-flyt-egrunnerverv-instance-gateway:sha-0000000
+  image: ghcr.io/fintlabs/fint-flyt-egrunnerverv-gateway:sha-0000000
   kafka:
     enabled: true
     acls:
       - permission: admin
         topic: 'no-permission'
+  database:
+    database: fint-flyt
   url:
     hostname: flyt.vigoiks.no
     basePath: ""
@@ -40,11 +42,17 @@ spec:
       value: "true"
     - name: fint.flyt.egrunnerverv.checkEmailDomain
       value: "true"
-  onePassword:
-    itemPath: path
+    - name: fint.flyt.egrunnerverv.dispatch.base-url
+      value: "https://vigoikstest.service-now.com/api/now/table"
+    - name: fint.flyt.egrunnerverv.dispatch.token-uri
+      value: "https://vigoikstest.service-now.com/oauth_token.do"
   envFrom:
     - secretRef:
+        name: fint-flyt-egrunnerverv-dispatch-oauth2-client
+    - secretRef:
         name: fint-flyt-file-oauth2-client
+    - secretRef:
+        name: fint-flyt-v1-slack-webhook
   resources:
     limits:
       memory: "750Mi"

@@ -11,6 +11,7 @@ import no.fint.model.resource.arkiv.noark.ArkivressursResource;
 import no.fint.model.resource.felles.PersonResource;
 import no.fintlabs.ResourceLinkUtil;
 import no.fintlabs.cache.FintCache;
+import no.fintlabs.instance.ResourceRepository;
 import no.fintlabs.kafka.entity.EntityConsumerFactoryService;
 import no.fintlabs.kafka.entity.topic.EntityTopicNameParameters;
 import org.springframework.context.annotation.Bean;
@@ -53,13 +54,19 @@ public class ResourceEntityConsumersConfiguration {
 
     @Bean
     ConcurrentMessageListenerContainer<String, ArkivressursResource> arkivressursResourceEntityConsumer(
-            FintCache<String, ArkivressursResource> arkivressursResourceCache
+            FintCache<String, ArkivressursResource> arkivressursResourceCache,
+            ResourceRepository resourceRepository
     ) {
-        return createCacheConsumer(
-                "arkiv.noark.arkivressurs",
+        return entityConsumerFactoryService.createRecordConsumerFactory(
                 ArkivressursResource.class,
-                arkivressursResourceCache
-        );
+                consumerRecord -> {
+                    arkivressursResourceCache.put(
+                            ResourceLinkUtil.getSelfLinks(consumerRecord.value()),
+                            consumerRecord.value()
+                    );
+                    resourceRepository.updateArkivRessurs(consumerRecord.value());
+                }
+        ).createContainer(EntityTopicNameParameters.builder().resource("arkiv.noark.arkivressurs").build());
     }
 
     @Bean
@@ -108,13 +115,19 @@ public class ResourceEntityConsumersConfiguration {
 
     @Bean
     ConcurrentMessageListenerContainer<String, PersonalressursResource> personalressursResourceEntityConsumer(
-            FintCache<String, PersonalressursResource> personalressursResourceCache
+            FintCache<String, PersonalressursResource> personalressursResourceCache,
+            ResourceRepository resourceRepository
     ) {
-        return createCacheConsumer(
-                "administrasjon.personal.personalressurs",
+        return entityConsumerFactoryService.createRecordConsumerFactory(
                 PersonalressursResource.class,
-                personalressursResourceCache
-        );
+                consumerRecord -> {
+                    personalressursResourceCache.put(
+                            ResourceLinkUtil.getSelfLinks(consumerRecord.value()),
+                            consumerRecord.value()
+                    );
+                    resourceRepository.updatePersonalRessurs(consumerRecord.value());
+                }
+        ).createContainer(EntityTopicNameParameters.builder().resource("administrasjon.personal.personalressurs").build());
     }
 
     @Bean

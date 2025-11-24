@@ -24,18 +24,29 @@ patches:
       - op: replace
         path: "/spec/ingress/basePath"
         value: "/beta/api/egrunnerverv/instances/999999999"
-      - op: replace
-        path: "/spec/env/5/value"
-        value: "false"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: novari.kafka.topic.org-id
+          value: "fintlabs-no"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: fint.flyt.egrunnerverv.checkEmailDomain
+          value: "false"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: fint.flyt.egrunnerverv.dispatch.base-url
+          value: "https://vigoiks.service-now.com/api/now/table"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: fint.flyt.egrunnerverv.dispatch.token-uri
+          value: "https://vigoiks.service-now.com/oauth_token.do"
       - op: replace
         path: "/spec/probes/readiness/path"
         value: "/beta/actuator/health"
-      - op: replace
-        path: "/spec/env/6/value"
-        value: "https://vigoiks.service-now.com/api/now/table"
-      - op: replace
-        path: "/spec/env/7/value"
-        value: "https://vigoiks.service-now.com/oauth_token.do"
     target:
       kind: Application
       name: fint-flyt-egrunnerverv-gateway

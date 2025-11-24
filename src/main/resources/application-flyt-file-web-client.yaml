@@ -11,6 +11,7 @@ spring:
             provider: fint-idp
             client-id: ${fint.sso.client-id}
             client-secret: ${fint.sso.client-secret}
-fint:
+
+novari:
   flyt:
     file-service-url: 'http://fint-flyt-file-service:8080'

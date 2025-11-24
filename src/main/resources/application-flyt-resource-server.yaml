@@ -1,6 +1,16 @@
-spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://idp.felleskomponent.no/nidp/oauth/nam
+novari:
+  flyt:
+    resource-server:
+      security:
+        api:
+          external:
+            enabled: true
+
+fint:
+  flyt:
+    resource-server:
+      security:
+        api:
+          external:
+            authorized-source-application-ids:
+              - 2

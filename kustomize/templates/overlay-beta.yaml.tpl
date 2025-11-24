@@ -42,7 +42,7 @@ patches:
         value: "$DISPATCH_ONEPASSWORD_PATH"
     target:
       kind: OnePasswordItem
-      name: fint-flyt-egrunnerverv-dispatch-oauth2-client
+      name: novari-flyt-egrunnerverv-dispatch-oauth2-client
 
   - patch: |-
       - op: replace

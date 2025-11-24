@@ -139,7 +139,7 @@ build_env_patches() {
       - op: add
         path: \"/spec/env/-\"
         value:
-          name: fint.flyt.egrunnerverv.checkSaksansvarligEpost
+          name: novari.flyt.egrunnerverv.checkSaksansvarligEpost
           value: \"${CHECK_SAKSANSVARLIG}\""
   fi
 
@@ -148,7 +148,7 @@ build_env_patches() {
       - op: add
         path: \"/spec/env/-\"
         value:
-          name: fint.flyt.egrunnerverv.checkSaksbehandler
+          name: novari.flyt.egrunnerverv.checkSaksbehandler
           value: \"${CHECK_SAKSBEHANDLER}\""
   fi
 
@@ -157,7 +157,7 @@ build_env_patches() {
       - op: add
         path: \"/spec/env/-\"
         value:
-          name: fint.flyt.egrunnerverv.checkEmailDomain
+          name: novari.flyt.egrunnerverv.checkEmailDomain
           value: \"${CHECK_EMAIL_DOMAIN}\""
   fi
 
@@ -172,12 +172,12 @@ build_dispatch_patches() {
       - op: add
         path: \"/spec/env/-\"
         value:
-          name: fint.flyt.egrunnerverv.dispatch.base-url
+          name: novari.flyt.egrunnerverv.dispatch.base-url
           value: \"${DISPATCH_BASE_URL}\"
       - op: add
         path: \"/spec/env/-\"
         value:
-          name: fint.flyt.egrunnerverv.dispatch.token-uri
+          name: novari.flyt.egrunnerverv.dispatch.token-uri
           value: \"${DISPATCH_TOKEN_URI}\""
   fi
 }

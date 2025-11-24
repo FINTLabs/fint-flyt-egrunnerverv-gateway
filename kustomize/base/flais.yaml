@@ -34,7 +34,7 @@ spec:
       value: '-XX:+ExitOnOutOfMemoryError -Xmx700M'
   envFrom:
     - secretRef:
-        name: fint-flyt-egrunnerverv-dispatch-oauth2-client
+        name: novari-flyt-egrunnerverv-dispatch-oauth2-client
     - secretRef:
         name: fint-flyt-file-oauth2-client
     - secretRef:

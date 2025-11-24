@@ -1,6 +1,7 @@
 fint:
   application-id: fint-flyt-egrunnerverv-gateway
 
+novari:
   flyt:
     egrunnerverv:
       checkSaksansvarligEpost: true

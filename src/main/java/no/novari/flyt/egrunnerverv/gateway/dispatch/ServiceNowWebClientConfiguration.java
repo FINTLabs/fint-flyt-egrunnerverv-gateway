@@ -31,7 +31,7 @@ import java.util.Map;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "fint.flyt.egrunnerverv.dispatch")
+@ConfigurationProperties(prefix = "novari.flyt.egrunnerverv.dispatch")
 public class ServiceNowWebClientConfiguration {
 
     public static final int UNLIMITED = -1;

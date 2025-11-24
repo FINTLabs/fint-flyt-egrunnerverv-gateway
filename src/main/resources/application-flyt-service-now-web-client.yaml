@@ -4,10 +4,10 @@ spring:
       client:
         provider:
           servicenow:
-            token-uri: ${fint.flyt.egrunnerverv.dispatch.token-uri}
+            token-uri: ${novari.flyt.egrunnerverv.dispatch.token-uri}
         registration:
           egrunnerverv:
             authorization-grant-type: password
             provider: servicenow
-            client-id: ${fint.flyt.egrunnerverv.dispatch.client-id}
-            client-secret: ${fint.flyt.egrunnerverv.dispatch.client-secret}
+            client-id: ${novari.flyt.egrunnerverv.dispatch.client-id}
+            client-secret: ${novari.flyt.egrunnerverv.dispatch.client-secret}

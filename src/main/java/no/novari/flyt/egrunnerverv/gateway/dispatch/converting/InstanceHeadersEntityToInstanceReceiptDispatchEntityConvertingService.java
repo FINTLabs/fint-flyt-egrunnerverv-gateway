@@ -30,8 +30,8 @@ public class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServi
     private static final String JOURNALPOST = "journalpost";
 
     public InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingService(
-            @Value("${fint.flyt.egrunnerverv.dispatch.tablenameSak}") String tablenameSak,
-            @Value("${fint.flyt.egrunnerverv.dispatch.tablenameJournalpost}") String tablenameJournalpost,
+            @Value("${novari.flyt.egrunnerverv.dispatch.tablenameSak}") String tablenameSak,
+            @Value("${novari.flyt.egrunnerverv.dispatch.tablenameJournalpost}") String tablenameJournalpost,
             CaseRequestService caseRequestService,
             ObjectMapper objectMapper,
             JournalpostToInstanceReceiptDispatchEntityConvertingService journalpostToInstanceReceiptDispatchEntityConvertingService

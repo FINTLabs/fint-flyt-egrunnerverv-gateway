@@ -5,12 +5,5 @@ novari:
         api:
           external:
             enabled: true
-
-fint:
-  flyt:
-    resource-server:
-      security:
-        api:
-          external:
             authorized-source-application-ids:
               - 2

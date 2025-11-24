@@ -27,18 +27,14 @@ repositories {
     mavenLocal()
 }
 
-var fintModelResourceVersion = "0.4.1"
+var fintModelResourceVersion = "0.5.0"
 var fintResourceModelVersion = "3.21.10"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
-
-    implementation("org.springframework.kafka:spring-kafka")
 
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
@@ -51,13 +47,11 @@ dependencies {
 
     implementation("org.apache.commons:commons-text:1.14.0")
 
-    implementation("no.novari:kafka:5.0.0-rc-20")
-    implementation("no.novari:flyt-cache:2.0.0-rc-2")
-    implementation("no.novari:flyt-instance-gateway:7.0.0-rc-8")
-    implementation("no.novari:flyt-kafka:4.0.0-rc-8")
-    implementation("no.novari:flyt-resource-server:6.0.0-rc-26")
+    implementation("no.novari:flyt-instance-gateway:7.0.0-rc-9")
+    implementation("no.novari:flyt-kafka:4.0.0-rc-9")
+    implementation("no.novari:flyt-resource-server:1.0-SNAPSHOT")
 
-    implementation("no.fint:fint-model-resource:$fintModelResourceVersion")
+    implementation("no.fintlabs:fint-model-resource:$fintModelResourceVersion")
     implementation("no.fint:fint-arkiv-resource-model-java:$fintResourceModelVersion")
     implementation("no.fint:fint-administrasjon-resource-model-java:$fintResourceModelVersion")
 

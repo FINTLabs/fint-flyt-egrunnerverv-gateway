@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager;
@@ -61,6 +62,7 @@ public class ServiceNowWebClientConfiguration {
     }
 
     @Bean(name = "dispatchClientHttpConnector")
+    @Primary
     public ClientHttpConnector dispatchClientHttpConnector() {
         return new ReactorClientHttpConnector(
                 HttpClient.create(
@@ -97,6 +99,4 @@ public class ServiceNowWebClientConfiguration {
                 .build();
     }
 
-
 }
-

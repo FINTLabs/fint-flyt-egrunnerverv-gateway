@@ -26,7 +26,7 @@ public class InstanceConsumerConfiguration {
     private final DispatchService dispatchService;
 
     private static final int PARTITIONS = 1;
-    private static final Duration RETENTION_TIME = Duration.ofDays(4);
+    private static final Duration RETENTION_TIME = Duration.ofDays(7);
     private static final EventCleanupFrequency CLEANUP_FREQUENCY = EventCleanupFrequency.NORMAL;
 
     public InstanceConsumerConfiguration(

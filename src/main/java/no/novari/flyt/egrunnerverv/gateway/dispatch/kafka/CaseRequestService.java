@@ -22,7 +22,7 @@ public class CaseRequestService {
     private final RequestTemplate<String, SakResource> template;
     private final RequestTopicNameParameters requestTopicNameParameters;
 
-    private static final Duration RETENTION_TIME = Duration.ofMinutes(5);
+    private static final Duration RETENTION_TIME = Duration.ofMinutes(10);
 
     public CaseRequestService(
             @Value("${novari.kafka.application-id}") String applicationId,

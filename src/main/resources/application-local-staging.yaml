@@ -1,13 +1,10 @@
 fint:
-  org-id: fintlabs.no
+  org-id: novari.no
+
+novari:
   flyt:
     file-service-url: http://localhost:8091
-    resource-server:
-      security:
-        api:
-          external:
-            enabled: true
-            authorized-client-ids: 2
+
     egrunnerverv:
       checkSaksansvarligEpost: false
       dispatch:
@@ -15,10 +12,15 @@ fint:
         token-uri: https://vigoikstest.service-now.com/oauth_token.do
         instance-dispatch-initial-delay: 20000
         instance-dispatch-fixed-delay: 10000
+
     instance-gateway:
       check-integration-exists: false
+
   kafka:
     default-replicas: 1
+    topic:
+      org-id: novari-no
+
 spring:
   kafka:
     bootstrap-servers: localhost:9092
@@ -28,11 +30,14 @@ spring:
     password: password
     hikari:
       schema: fintlabs_no
+
 server:
   port: 8102
+
 logging:
   level:
-    no.fintlabs.no.fintlabs.instance.EgrunnervervInstanceController: DEBUG
+    no.novari.no.fintlabs.instance.EgrunnervervInstanceController: DEBUG
+
 slack:
   webhook:
     url: ""

@@ -1,12 +1,15 @@
 fint:
   application-id: fint-flyt-egrunnerverv-gateway
-  cache:
-    defaultCacheEntryTimeToLiveMillis: 518400000
-    defaultCacheHeapSize: 1000000
+
+novari:
   flyt:
     egrunnerverv:
-      retentionTimeInDays: 30
+      checkSaksansvarligEpost: true
+      checkSaksbehandler: true
+      checkEmailDomain: true
       dispatch:
+        base-url: https://vigoikstest.service-now.com/api/now/table
+        token-uri: https://vigoikstest.service-now.com/oauth_token.do
         tablenameSak: "x_nvas_grunnerverv_grunnerverv"
         tablenameJournalpost: "x_nvas_grunnerverv_dokumenter"
         instance-initial-delay: 120000
@@ -14,16 +17,17 @@ fint:
         username:
         password:
         registrationId: egrunnerverv
+
 logging:
   level:
-    no.fintlabs.cache.ehcache.FintEhCacheEventLogger: WARN
+    no.novari.cache.ehcache.FintEhCacheEventLogger: WARN
+
 server:
-  max-http-header-size: 40KB
   error:
     include-message: always
+  max-http-request-header-size: 40KB
+
 spring:
-  codec:
-    max-in-memory-size: 100MB
   profiles:
     include:
       - flyt-kafka
@@ -32,3 +36,11 @@ spring:
       - flyt-resource-server
       - flyt-file-web-client
       - flyt-service-now-web-client
+
+  http:
+    codecs:
+      max-in-memory-size: 100MB
+
+  output:
+    ansi:
+      enabled: always

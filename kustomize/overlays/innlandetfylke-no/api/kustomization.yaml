@@ -21,13 +21,21 @@ patches:
       - op: replace
         path: "/spec/ingress/basePath"
         value: "/api/egrunnerverv/instances/920717152"
-      - op: replace
-        path: "/spec/env/6/value"
-        value: "https://vigoiks.service-now.com/api/now/table"
-      - op: replace
-        path: "/spec/env/7/value"
-        value: "https://vigoiks.service-now.com/oauth_token.do"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: novari.kafka.topic.org-id
+          value: "innlandetfylke-no"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: novari.flyt.egrunnerverv.dispatch.base-url
+          value: "https://vigoiks.service-now.com/api/now/table"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: novari.flyt.egrunnerverv.dispatch.token-uri
+          value: "https://vigoiks.service-now.com/oauth_token.do"
     target:
       kind: Application
       name: fint-flyt-egrunnerverv-gateway
-

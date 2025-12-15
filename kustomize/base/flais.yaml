@@ -32,23 +32,9 @@ spec:
   env:
     - name: JAVA_TOOL_OPTIONS
       value: '-XX:+ExitOnOutOfMemoryError -Xmx700M'
-    - name: fint.flyt.resource-server.security.api.external.enabled
-      value: "true"
-    - name: fint.flyt.resource-server.security.api.external.authorized-client-ids
-      value: "2"
-    - name: fint.flyt.egrunnerverv.checkSaksansvarligEpost
-      value: "true"
-    - name: fint.flyt.egrunnerverv.checkSaksbehandler
-      value: "true"
-    - name: fint.flyt.egrunnerverv.checkEmailDomain
-      value: "true"
-    - name: fint.flyt.egrunnerverv.dispatch.base-url
-      value: "https://vigoikstest.service-now.com/api/now/table"
-    - name: fint.flyt.egrunnerverv.dispatch.token-uri
-      value: "https://vigoikstest.service-now.com/oauth_token.do"
   envFrom:
     - secretRef:
-        name: fint-flyt-egrunnerverv-dispatch-oauth2-client
+        name: novari-flyt-egrunnerverv-dispatch-oauth2-client
     - secretRef:
         name: fint-flyt-file-oauth2-client
     - secretRef:

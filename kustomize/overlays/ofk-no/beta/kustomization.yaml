@@ -24,6 +24,11 @@ patches:
       - op: replace
         path: "/spec/ingress/basePath"
         value: "/beta/api/egrunnerverv/instances/930580694"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: novari.kafka.topic.org-id
+          value: "ofk-no"
       - op: replace
         path: "/spec/probes/readiness/path"
         value: "/beta/actuator/health"
@@ -37,7 +42,7 @@ patches:
         value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-gateway-out"
     target:
       kind: OnePasswordItem
-      name: fint-flyt-egrunnerverv-dispatch-oauth2-client
+      name: novari-flyt-egrunnerverv-dispatch-oauth2-client
 
   - patch: |-
       - op: replace
@@ -46,4 +51,3 @@ patches:
     target:
       kind: OnePasswordItem
       name: fint-flyt-v1-slack-webhook
-

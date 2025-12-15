@@ -12,11 +12,10 @@ import no.fint.model.resource.felles.PersonResource;
 import no.novari.cache.FintCache;
 import no.novari.flyt.egrunnerverv.gateway.ResourceLinkUtil;
 import no.novari.flyt.egrunnerverv.gateway.instance.ResourceRepository;
+import no.novari.kafka.consuming.ListenerConfiguration;
 import no.novari.kafka.consuming.ErrorHandlerConfiguration;
 import no.novari.kafka.consuming.ErrorHandlerFactory;
-import no.novari.kafka.requestreply.ReplyProducerRecord;
-import no.novari.kafka.requestreply.RequestListenerConfiguration;
-import no.novari.kafka.requestreply.RequestListenerContainerFactory;
+import no.novari.kafka.consuming.ParameterizedListenerContainerFactoryService;
 import no.novari.kafka.topic.name.EntityTopicNameParameters;
 import no.novari.kafka.topic.name.TopicNamePrefixParameters;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -27,14 +26,14 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 @Configuration
 public class ResourceEntityConsumersConfiguration {
 
-    private final RequestListenerContainerFactory requestListenerContainerFactory;
+    private final ParameterizedListenerContainerFactoryService parameterizedListenerContainerFactoryService;
     private final ErrorHandlerFactory errorHandlerFactory;
 
     public ResourceEntityConsumersConfiguration(
-            RequestListenerContainerFactory requestListenerContainerFactory,
+            ParameterizedListenerContainerFactoryService parameterizedListenerContainerFactoryService,
             ErrorHandlerFactory errorHandlerFactory
     ) {
-        this.requestListenerContainerFactory = requestListenerContainerFactory;
+        this.parameterizedListenerContainerFactoryService = parameterizedListenerContainerFactoryService;
         this.errorHandlerFactory = errorHandlerFactory;
     }
 
@@ -43,17 +42,17 @@ public class ResourceEntityConsumersConfiguration {
             Class<T> resourceClass,
             FintCache<String, T> cache
     ) {
-        return requestListenerContainerFactory.createRecordConsumerFactory(
+        return parameterizedListenerContainerFactoryService.createRecordListenerContainerFactory(
                 resourceClass,
-                Void.class,
-                (ConsumerRecord<String, T> record) -> {
-                    cache.put(ResourceLinkUtil.getSelfLinks(record.value()), record.value());
-                    return ReplyProducerRecord.<Void>builder().build();
-                },
-                RequestListenerConfiguration
-                        .stepBuilder(resourceClass)
+                (ConsumerRecord<String, T> record) -> cache.put(
+                        ResourceLinkUtil.getSelfLinks(record.value()), record.value()
+                ),
+                ListenerConfiguration
+                        .stepBuilder()
+                        .groupIdApplicationDefault()
                         .maxPollRecordsKafkaDefault()
                         .maxPollIntervalKafkaDefault()
+                        .seekToBeginningOnAssignment()
                         .build(),
                 errorHandlerFactory.createErrorHandler(ErrorHandlerConfiguration
                         .stepBuilder()
@@ -89,20 +88,20 @@ public class ResourceEntityConsumersConfiguration {
             FintCache<String, ArkivressursResource> arkivressursResourceCache,
             ResourceRepository resourceRepository
     ) {
-        return requestListenerContainerFactory.createRecordConsumerFactory(
+        return parameterizedListenerContainerFactoryService.createRecordListenerContainerFactory(
                 ArkivressursResource.class,
-                Void.class,
                 (ConsumerRecord<String, ArkivressursResource> record) -> {
                     arkivressursResourceCache.put(
                             ResourceLinkUtil.getSelfLinks(record.value()), record.value()
                     );
                     resourceRepository.updateArkivRessurs(record.value());
-                    return ReplyProducerRecord.<Void>builder().build();
                 },
-                RequestListenerConfiguration
-                        .stepBuilder(ArkivressursResource.class)
+                ListenerConfiguration
+                        .stepBuilder()
+                        .groupIdApplicationDefault()
                         .maxPollRecordsKafkaDefault()
                         .maxPollIntervalKafkaDefault()
+                        .seekToBeginningOnAssignment()
                         .build(),
                 errorHandlerFactory.createErrorHandler(ErrorHandlerConfiguration
                         .stepBuilder()
@@ -172,20 +171,20 @@ public class ResourceEntityConsumersConfiguration {
             FintCache<String, PersonalressursResource> personalressursResourceCache,
             ResourceRepository resourceRepository
     ) {
-        return requestListenerContainerFactory.createRecordConsumerFactory(
+        return parameterizedListenerContainerFactoryService.createRecordListenerContainerFactory(
                 PersonalressursResource.class,
-                Void.class,
                 (ConsumerRecord<String, PersonalressursResource> record) -> {
                     personalressursResourceCache.put(
                             ResourceLinkUtil.getSelfLinks(record.value()), record.value()
                     );
                     resourceRepository.updatePersonalRessurs(record.value());
-                    return ReplyProducerRecord.<Void>builder().build();
                 },
-                RequestListenerConfiguration
-                        .stepBuilder(PersonalressursResource.class)
+                ListenerConfiguration
+                        .stepBuilder()
+                        .groupIdApplicationDefault()
                         .maxPollRecordsKafkaDefault()
                         .maxPollIntervalKafkaDefault()
+                        .seekToBeginningOnAssignment()
                         .build(),
                 errorHandlerFactory.createErrorHandler(ErrorHandlerConfiguration
                         .stepBuilder()

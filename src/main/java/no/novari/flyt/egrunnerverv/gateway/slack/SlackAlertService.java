@@ -1,13 +1,16 @@
 package no.novari.flyt.egrunnerverv.gateway.slack;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class SlackAlertService {
 
     @Value("${fint.org-id}")
@@ -19,12 +22,12 @@ public class SlackAlertService {
     @Value("${slack.webhook.url}")
     private String slackWebhookUrl;
 
-    private final RestTemplate restTemplate;
+    private final WebClient webClient;
 
     public SlackAlertService(
-            RestTemplate restTemplate
+            @Qualifier("slackWebClient") WebClient webClient
     ) {
-        this.restTemplate = restTemplate;
+        this.webClient = webClient;
     }
 
     public void sendMessage(String message) {
@@ -32,7 +35,12 @@ public class SlackAlertService {
         String formattedMessage = formatMessageWithPrefix(message);
         payload.put("text", formattedMessage);
 
-        restTemplate.postForObject(slackWebhookUrl, payload, String.class);
+        webClient.post()
+                .uri(slackWebhookUrl)
+                .bodyValue(payload)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
     }
 
     private String formatMessageWithPrefix(String message) {

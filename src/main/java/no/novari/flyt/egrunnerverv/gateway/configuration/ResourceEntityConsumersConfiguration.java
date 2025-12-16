@@ -49,7 +49,7 @@ public class ResourceEntityConsumersConfiguration {
                 .groupIdApplicationDefault()
                 .maxPollRecordsKafkaDefault()
                 .maxPollIntervalKafkaDefault()
-                .continueFromPreviousOffsetOnAssignment()
+                .seekToBeginningOnAssignment()
                 .build();
 
         return listenerFactoryService

@@ -1,6 +1,7 @@
 package no.novari.flyt.egrunnerverv.gateway.configuration;
 
 import jakarta.annotation.Nullable;
+import lombok.extern.slf4j.Slf4j;
 import no.fint.model.resource.FintLinks;
 import no.fint.model.resource.administrasjon.personal.PersonalressursResource;
 import no.fint.model.resource.arkiv.kodeverk.JournalStatusResource;
@@ -26,6 +27,7 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import java.util.function.Consumer;
 
 @Configuration
+@Slf4j
 public class ResourceEntityConsumersConfiguration {
 
     private final ParameterizedListenerContainerFactoryService listenerFactoryService;
@@ -57,6 +59,7 @@ public class ResourceEntityConsumersConfiguration {
                         resourceClass,
                         record -> {
                             T value = record.value();
+                            log.info("Kodeverk verdi: {}", value);
                             cache.put(ResourceLinkUtil.getSelfLinks(value), value);
                             if (afterCache != null) {
                                 afterCache.accept(value);

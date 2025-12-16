@@ -1,5 +1,6 @@
 package no.novari.flyt.egrunnerverv.gateway.configuration;
 
+import jakarta.annotation.Nullable;
 import no.fint.model.resource.FintLinks;
 import no.fint.model.resource.administrasjon.personal.PersonalressursResource;
 import no.fint.model.resource.arkiv.kodeverk.JournalStatusResource;
@@ -14,63 +15,67 @@ import no.novari.flyt.egrunnerverv.gateway.ResourceLinkUtil;
 import no.novari.flyt.egrunnerverv.gateway.instance.ResourceRepository;
 import no.novari.kafka.consuming.ErrorHandlerConfiguration;
 import no.novari.kafka.consuming.ErrorHandlerFactory;
-import no.novari.kafka.requestreply.ReplyProducerRecord;
-import no.novari.kafka.requestreply.RequestListenerConfiguration;
-import no.novari.kafka.requestreply.RequestListenerContainerFactory;
+import no.novari.kafka.consuming.ListenerConfiguration;
+import no.novari.kafka.consuming.ParameterizedListenerContainerFactoryService;
 import no.novari.kafka.topic.name.EntityTopicNameParameters;
 import no.novari.kafka.topic.name.TopicNamePrefixParameters;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 
+import java.util.function.Consumer;
+
 @Configuration
 public class ResourceEntityConsumersConfiguration {
 
-    private final RequestListenerContainerFactory requestListenerContainerFactory;
+    private final ParameterizedListenerContainerFactoryService listenerFactoryService;
     private final ErrorHandlerFactory errorHandlerFactory;
 
     public ResourceEntityConsumersConfiguration(
-            RequestListenerContainerFactory requestListenerContainerFactory,
+            ParameterizedListenerContainerFactoryService listenerFactoryService,
             ErrorHandlerFactory errorHandlerFactory
     ) {
-        this.requestListenerContainerFactory = requestListenerContainerFactory;
+        this.listenerFactoryService = listenerFactoryService;
         this.errorHandlerFactory = errorHandlerFactory;
     }
 
     private <T extends FintLinks> ConcurrentMessageListenerContainer<String, T> createCacheConsumer(
-            String resourceReference,
+            String resourceName,
             Class<T> resourceClass,
-            FintCache<String, T> cache
+            FintCache<String, T> cache,
+            @Nullable Consumer<T> afterCache
     ) {
-        return requestListenerContainerFactory.createRecordConsumerFactory(
-                resourceClass,
-                Void.class,
-                (ConsumerRecord<String, T> record) -> {
-                    cache.put(ResourceLinkUtil.getSelfLinks(record.value()), record.value());
-                    return ReplyProducerRecord.<Void>builder().build();
-                },
-                RequestListenerConfiguration
-                        .stepBuilder(resourceClass)
-                        .maxPollRecordsKafkaDefault()
-                        .maxPollIntervalKafkaDefault()
-                        .build(),
-                errorHandlerFactory.createErrorHandler(ErrorHandlerConfiguration
-                        .stepBuilder()
-                        .noRetries()
-                        .skipFailedRecords()
-                        .build()
+        ListenerConfiguration listenerConfig = ListenerConfiguration.stepBuilder()
+                .groupIdApplicationDefault()
+                .maxPollRecordsKafkaDefault()
+                .maxPollIntervalKafkaDefault()
+                .continueFromPreviousOffsetOnAssignment()
+                .build();
+
+        return listenerFactoryService
+                .createRecordListenerContainerFactory(
+                        resourceClass,
+                        record -> {
+                            T value = record.value();
+                            cache.put(ResourceLinkUtil.getSelfLinks(value), value);
+                            if (afterCache != null) {
+                                afterCache.accept(value);
+                            }
+                        },
+                        listenerConfig,
+                        errorHandlerFactory.createErrorHandler(ErrorHandlerConfiguration.<T>builder().build())
                 )
-        ).createContainer(EntityTopicNameParameters
-                .builder()
-                .topicNamePrefixParameters(TopicNamePrefixParameters
-                        .stepBuilder()
-                        .orgIdApplicationDefault()
-                        .domainContextApplicationDefault()
-                        .build()
-                )
-                .resourceName(resourceReference)
-                .build());
+                .createContainer(
+                        EntityTopicNameParameters.builder()
+                                .topicNamePrefixParameters(
+                                        TopicNamePrefixParameters.stepBuilder()
+                                                .orgIdApplicationDefault()
+                                                .domainContextApplicationDefault()
+                                                .build()
+                                )
+                                .resourceName(resourceName)
+                                .build()
+                );
     }
 
     @Bean
@@ -80,7 +85,8 @@ public class ResourceEntityConsumersConfiguration {
         return createCacheConsumer(
                 "arkiv-noark-administrativenhet",
                 AdministrativEnhetResource.class,
-                administrativEnhetResourceCache
+                administrativEnhetResourceCache,
+                null
         );
     }
 
@@ -89,37 +95,11 @@ public class ResourceEntityConsumersConfiguration {
             FintCache<String, ArkivressursResource> arkivressursResourceCache,
             ResourceRepository resourceRepository
     ) {
-        return requestListenerContainerFactory.createRecordConsumerFactory(
+        return createCacheConsumer(
+                "arkiv-noark-arkivressurs",
                 ArkivressursResource.class,
-                Void.class,
-                (ConsumerRecord<String, ArkivressursResource> record) -> {
-                    arkivressursResourceCache.put(
-                            ResourceLinkUtil.getSelfLinks(record.value()), record.value()
-                    );
-                    resourceRepository.updateArkivRessurs(record.value());
-                    return ReplyProducerRecord.<Void>builder().build();
-                },
-                RequestListenerConfiguration
-                        .stepBuilder(ArkivressursResource.class)
-                        .maxPollRecordsKafkaDefault()
-                        .maxPollIntervalKafkaDefault()
-                        .build(),
-                errorHandlerFactory.createErrorHandler(ErrorHandlerConfiguration
-                        .stepBuilder()
-                        .noRetries()
-                        .skipFailedRecords()
-                        .build()
-                )
-        ).createContainer(EntityTopicNameParameters
-                .builder()
-                .topicNamePrefixParameters(TopicNamePrefixParameters
-                        .stepBuilder()
-                        .orgIdApplicationDefault()
-                        .domainContextApplicationDefault()
-                        .build()
-                )
-                .resourceName("arkiv-noark-arkivressurs")
-                .build()
+                arkivressursResourceCache,
+                resourceRepository::updateArkivRessurs
         );
     }
 
@@ -130,7 +110,8 @@ public class ResourceEntityConsumersConfiguration {
         return createCacheConsumer(
                 "arkiv-kodeverk-tilgangsrestriksjon",
                 TilgangsrestriksjonResource.class,
-                tilgangsrestriksjonResourceCache
+                tilgangsrestriksjonResourceCache,
+                null
         );
     }
 
@@ -141,7 +122,8 @@ public class ResourceEntityConsumersConfiguration {
         return createCacheConsumer(
                 "arkiv-kodeverk-skjermingshjemmel",
                 SkjermingshjemmelResource.class,
-                skjermingshjemmelResourceCache
+                skjermingshjemmelResourceCache,
+                null
         );
     }
 
@@ -152,7 +134,8 @@ public class ResourceEntityConsumersConfiguration {
         return createCacheConsumer(
                 "arkiv-kodeverk-journalstatus",
                 JournalStatusResource.class,
-                journalStatusResourceCache
+                journalStatusResourceCache,
+                null
         );
     }
 
@@ -163,7 +146,8 @@ public class ResourceEntityConsumersConfiguration {
         return createCacheConsumer(
                 "arkiv-kodeverk-journalposttype",
                 JournalpostTypeResource.class,
-                journalpostTypeResourceCache
+                journalpostTypeResourceCache,
+                null
         );
     }
 
@@ -172,37 +156,11 @@ public class ResourceEntityConsumersConfiguration {
             FintCache<String, PersonalressursResource> personalressursResourceCache,
             ResourceRepository resourceRepository
     ) {
-        return requestListenerContainerFactory.createRecordConsumerFactory(
+        return createCacheConsumer(
+                "administrasjon-personal-personalressurs",
                 PersonalressursResource.class,
-                Void.class,
-                (ConsumerRecord<String, PersonalressursResource> record) -> {
-                    personalressursResourceCache.put(
-                            ResourceLinkUtil.getSelfLinks(record.value()), record.value()
-                    );
-                    resourceRepository.updatePersonalRessurs(record.value());
-                    return ReplyProducerRecord.<Void>builder().build();
-                },
-                RequestListenerConfiguration
-                        .stepBuilder(PersonalressursResource.class)
-                        .maxPollRecordsKafkaDefault()
-                        .maxPollIntervalKafkaDefault()
-                        .build(),
-                errorHandlerFactory.createErrorHandler(ErrorHandlerConfiguration
-                        .stepBuilder()
-                        .noRetries()
-                        .skipFailedRecords()
-                        .build()
-                )
-        ).createContainer(EntityTopicNameParameters
-                .builder()
-                .topicNamePrefixParameters(TopicNamePrefixParameters
-                        .stepBuilder()
-                        .orgIdApplicationDefault()
-                        .domainContextApplicationDefault()
-                        .build()
-                )
-                .resourceName("administrasjon-personal-personalressurs")
-                .build()
+                personalressursResourceCache,
+                resourceRepository::updatePersonalRessurs
         );
     }
 
@@ -213,8 +171,8 @@ public class ResourceEntityConsumersConfiguration {
         return createCacheConsumer(
                 "administrasjon-personal-person",
                 PersonResource.class,
-                personResourceCache
+                personResourceCache,
+                null
         );
     }
-
 }

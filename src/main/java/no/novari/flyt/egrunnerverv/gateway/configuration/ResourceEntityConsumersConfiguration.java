@@ -60,7 +60,6 @@ public class ResourceEntityConsumersConfiguration {
                         resourceClass,
                         record -> {
                             T value = record.value();
-                            log.info("Kodeverk verdi: {}", value);
                             cache.put(ResourceLinkUtil.getSelfLinks(value), value);
                             if (afterCache != null) {
                                 afterCache.accept(value);

@@ -45,7 +45,8 @@ public class ResourceEntityConsumersConfiguration {
             FintCache<String, T> cache,
             @Nullable Consumer<T> afterCache
     ) {
-        ListenerConfiguration listenerConfig = ListenerConfiguration.stepBuilder()
+        ListenerConfiguration listenerConfig = ListenerConfiguration
+                .stepBuilder()
                 .groupIdApplicationDefault()
                 .maxPollRecordsKafkaDefault()
                 .maxPollIntervalKafkaDefault()
@@ -63,7 +64,11 @@ public class ResourceEntityConsumersConfiguration {
                             }
                         },
                         listenerConfig,
-                        errorHandlerFactory.createErrorHandler(ErrorHandlerConfiguration.<T>builder().build())
+                        errorHandlerFactory.createErrorHandler(ErrorHandlerConfiguration
+                                .stepBuilder()
+                                .noRetries()
+                                .skipFailedRecords()
+                                .build())
                 )
                 .createContainer(
                         EntityTopicNameParameters.builder()

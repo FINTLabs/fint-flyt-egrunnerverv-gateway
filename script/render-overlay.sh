@@ -212,6 +212,7 @@ while IFS= read -r file; do
     export STARTUP_PATH="/beta/actuator/health"
     export READINESS_PATH="/beta/actuator/health/readiness"
     export LIVENESS_PATH="/beta/actuator/health/liveness"
+    export METRICS_PATH="/beta/actuator/prometheus"
     export DISPATCH_ONEPASSWORD_PATH="vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-gateway-out"
     export SLACK_ONEPASSWORD_PATH="vaults/aks-beta-vault/items/fint-flyt-v1-slack-webhook"
   else
@@ -219,6 +220,7 @@ while IFS= read -r file; do
     export STARTUP_PATH="/actuator/health"
     export READINESS_PATH="/actuator/health/readiness"
     export LIVENESS_PATH="/actuator/health/liveness"
+    export METRICS_PATH="/actuator/prometheus"
     export DISPATCH_ONEPASSWORD_PATH=""
     export SLACK_ONEPASSWORD_PATH=""
   fi
@@ -227,7 +229,7 @@ while IFS= read -r file; do
   target_dir="$ROOT/kustomize/overlays/$dir"
 
   tmp="$(mktemp "$target_dir/.kustomization.yaml.XXXXXX")"
-  envsubst '$NAMESPACE $APP_INSTANCE_LABEL $ORG_ID $KAFKA_TOPIC $INGRESS_BASE_PATH $ENV_PATCHES $DISPATCH_PATCHES $URL_BASE_PATH $STARTUP_PATH $READINESS_PATH $LIVENESS_PATH $DISPATCH_ONEPASSWORD_PATH $SLACK_ONEPASSWORD_PATH' \
+  envsubst '$NAMESPACE $APP_INSTANCE_LABEL $ORG_ID $KAFKA_TOPIC $INGRESS_BASE_PATH $ENV_PATCHES $DISPATCH_PATCHES $URL_BASE_PATH $STARTUP_PATH $READINESS_PATH $LIVENESS_PATH $METRICS_PATH $DISPATCH_ONEPASSWORD_PATH $SLACK_ONEPASSWORD_PATH' \
     < "$template" > "$tmp"
   mv "$tmp" "$target_dir/kustomization.yaml"
 done < <(find "$ROOT/kustomize/overlays" -name kustomization.yaml -print | sort)

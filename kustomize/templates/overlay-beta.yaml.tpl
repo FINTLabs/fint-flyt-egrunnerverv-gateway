@@ -30,8 +30,14 @@ patches:
           name: novari.kafka.topic.org-id
           value: "$NAMESPACE"$ENV_PATCHES$DISPATCH_PATCHES
       - op: replace
+        path: "/spec/probes/startup/path"
+        value: "$STARTUP_PATH"
+      - op: replace
         path: "/spec/probes/readiness/path"
         value: "$READINESS_PATH"
+      - op: replace
+        path: "/spec/probes/liveness/path"
+        value: "$LIVENESS_PATH"
     target:
       kind: Application
       name: fint-flyt-egrunnerverv-gateway

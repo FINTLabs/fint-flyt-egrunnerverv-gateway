@@ -33,13 +33,14 @@ spring:
       - flyt-kafka
       - flyt-logging
       - flyt-postgres
-      - flyt-resource-server
+      - flyt-web-resource-server
       - flyt-file-web-client
       - flyt-service-now-web-client
 
-  http:
-    codecs:
-      max-in-memory-size: 100MB
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
 
   output:
     ansi:

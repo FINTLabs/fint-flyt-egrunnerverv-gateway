@@ -47,7 +47,7 @@ dependencies {
 
     implementation("org.apache.commons:commons-text:1.14.0")
 
-    implementation("no.novari:flyt-instance-gateway:7.0.1")
+    implementation("no.novari:flyt-instance-gateway:7.1.0")
     implementation("no.novari:flyt-kafka:4.0.0")
     implementation("no.novari:flyt-resource-server:6.0.0")
 

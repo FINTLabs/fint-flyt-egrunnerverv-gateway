@@ -1,5 +1,8 @@
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import org.gradle.kotlin.dsl.named
+
 plugins {
-    id("org.springframework.boot") version "3.5.7"
+    id("org.springframework.boot") version "3.5.10"
     id("io.spring.dependency-management") version "1.1.7"
     java
     id("com.github.ben-manes.versions") version "0.53.0"
@@ -9,7 +12,7 @@ group = "no.novari"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(25))
     }
 }
 
@@ -20,11 +23,11 @@ configurations {
 }
 
 repositories {
-    mavenCentral()
+    mavenLocal()
     maven {
         url = uri("https://repo.fintlabs.no/releases")
     }
-    mavenLocal()
+    mavenCentral()
 }
 
 var fintModelResourceVersion = "0.5.0"
@@ -47,7 +50,7 @@ dependencies {
 
     implementation("org.apache.commons:commons-text:1.14.0")
 
-    implementation("no.novari:flyt-instance-gateway:7.1.0")
+    implementation("no.novari:flyt-instance-gateway:7.1.2")
     implementation("no.novari:flyt-kafka:4.0.0")
     implementation("no.novari:flyt-resource-server:6.0.0")
 
@@ -60,4 +63,17 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.uppercase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return !isStable
+}
+
+tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
+    rejectVersionIf {
+        isNonStable(candidate.version)
+    }
 }

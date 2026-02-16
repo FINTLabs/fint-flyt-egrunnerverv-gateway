@@ -50,9 +50,9 @@ dependencies {
 
     implementation("org.apache.commons:commons-text:1.14.0")
 
-    implementation("no.novari:flyt-instance-gateway:7.1.2")
-    implementation("no.novari:flyt-kafka:4.0.0")
-    implementation("no.novari:flyt-resource-server:6.0.0")
+    implementation("no.novari:flyt-instance-gateway:8.0.0")
+    implementation("no.novari:flyt-kafka:6.0.0")
+    implementation("no.novari:flyt-resource-server:7.0.0")
 
     implementation("no.fintlabs:fint-model-resource:$fintModelResourceVersion")
     implementation("no.fint:fint-arkiv-resource-model-java:$fintResourceModelVersion")

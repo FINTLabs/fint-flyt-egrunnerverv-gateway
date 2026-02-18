@@ -1,6 +1,5 @@
 package no.novari.flyt.egrunnerverv.gateway.configuration;
 
-import jakarta.annotation.Nullable;
 import no.fint.model.resource.FintLinks;
 import no.fint.model.resource.administrasjon.personal.PersonalressursResource;
 import no.fint.model.resource.arkiv.kodeverk.JournalStatusResource;
@@ -12,7 +11,6 @@ import no.fint.model.resource.arkiv.noark.ArkivressursResource;
 import no.fint.model.resource.felles.PersonResource;
 import no.novari.cache.FintCache;
 import no.novari.flyt.egrunnerverv.gateway.ResourceLinkUtil;
-import no.novari.flyt.egrunnerverv.gateway.instance.ResourceRepository;
 import no.novari.kafka.consuming.ErrorHandlerConfiguration;
 import no.novari.kafka.consuming.ErrorHandlerFactory;
 import no.novari.kafka.consuming.ListenerConfiguration;
@@ -22,8 +20,6 @@ import no.novari.kafka.topic.name.TopicNamePrefixParameters;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
-
-import java.util.function.Consumer;
 
 @Configuration
 public class ResourceEntityConsumersConfiguration {
@@ -42,8 +38,7 @@ public class ResourceEntityConsumersConfiguration {
     private <T extends FintLinks> ConcurrentMessageListenerContainer<String, T> createCacheConsumer(
             String resourceName,
             Class<T> resourceClass,
-            FintCache<String, T> cache,
-            @Nullable Consumer<T> afterCache
+            FintCache<String, T> cache
     ) {
         ListenerConfiguration listenerConfig = ListenerConfiguration
                 .stepBuilder()
@@ -59,9 +54,6 @@ public class ResourceEntityConsumersConfiguration {
                         record -> {
                             T value = record.value();
                             cache.put(ResourceLinkUtil.getSelfLinks(value), value);
-                            if (afterCache != null) {
-                                afterCache.accept(value);
-                            }
                         },
                         listenerConfig,
                         errorHandlerFactory.createErrorHandler(ErrorHandlerConfiguration
@@ -90,21 +82,18 @@ public class ResourceEntityConsumersConfiguration {
         return createCacheConsumer(
                 "arkiv-noark-administrativenhet",
                 AdministrativEnhetResource.class,
-                administrativEnhetResourceCache,
-                null
+                administrativEnhetResourceCache
         );
     }
 
     @Bean
     ConcurrentMessageListenerContainer<String, ArkivressursResource> arkivressursResourceEntityConsumer(
-            FintCache<String, ArkivressursResource> arkivressursResourceCache,
-            ResourceRepository resourceRepository
+            FintCache<String, ArkivressursResource> arkivressursResourceCache
     ) {
         return createCacheConsumer(
                 "arkiv-noark-arkivressurs",
                 ArkivressursResource.class,
-                arkivressursResourceCache,
-                resourceRepository::updateArkivRessurs
+                arkivressursResourceCache
         );
     }
 
@@ -115,8 +104,7 @@ public class ResourceEntityConsumersConfiguration {
         return createCacheConsumer(
                 "arkiv-kodeverk-tilgangsrestriksjon",
                 TilgangsrestriksjonResource.class,
-                tilgangsrestriksjonResourceCache,
-                null
+                tilgangsrestriksjonResourceCache
         );
     }
 
@@ -127,8 +115,7 @@ public class ResourceEntityConsumersConfiguration {
         return createCacheConsumer(
                 "arkiv-kodeverk-skjermingshjemmel",
                 SkjermingshjemmelResource.class,
-                skjermingshjemmelResourceCache,
-                null
+                skjermingshjemmelResourceCache
         );
     }
 
@@ -139,8 +126,7 @@ public class ResourceEntityConsumersConfiguration {
         return createCacheConsumer(
                 "arkiv-kodeverk-journalstatus",
                 JournalStatusResource.class,
-                journalStatusResourceCache,
-                null
+                journalStatusResourceCache
         );
     }
 
@@ -151,21 +137,18 @@ public class ResourceEntityConsumersConfiguration {
         return createCacheConsumer(
                 "arkiv-kodeverk-journalposttype",
                 JournalpostTypeResource.class,
-                journalpostTypeResourceCache,
-                null
+                journalpostTypeResourceCache
         );
     }
 
     @Bean
     ConcurrentMessageListenerContainer<String, PersonalressursResource> personalressursResourceEntityConsumer(
-            FintCache<String, PersonalressursResource> personalressursResourceCache,
-            ResourceRepository resourceRepository
+            FintCache<String, PersonalressursResource> personalressursResourceCache
     ) {
         return createCacheConsumer(
                 "administrasjon-personal-personalressurs",
                 PersonalressursResource.class,
-                personalressursResourceCache,
-                resourceRepository::updatePersonalRessurs
+                personalressursResourceCache
         );
     }
 
@@ -176,8 +159,7 @@ public class ResourceEntityConsumersConfiguration {
         return createCacheConsumer(
                 "administrasjon-personal-person",
                 PersonResource.class,
-                personResourceCache,
-                null
+                personResourceCache
         );
     }
 }

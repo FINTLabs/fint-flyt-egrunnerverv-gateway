@@ -14,8 +14,6 @@ novari:
         tablenameJournalpost: "x_nvas_grunnerverv_dokumenter"
         instance-initial-delay: 120000
         instance-fixed-delay: 300000
-        username:
-        password:
         registrationId: egrunnerverv
 
 logging:

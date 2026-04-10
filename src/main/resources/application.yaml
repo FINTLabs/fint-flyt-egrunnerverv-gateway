@@ -10,22 +10,21 @@ novari:
       dispatch:
         base-url: https://vigoikstest.service-now.com/api/now/table
         token-uri: https://vigoikstest.service-now.com/oauth_token.do
-        tablenameSak: "x_nvas_grunnerverv_grunnerverv"
-        tablenameJournalpost: "x_nvas_grunnerverv_dokumenter"
+        tablenameSak: x_nvas_grunnerverv_grunnerverv
+        tablenameJournalpost: x_nvas_grunnerverv_dokumenter
         instance-initial-delay: 120000
         instance-fixed-delay: 300000
-        username:
-        password:
-        registrationId: egrunnerverv
+        registration-id: egrunnerverv
 
 logging:
   level:
     no.novari.cache.ehcache.FintEhCacheEventLogger: WARN
 
 server:
-  error:
-    include-message: always
   max-http-request-header-size: 40KB
+  tomcat:
+    max-http-form-post-size: 100MB
+    max-swallow-size: 100MB
 
 spring:
   profiles:
@@ -33,14 +32,14 @@ spring:
       - flyt-kafka
       - flyt-logging
       - flyt-postgres
-      - flyt-resource-server
+      - flyt-web-resource-server
       - flyt-file-web-client
       - flyt-service-now-web-client
-
-  http:
-    codecs:
-      max-in-memory-size: 100MB
-
   output:
     ansi:
       enabled: always
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB

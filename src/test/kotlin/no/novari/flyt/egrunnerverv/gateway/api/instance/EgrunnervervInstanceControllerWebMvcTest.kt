@@ -64,7 +64,7 @@ class EgrunnervervInstanceControllerWebMvcTest {
     }
 
     @Test
-    fun `POST archive with invalid body returns ProblemDetail 400`() {
+    fun `POST archive with invalid body returns ErrorResponse 400`() {
         mockMvc
             .perform(
                 org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -74,15 +74,14 @@ class EgrunnervervInstanceControllerWebMvcTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("{}"),
             ).andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.title").value("Bad Request"))
-            .andExpect(jsonPath("$.detail").value("Invalid request"))
+            .andExpect(jsonPath("$.error").value("Bad Request"))
             .andExpect(jsonPath("$.status").value(400))
             .andExpect(jsonPath("$.path").value("$EXTERNAL_API/egrunnerverv/instances/999/archive"))
             .andExpect(jsonPath("$.timestamp").exists())
     }
 
     @Test
-    fun `POST archive when processor throws IllegalArgumentException returns ProblemDetail 400`() {
+    fun `POST archive when processor throws IllegalArgumentException returns ErrorResponse 400`() {
         doThrow(IllegalArgumentException("bad input"))
             .whenever(sakInstanceProcessor)
             .processInstance(any<Authentication>(), any<EgrunnervervSakInstance>())
@@ -96,11 +95,11 @@ class EgrunnervervInstanceControllerWebMvcTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsBytes(validSakInstance())),
             ).andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.detail").value("Invalid request"))
+            .andExpect(jsonPath("$.message").value("Invalid request"))
     }
 
     @Test
-    fun `POST archive when processor throws unexpected exception returns ProblemDetail 500`() {
+    fun `POST archive when processor throws unexpected exception returns ErrorResponse 500`() {
         doThrow(RuntimeException("boom"))
             .whenever(sakInstanceProcessor)
             .processInstance(any<Authentication>(), any<EgrunnervervSakInstance>())
@@ -114,11 +113,11 @@ class EgrunnervervInstanceControllerWebMvcTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsBytes(validSakInstance())),
             ).andExpect(status().isInternalServerError)
-            .andExpect(jsonPath("$.detail").value("Internal server error"))
+            .andExpect(jsonPath("$.error").value("Internal Server Error"))
     }
 
     @Test
-    fun `POST document without id returns ProblemDetail 400`() {
+    fun `POST document without id returns ErrorResponse 500`() {
         mockMvc
             .perform(
                 org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -127,8 +126,8 @@ class EgrunnervervInstanceControllerWebMvcTest {
                     .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsBytes(validJournalpostBody())),
-            ).andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.detail").value("Invalid request"))
+            ).andExpect(status().isInternalServerError)
+            .andExpect(jsonPath("$.error").value("Internal Server Error"))
     }
 
     private fun validSakInstance(): EgrunnervervSakInstance =

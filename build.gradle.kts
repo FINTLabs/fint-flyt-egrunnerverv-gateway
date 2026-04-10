@@ -47,8 +47,6 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     implementation("no.novari:flyt-web-instance-gateway:2.0.0")
-    implementation("no.novari:flyt-kafka:4.0.0")
-    implementation("no.novari:flyt-web-resource-server:2.0.0")
 
     implementation("no.fintlabs:fint-model-resource:$fintModelResourceVersion")
     implementation("no.fint:fint-arkiv-resource-model-java:$fintResourceModelVersion")

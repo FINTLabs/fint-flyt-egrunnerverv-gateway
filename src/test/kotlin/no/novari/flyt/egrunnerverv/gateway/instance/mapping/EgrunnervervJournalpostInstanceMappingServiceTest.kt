@@ -113,13 +113,13 @@ class EgrunnervervJournalpostInstanceMappingServiceTest {
                             EgrunnervervJournalpostDocument(
                                 tittel = "Hoveddok",
                                 filnavn = "hoved.pdf",
-                                dokumentBase64 = "AAAA".toByteArray(),
+                                dokumentBase64 = "AAAA",
                                 hoveddokument = true,
                             ),
                             EgrunnervervJournalpostDocument(
                                 tittel = "Vedlegg1",
                                 filnavn = "vedlegg1.pdf",
-                                dokumentBase64 = "BBBB".toByteArray(),
+                                dokumentBase64 = "BBBB",
                                 hoveddokument = false,
                             ),
                         ),

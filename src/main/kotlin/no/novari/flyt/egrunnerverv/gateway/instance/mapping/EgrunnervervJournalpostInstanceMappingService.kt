@@ -169,6 +169,6 @@ class EgrunnervervJournalpostInstanceMappingService(
             sourceApplicationInstanceId = sourceApplicationInstanceId,
             type = type,
             encoding = "UTF-8",
-            base64Contents = Base64.getEncoder().encodeToString(document.dokumentBase64),
+            base64Contents = document.dokumentBase64,
         )
 }

@@ -172,7 +172,7 @@ class EgrunnervervInstanceControllerWebMvcTest {
                     EgrunnervervJournalpostDocument(
                         tittel = "Hoveddok",
                         filnavn = "hoved.pdf",
-                        dokumentBase64 = "AAAA".toByteArray(),
+                        dokumentBase64 = "AAAA",
                         hoveddokument = true,
                     ),
                 ),

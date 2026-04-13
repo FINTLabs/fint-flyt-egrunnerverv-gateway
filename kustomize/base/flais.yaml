@@ -31,7 +31,7 @@ spec:
     basePath: path
   env:
     - name: JAVA_TOOL_OPTIONS
-      value: '-XX:+ExitOnOutOfMemoryError -Xmx512M'
+      value: '-XX:+ExitOnOutOfMemoryError -XX:MaxRAMPercentage=80 -XX:InitialRAMPercentage=50'
   envFrom:
     - secretRef:
         name: novari-flyt-egrunnerverv-dispatch-oauth2-client

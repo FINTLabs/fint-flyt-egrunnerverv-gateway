@@ -348,3 +348,4 @@ Det betyr i praksis:
 - [`Dockerfile`](Dockerfile)
 - [`src/main/kotlin/no/novari/flyt/egrunnerverv/gateway/instance/EgrunnervervInstanceController.kt`](src/main/kotlin/no/novari/flyt/egrunnerverv/gateway/instance/EgrunnervervInstanceController.kt)
 - [`src/main/kotlin/no/novari/flyt/egrunnerverv/gateway/dispatch/DispatchService.kt`](src/main/kotlin/no/novari/flyt/egrunnerverv/gateway/dispatch/DispatchService.kt)
+

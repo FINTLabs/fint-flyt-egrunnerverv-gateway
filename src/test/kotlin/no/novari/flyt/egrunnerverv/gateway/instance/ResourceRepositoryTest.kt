@@ -1,10 +1,10 @@
 package no.novari.flyt.egrunnerverv.gateway.instance
 
-import no.fint.model.felles.kompleksedatatyper.Identifikator
-import no.fint.model.felles.kompleksedatatyper.Kontaktinformasjon
-import no.fint.model.resource.Link
-import no.fint.model.resource.administrasjon.personal.PersonalressursResource
-import no.fint.model.resource.arkiv.noark.ArkivressursResource
+import no.novari.fint.model.felles.kompleksedatatyper.Identifikator
+import no.novari.fint.model.felles.kompleksedatatyper.Kontaktinformasjon
+import no.novari.fint.model.resource.Link
+import no.novari.fint.model.resource.administrasjon.personal.PersonalressursResource
+import no.novari.fint.model.resource.arkiv.noark.ArkivressursResource
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

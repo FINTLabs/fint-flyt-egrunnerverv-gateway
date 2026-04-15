@@ -1,6 +1,6 @@
 package no.novari.flyt.egrunnerverv.gateway.exception
 
-import no.fint.model.resource.FintLinks
+import no.novari.fint.model.resource.FintLinks
 
 class NoSuchLinkException(
     message: String,

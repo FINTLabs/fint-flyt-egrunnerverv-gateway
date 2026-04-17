@@ -1,7 +1,7 @@
 package no.novari.flyt.egrunnerverv.gateway.instance
 
-import no.fint.model.resource.administrasjon.personal.PersonalressursResource
-import no.fint.model.resource.arkiv.noark.ArkivressursResource
+import no.novari.fint.model.resource.administrasjon.personal.PersonalressursResource
+import no.novari.fint.model.resource.arkiv.noark.ArkivressursResource
 import no.novari.flyt.egrunnerverv.gateway.ResourceLinkUtil
 import org.springframework.stereotype.Repository
 import org.springframework.util.StringUtils

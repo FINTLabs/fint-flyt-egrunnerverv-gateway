@@ -25,8 +25,8 @@ repositories {
     mavenLocal()
 }
 
-val fintModelResourceVersion = "0.5.0"
-val fintResourceModelVersion = "3.21.10"
+val fintModelResourceVersion = "1.0.1"
+val fintResourceModelVersion = "4.0.10"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
@@ -48,9 +48,9 @@ dependencies {
 
     implementation("no.novari:flyt-web-instance-gateway:2.0.0")
 
-    implementation("no.fintlabs:fint-model-resource:$fintModelResourceVersion")
-    implementation("no.fint:fint-arkiv-resource-model-java:$fintResourceModelVersion")
-    implementation("no.fint:fint-administrasjon-resource-model-java:$fintResourceModelVersion")
+    implementation("no.novari:fint-model-resource:$fintModelResourceVersion")
+    implementation("no.novari:fint-arkiv-resource-model-java:$fintResourceModelVersion")
+    implementation("no.novari:fint-administrasjon-resource-model-java:$fintResourceModelVersion")
 
     // For compatibility with the fint models pulled in above
     implementation("javax.validation:validation-api:2.0.1.Final")

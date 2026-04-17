@@ -1,6 +1,6 @@
 package no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.kafka
 
-import no.fint.model.resource.arkiv.noark.SakResource
+import no.novari.fint.model.resource.arkiv.noark.SakResource
 import no.novari.kafka.consuming.ListenerConfiguration
 import no.novari.kafka.requestreply.RequestProducerRecord
 import no.novari.kafka.requestreply.RequestTemplate

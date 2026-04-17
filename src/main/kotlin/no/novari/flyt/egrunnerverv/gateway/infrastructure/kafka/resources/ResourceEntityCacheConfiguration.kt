@@ -1,15 +1,15 @@
 package no.novari.flyt.egrunnerverv.gateway.infrastructure.kafka.resources
 
-import no.fint.model.resource.administrasjon.personal.PersonalressursResource
-import no.fint.model.resource.arkiv.kodeverk.JournalStatusResource
-import no.fint.model.resource.arkiv.kodeverk.JournalpostTypeResource
-import no.fint.model.resource.arkiv.kodeverk.SkjermingshjemmelResource
-import no.fint.model.resource.arkiv.kodeverk.TilgangsrestriksjonResource
-import no.fint.model.resource.arkiv.noark.AdministrativEnhetResource
-import no.fint.model.resource.arkiv.noark.ArkivressursResource
-import no.fint.model.resource.felles.PersonResource
 import no.novari.cache.FintCache
 import no.novari.cache.FintCacheManager
+import no.novari.fint.model.resource.administrasjon.personal.PersonalressursResource
+import no.novari.fint.model.resource.arkiv.kodeverk.JournalStatusResource
+import no.novari.fint.model.resource.arkiv.kodeverk.JournalpostTypeResource
+import no.novari.fint.model.resource.arkiv.kodeverk.SkjermingshjemmelResource
+import no.novari.fint.model.resource.arkiv.kodeverk.TilgangsrestriksjonResource
+import no.novari.fint.model.resource.arkiv.noark.AdministrativEnhetResource
+import no.novari.fint.model.resource.arkiv.noark.ArkivressursResource
+import no.novari.fint.model.resource.felles.PersonResource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.util.Locale

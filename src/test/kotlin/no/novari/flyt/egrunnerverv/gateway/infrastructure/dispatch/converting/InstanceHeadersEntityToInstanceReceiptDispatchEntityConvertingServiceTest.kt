@@ -1,7 +1,7 @@
 package no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.converting
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.fint.model.resource.arkiv.noark.SakResource
+import no.novari.fint.model.resource.arkiv.noark.SakResource
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.kafka.CaseRequestService
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.InstanceHeadersEntity
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.JournalpostReceipt

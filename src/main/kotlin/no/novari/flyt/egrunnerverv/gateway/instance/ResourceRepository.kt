@@ -39,7 +39,8 @@ class ResourceRepository(
         arkivressursResource: ArkivressursResource,
         personalRessursUsername: String,
     ): Boolean =
-        arkivressursResource.personalressurs.orEmpty()
+        arkivressursResource.personalressurs
+            .orEmpty()
             .any { StringUtils.endsWithIgnoreCase(it.href, personalRessursUsername) }
 
     private fun getEmailAddress(resource: PersonalressursResource): String? = resource.kontaktinformasjon?.epostadresse

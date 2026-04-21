@@ -20,7 +20,7 @@ patches:
         value: "$ORG_ID"
       - op: add
         path: "/spec/url/basePath"
-        value: "$URL_BASE_PATH"
+        value: ""
       - op: replace
         path: "/spec/ingress/basePath"
         value: "$INGRESS_BASE_PATH"
@@ -29,6 +29,11 @@ patches:
         value:
           name: novari.kafka.topic.org-id
           value: "$NAMESPACE"$ENV_PATCHES$DISPATCH_PATCHES
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: server.servlet.context-path
+          value: "$URL_BASE_PATH"
       - op: replace
         path: "/spec/probes/startup/path"
         value: "$STARTUP_PATH"

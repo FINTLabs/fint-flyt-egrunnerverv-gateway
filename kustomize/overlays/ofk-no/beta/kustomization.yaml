@@ -20,7 +20,7 @@ patches:
         value: "ofk.no"
       - op: add
         path: "/spec/url/basePath"
-        value: "/beta"
+        value: ""
       - op: replace
         path: "/spec/ingress/basePath"
         value: "/beta/api/egrunnerverv/instances/930580694"
@@ -29,6 +29,11 @@ patches:
         value:
           name: novari.kafka.topic.org-id
           value: "ofk-no"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: server.servlet.context-path
+          value: "/beta"
       - op: replace
         path: "/spec/probes/startup/path"
         value: "/beta/actuator/health"

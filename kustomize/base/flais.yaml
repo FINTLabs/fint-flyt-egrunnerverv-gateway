@@ -31,7 +31,7 @@ spec:
     basePath: path
   env:
     - name: JAVA_TOOL_OPTIONS
-      value: '-XX:+ExitOnOutOfMemoryError -Xmx700M'
+      value: '-XX:+ExitOnOutOfMemoryError -XX:MaxRAMPercentage=45'
   envFrom:
     - secretRef:
         name: novari-flyt-egrunnerverv-dispatch-oauth2-client
@@ -41,10 +41,10 @@ spec:
         name: fint-flyt-v1-slack-webhook
   resources:
     limits:
-      memory: "750Mi"
+      memory: "1Gi"
       cpu: "500m"
     requests:
-      memory: "512Mi"
+      memory: "768Mi"
       cpu: "100m"
   probes:
     startup:

@@ -44,6 +44,11 @@ patches:
         value:
           name: novari.flyt.egrunnerverv.checkSaksbehandler
           value: "false"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: logging.level.no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch
+          value: "DEBUG"
       - op: replace
         path: "/spec/probes/startup/path"
         value: "/beta/actuator/health"

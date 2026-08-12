@@ -46,6 +46,11 @@ patches:
       - op: replace
         path: "/spec/observability/metrics/path"
         value: "$METRICS_PATH"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "OTEL_EXPORTER_OTLP_ENDPOINT"
+          value: "http://alloy.flais-system.svc.cluster.local:4318"
     target:
       kind: Application
       name: fint-flyt-egrunnerverv-gateway

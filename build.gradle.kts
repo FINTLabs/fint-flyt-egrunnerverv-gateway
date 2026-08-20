@@ -26,7 +26,7 @@ repositories {
 }
 
 val fintModelResourceVersion = "1.0.1"
-val fintResourceModelVersion = "4.0.10"
+val fintResourceModelVersion = "4.1.0"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")

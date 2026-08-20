@@ -6,9 +6,9 @@ plugins {
     id("com.github.ben-manes.versions") version "0.61.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     jacoco
-    kotlin("jvm") version "2.4.0"
-    kotlin("plugin.spring") version "2.4.0"
-    kotlin("plugin.jpa") version "2.4.0"
+    kotlin("jvm") version "2.4.10"
+    kotlin("plugin.spring") version "2.4.10"
+    kotlin("plugin.jpa") version "2.4.10"
 }
 
 group = "no.novari"
@@ -26,7 +26,7 @@ repositories {
 }
 
 val fintModelResourceVersion = "1.0.1"
-val fintResourceModelVersion = "4.0.10"
+val fintResourceModelVersion = "4.1.0"
 
 extra["jackson-bom.version"] = "2.21.5"
 extra["log4j2.version"] = "2.25.5"
@@ -68,7 +68,7 @@ dependencies {
     testImplementation("org.springframework.kafka:spring-kafka-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:6.2.3")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

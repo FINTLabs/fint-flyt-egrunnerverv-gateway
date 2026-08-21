@@ -46,7 +46,7 @@ dependencies {
         }
     }
 
-    implementation(platform("tools.jackson:jackson-bom:3.1.5"))
+    implementation(platform("tools.jackson:jackson-bom:3.2.2"))
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")

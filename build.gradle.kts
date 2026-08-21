@@ -28,7 +28,25 @@ repositories {
 val fintModelResourceVersion = "1.0.1"
 val fintResourceModelVersion = "4.1.0"
 
+extra["commons-lang3.version"] = "3.18.0"
+extra["httpclient5.version"] = "5.6.3"
+extra["httpcore5.version"] = "5.4.3"
+extra["jackson-bom.version"] = "2.22.2"
+extra["log4j2.version"] = "2.26.1"
+extra["netty.version"] = "4.2.17.Final"
+extra["postgresql.version"] = "42.7.12"
+
 dependencies {
+    constraints {
+        implementation("at.yawk.lz4:lz4-java:1.11.2") {
+            because("Fixes CVE-2026-59949 in the kafka-clients transitive dependency")
+        }
+        testImplementation("org.apache.commons:commons-compress:1.28.0") {
+            because("Fixes CVE-2024-25710 and CVE-2024-26308 in the Testcontainers transitive dependency")
+        }
+    }
+
+    implementation(platform("tools.jackson:jackson-bom:3.1.5"))
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")

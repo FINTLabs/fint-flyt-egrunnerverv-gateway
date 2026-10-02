@@ -62,7 +62,6 @@ dependencies {
         }
     }
 
-    implementation(platform("tools.jackson:jackson-bom:3.2.3"))
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -74,7 +73,8 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
-    implementation("net.logstash.logback:logstash-logback-encoder:9.0")
+    // Pinned to 8.x: 9.x pulls in Jackson 3 (tools.jackson), while Spring Boot 3.5 uses Jackson 2
+    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
 
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")

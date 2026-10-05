@@ -271,7 +271,7 @@ Default profiler inkludert via `application.yaml`:
 `local-staging` overstyrer blant annet:
 
 - lokal Kafka på `localhost:9092`
-- lokal Postgres på `localhost:5441`
+- lokal Postgres på `localhost:5439`
 - `novari.flyt.file-service-url=http://localhost:8091`
 - `novari.flyt.gateway-starter.check-integration-exists=false`
 - enklere eGrunnerverv-validering ved å slå av oppslag for saksansvarlig og saksbehandler
@@ -292,9 +292,10 @@ docker compose up -d
 
 Dette starter:
 
-- Kafka 3.8.1 på `localhost:9092`
-- Kafdrop på `http://localhost:19000`
-- Postgres på `localhost:5441`
+- Kafka 3.9.2 på `localhost:9092`
+- Postgres på `localhost:5439`
+
+Legg til `--profile tools` for å også starte Kafdrop på http://localhost:19000. Topicene og databasen er tomme ved hver oppstart.
 
 Merk:
 

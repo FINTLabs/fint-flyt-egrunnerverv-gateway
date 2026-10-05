@@ -40,6 +40,10 @@ repositories {
     mavenLocal()
 }
 
+tasks.jar {
+    isEnabled = false
+}
+
 val fintModelResourceVersion = "1.0.1"
 val fintResourceModelVersion = "4.1.0"
 

@@ -25,7 +25,7 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
   datasource:
-    url: jdbc:postgresql://localhost:5441/fint-flyt-egrunnerverv-gateway
+    url: jdbc:postgresql://localhost:5439/fint-flyt-egrunnerverv-gateway
     username: postgres
     password: password
     hikari:

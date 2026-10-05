@@ -295,7 +295,7 @@ Dette starter:
 - Kafka 3.9.2 på `localhost:9092`
 - Postgres på `localhost:5439`
 
-Legg til `--profile tools` for å også starte Kafdrop på http://localhost:19000. `docker compose down -v` stopper alt og sletter dataene.
+Legg til `--profile tools` for å også starte Kafdrop på http://localhost:19000. Topicene og databasen er tomme ved hver oppstart.
 
 Merk:
 

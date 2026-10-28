@@ -1,7 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-    configurations.classpath { resolutionStrategy.activateDependencyLocking() }
     repositories {
         gradlePluginPortal()
     }

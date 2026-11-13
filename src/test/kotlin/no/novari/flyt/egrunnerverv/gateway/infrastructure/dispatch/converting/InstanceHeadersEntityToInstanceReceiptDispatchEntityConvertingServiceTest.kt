@@ -2,7 +2,7 @@ package no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.converting
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.novari.fint.model.resource.arkiv.noark.SakResource
-import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.kafka.CaseRequestService
+import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.archive.ArchiveGatewayClient
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.InstanceHeadersEntity
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.JournalpostReceipt
 import org.assertj.core.api.Assertions.assertThat
@@ -14,7 +14,7 @@ import java.time.Instant
 import java.util.Date
 
 class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest {
-    private val caseRequestService: CaseRequestService = mock()
+    private val archiveGatewayClient: ArchiveGatewayClient = mock()
     private val journalpostMapper: JournalpostToInstanceReceiptDispatchEntityConvertingService = mock()
     private val objectMapper = jacksonObjectMapper()
 
@@ -22,14 +22,14 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest 
         InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingService(
             tablenameSak = "sak-table",
             tablenameJournalpost = "journalpost-table",
-            caseRequestService = caseRequestService,
+            archiveGatewayClient = archiveGatewayClient,
             objectMapper = objectMapper,
             journalpostToInstanceReceiptDispatchEntityConvertingService = journalpostMapper,
         )
 
     @Test
     fun `convert returns null when case is missing (sak)`() {
-        whenever(caseRequestService.getByMappeId("ARK-1")).thenReturn(null)
+        whenever(archiveGatewayClient.getByMappeId("ARK-1")).thenReturn(null)
 
         val result =
             service.convert(
@@ -47,7 +47,7 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest 
     fun `convert builds receipt and uri for sak`() {
         val sakResource: SakResource = mock()
         whenever(sakResource.opprettetDato).thenReturn(Date.from(Instant.ofEpochSecond(0)))
-        whenever(caseRequestService.getByMappeId("ARK-1")).thenReturn(sakResource)
+        whenever(archiveGatewayClient.getByMappeId("ARK-1")).thenReturn(sakResource)
 
         val result =
             service.convert(
@@ -74,7 +74,7 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest 
 
     @Test
     fun `convert returns null when case is missing (journalpost)`() {
-        whenever(caseRequestService.getByMappeId("CASE")).thenReturn(null)
+        whenever(archiveGatewayClient.getByMappeId("CASE")).thenReturn(null)
 
         val result =
             service.convert(
@@ -91,7 +91,7 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest 
     @Test
     fun `convert builds receipt and uri for journalpost`() {
         val sakResource: SakResource = mock()
-        whenever(caseRequestService.getByMappeId("CASE")).thenReturn(sakResource)
+        whenever(archiveGatewayClient.getByMappeId("CASE")).thenReturn(sakResource)
 
         val receipt =
             JournalpostReceipt(

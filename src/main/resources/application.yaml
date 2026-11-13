@@ -34,6 +34,7 @@ spring:
       - flyt-postgres
       - flyt-web-resource-server
       - flyt-file-web-client
+      - flyt-authorization-client
       - flyt-service-now-web-client
   output:
     ansi:

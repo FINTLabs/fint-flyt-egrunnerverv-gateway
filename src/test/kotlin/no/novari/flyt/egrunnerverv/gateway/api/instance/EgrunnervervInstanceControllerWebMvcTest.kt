@@ -9,7 +9,6 @@ import no.novari.flyt.egrunnerverv.gateway.instance.model.EgrunnervervSakInstanc
 import no.novari.flyt.gateway.instance.InstanceProcessor
 import no.novari.flyt.webresourceserver.UrlPaths.EXTERNAL_API
 import no.novari.flyt.webresourceserver.security.client.sourceapplication.SourceApplicationAuthorityMappingService
-import no.novari.flyt.webresourceserver.security.client.sourceapplication.SourceApplicationAuthorizationRequestService
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
@@ -41,9 +40,6 @@ class EgrunnervervInstanceControllerWebMvcTest {
 
     @MockitoBean(name = "journalpostInstanceProcessor")
     private lateinit var journalpostInstanceProcessor: InstanceProcessor<*>
-
-    @MockitoBean
-    private lateinit var sourceApplicationAuthorizationRequestService: SourceApplicationAuthorizationRequestService
 
     @MockitoBean
     private lateinit var sourceApplicationAuthorityMappingService: SourceApplicationAuthorityMappingService

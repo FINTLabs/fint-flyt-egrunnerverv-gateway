@@ -2,10 +2,9 @@ package no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.converting
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.kafka.CaseRequestService
+import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.archive.ArchiveGatewayClient
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.InstanceHeadersEntity
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.InstanceReceiptDispatchEntity
-import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.JournalpostReceipt
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.SakReceipt
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -20,7 +19,7 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingService(
     private val tablenameSak: String,
     @param:Value("\${novari.flyt.egrunnerverv.dispatch.tablenameJournalpost}")
     private val tablenameJournalpost: String,
-    private val caseRequestService: CaseRequestService,
+    private val archiveGatewayClient: ArchiveGatewayClient,
     private val objectMapper: ObjectMapper,
     private val journalpostToInstanceReceiptDispatchEntityConvertingService:
         JournalpostToInstanceReceiptDispatchEntityConvertingService,
@@ -36,7 +35,7 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingService(
         val archiveInstanceId = instanceHeadersEntity.archiveInstanceId
         val sourceApplicationInstanceId = instanceHeadersEntity.sourceApplicationInstanceId
 
-        return caseRequestService.getByMappeId(archiveInstanceId)?.let { sakResource ->
+        return archiveGatewayClient.getByMappeId(archiveInstanceId)?.let { sakResource ->
             val sakReceipt =
                 SakReceipt(
                     arkivnummer = archiveInstanceId,
@@ -61,7 +60,7 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingService(
                 .replace("]", "")
                 .toLong()
 
-        return caseRequestService.getByMappeId(caseId)?.let { sakResource ->
+        return archiveGatewayClient.getByMappeId(caseId)?.let { sakResource ->
             val journalpostReceipt =
                 journalpostToInstanceReceiptDispatchEntityConvertingService.map(sakResource, journalpostNummer)
 

@@ -15,6 +15,16 @@ novari:
         instance-initial-delay: 120000
         instance-fixed-delay: 300000
         registration-id: egrunnerverv
+      # The other FLYT services run under /<org> (api) or /beta/<org> (beta), unlike this gateway, so the
+      # internal URLs cannot be derived from server.servlet.context-path. Set per overlay.
+      service-context-path: ""
+    intgr-conf-service-url: http://fint-flyt-intgr-conf-service:8080${novari.flyt.egrunnerverv.service-context-path}
+    history-service-url: http://fint-flyt-history-service:8080${novari.flyt.egrunnerverv.service-context-path}
+    archive-gateway-url: http://fint-flyt-archive-gateway:8080${novari.flyt.egrunnerverv.service-context-path}
+    web-resource-server:
+      security:
+        authorization:
+          base-url: http://fint-flyt-authorization-service:8080${novari.flyt.egrunnerverv.service-context-path}
 
 logging:
   level:

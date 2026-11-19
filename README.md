@@ -26,16 +26,16 @@ Kotlin-basert Spring Boot-tjeneste for mottak av eGrunnerverv-instanser i Flyt. 
 
 ## Arkitektur
 
-| Komponent                                       | Ansvar                                                          |
-|-------------------------------------------------|-----------------------------------------------------------------|
-| `EgrunnervervInstanceController`                | Eksterne endepunkter for mottak av `sak` og `journalpost`.      |
-| `EgrunnervervSakInstanceMappingService`         | Mapper `sak` til Flyt `InstanceObject`.                         |
-| `EgrunnervervJournalpostInstanceMappingService` | Mapper `journalpost`, inkludert filopplasting.                  |
-| `ResourceRepository`                            | Oppslag direkte i Kafka-synkede `FintCache`-ressurser.          |
+| Komponent                                       | Ansvar                                                             |
+| ----------------------------------------------- | ------------------------------------------------------------------ |
+| `EgrunnervervInstanceController`                | Eksterne endepunkter for mottak av `sak` og `journalpost`.         |
+| `EgrunnervervSakInstanceMappingService`         | Mapper `sak` til Flyt `InstanceObject`.                            |
+| `EgrunnervervJournalpostInstanceMappingService` | Mapper `journalpost`, inkludert filopplasting.                     |
+| `ResourceRepository`                            | Oppslag direkte i Kafka-synkede `FintCache`-ressurser.             |
 | `DispatchService`                               | Håndterer lagring, konvertering og retry av dispatch-kvitteringer. |
-| `CaseRequestService`                            | Request-reply mot Kafka for å hente `SakResource`.              |
-| `RestClientRequestService`                      | Sender kvitteringer til ServiceNow.                             |
-| `GlobalExceptionHandler`                        | Standardiserer feilresponser med `ProblemDetail`.               |
+| `ArchiveGatewayClient`                          | Henter `SakResource` fra archive-gateway over HTTP.                |
+| `RestClientRequestService`                      | Sender kvitteringer til ServiceNow.                                |
+| `GlobalExceptionHandler`                        | Standardiserer feilresponser med `ProblemDetail`.                  |
 
 ## Flyt
 
@@ -70,8 +70,8 @@ sequenceDiagram
     Archive-->>Kafka: instance-dispatched
     Kafka->>Gateway: Konsumer event
     Gateway->>Gateway: Lagre headers / bygg receipt
-    Gateway->>Kafka: Request-reply for SakResource ved behov
-    Kafka-->>Gateway: SakResource
+    Gateway->>Archive: GET /api/intern-klient/arkiv/saker ved behov
+    Archive-->>Gateway: SakResource
     Gateway->>SN: PATCH kvittering
     alt Vellykket
         Gateway->>Gateway: Slett receipt fra Postgres
@@ -239,23 +239,30 @@ Viktige konfigurasjonsfiler:
 
 Vanlige properties og secrets:
 
-| Property                                          | Beskrivelse                                                 |
-|---------------------------------------------------|-------------------------------------------------------------|
-| `fint.application-id`                             | App-id for tjenesten.                                       |
-| `fint.org-id`                                     | Org-id brukt blant annet i Slack-meldinger og lokal profil. |
-| `fint.database.url`                               | JDBC URL til Postgres.                                      |
-| `fint.database.username`                          | DB-bruker.                                                  |
-| `fint.database.password`                          | DB-passord.                                                 |
-| `fint.sso.client-id`                              | OAuth2 client id for fil-tjenesten.                         |
-| `fint.sso.client-secret`                          | OAuth2 client secret for fil-tjenesten.                     |
-| `novari.flyt.file-service-url`                    | Base URL til fil-tjenesten.                                 |
-| `novari.flyt.egrunnerverv.dispatch.base-url`      | Base URL til ServiceNow-tabell-API.                         |
-| `novari.flyt.egrunnerverv.dispatch.token-uri`     | Token endpoint for ServiceNow OAuth2.                       |
-| `novari.flyt.egrunnerverv.dispatch.client-id`     | OAuth2 client id for ServiceNow.                            |
-| `novari.flyt.egrunnerverv.dispatch.client-secret` | OAuth2 client secret for ServiceNow.                        |
-| `novari.flyt.egrunnerverv.dispatch.username`      | ServiceNow brukernavn for password grant.                   |
-| `novari.flyt.egrunnerverv.dispatch.password`      | ServiceNow passord for password grant.                      |
-| `slack.webhook.url`                               | Webhook for Slack-varsling ved manglende arkivressurs.      |
+| Property                                          | Beskrivelse                                                                                           |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `fint.application-id`                             | App-id for tjenesten.                                                                                 |
+| `fint.org-id`                                     | Org-id brukt blant annet i Slack-meldinger og lokal profil.                                           |
+| `fint.database.url`                               | JDBC URL til Postgres.                                                                                |
+| `fint.database.username`                          | DB-bruker.                                                                                            |
+| `fint.database.password`                          | DB-passord.                                                                                           |
+| `fint.sso.client-id`                              | OAuth2 client id for fil-tjenesten.                                                                   |
+| `fint.sso.client-secret`                          | OAuth2 client secret for fil-tjenesten.                                                               |
+| `fint.flyt.authorization.sso.client-id`           | OAuth2 client id for interne FLYT-kall.                                                               |
+| `fint.flyt.authorization.sso.client-secret`       | OAuth2 client secret for interne FLYT-kall.                                                           |
+| `novari.flyt.egrunnerverv.service-context-path`   | Kontekststi til de andre FLYT-tjenestene: `/<org>` i api og `/beta/<org>` i beta. Settes per overlay. |
+| `novari.flyt.archive-gateway-url`                 | Base URL til archive-gateway. Standard bygger på `service-context-path`.                              |
+| `novari.flyt.file-service-url`                    | Base URL til fil-tjenesten.                                                                           |
+| `novari.flyt.egrunnerverv.dispatch.base-url`      | Base URL til ServiceNow-tabell-API.                                                                   |
+| `novari.flyt.egrunnerverv.dispatch.token-uri`     | Token endpoint for ServiceNow OAuth2.                                                                 |
+| `novari.flyt.egrunnerverv.dispatch.client-id`     | OAuth2 client id for ServiceNow.                                                                      |
+| `novari.flyt.egrunnerverv.dispatch.client-secret` | OAuth2 client secret for ServiceNow.                                                                  |
+| `novari.flyt.egrunnerverv.dispatch.username`      | ServiceNow brukernavn for password grant.                                                             |
+| `novari.flyt.egrunnerverv.dispatch.password`      | ServiceNow passord for password grant.                                                                |
+| `slack.webhook.url`                               | Webhook for Slack-varsling ved manglende arkivressurs.                                                |
+
+Registreringene `intgr-conf-service`, `history-service`, `authorization-service` og `archive-gateway` bruker den felles
+`fint-flyt-authorization-oauth2-client`, mappet til `fint.flyt.authorization.sso.*` med `secretKeyRef`.
 
 ## Profiler
 
@@ -340,6 +347,7 @@ Det betyr i praksis:
 
 - `spec.url.basePath` skal ikke brukes til å legge på servlet context path
 - overlay skal sette `server.servlet.context-path`
+- overlay skal sette `novari.flyt.egrunnerverv.service-context-path`, fordi gatewayens egen context path (tom i api, `/beta` i beta) ikke er den samme som for de andre FLYT-tjenestene. Den gir URL-ene til intgr-conf-service, history-service, archive-gateway og authorization-service
 - overlay skal oppdatere probe-paths og metrics-paths tilsvarende
 
 ## Relevante filer

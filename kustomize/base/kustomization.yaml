@@ -5,3 +5,4 @@ resources:
   - egrunnerverv-dispatch-onepassword.yaml
   - oauth2-file-client.yaml
   - slack-onepassword.yaml
+  - oauth2-authorization-client.yaml

@@ -1,11 +1,11 @@
 package no.novari.flyt.egrunnerverv.gateway.instance
 
-import no.novari.cache.FintCache
 import no.novari.fint.model.felles.kompleksedatatyper.Identifikator
 import no.novari.fint.model.felles.kompleksedatatyper.Kontaktinformasjon
 import no.novari.fint.model.resource.Link
 import no.novari.fint.model.resource.administrasjon.personal.PersonalressursResource
 import no.novari.fint.model.resource.arkiv.noark.ArkivressursResource
+import no.novari.flyt.cache.FlytCache
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -13,8 +13,8 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 class ResourceRepositoryTest {
-    private val personalressursResourceCache: FintCache<String, PersonalressursResource> = mock()
-    private val arkivressursResourceCache: FintCache<String, ArkivressursResource> = mock()
+    private val personalressursResourceCache: FlytCache<String, PersonalressursResource> = mock()
+    private val arkivressursResourceCache: FlytCache<String, ArkivressursResource> = mock()
 
     private lateinit var repo: ResourceRepository
 
@@ -25,8 +25,8 @@ class ResourceRepositoryTest {
 
     @Test
     fun `returns null when personalressurs is missing`() {
-        whenever(personalressursResourceCache.getAllDistinct()).thenReturn(emptyList())
-        whenever(arkivressursResourceCache.getAllDistinct()).thenReturn(emptyList())
+        whenever(personalressursResourceCache.distinctValues()).thenReturn(emptyList())
+        whenever(arkivressursResourceCache.distinctValues()).thenReturn(emptyList())
 
         assertThat(repo.getArkivressursHrefFromPersonEmail("test@novari.no")).isNull()
     }
@@ -52,8 +52,8 @@ class ResourceRepositoryTest {
                 addSelf(Link(arkivressursSelfHref))
             }
 
-        whenever(personalressursResourceCache.getAllDistinct()).thenReturn(listOf(personalressurs))
-        whenever(arkivressursResourceCache.getAllDistinct()).thenReturn(listOf(arkivressurs))
+        whenever(personalressursResourceCache.distinctValues()).thenReturn(listOf(personalressurs))
+        whenever(arkivressursResourceCache.distinctValues()).thenReturn(listOf(arkivressurs))
 
         val href = repo.getArkivressursHrefFromPersonEmail("  TEST@NOVARI.NO  ")
         assertThat(href).isEqualTo(arkivressursSelfHref)

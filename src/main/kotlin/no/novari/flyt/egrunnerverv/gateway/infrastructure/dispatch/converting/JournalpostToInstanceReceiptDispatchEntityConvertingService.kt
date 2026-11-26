@@ -1,6 +1,5 @@
 package no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.converting
 
-import no.novari.cache.FintCache
 import no.novari.fint.model.resource.administrasjon.personal.PersonalressursResource
 import no.novari.fint.model.resource.arkiv.kodeverk.JournalStatusResource
 import no.novari.fint.model.resource.arkiv.kodeverk.JournalpostTypeResource
@@ -10,6 +9,7 @@ import no.novari.fint.model.resource.arkiv.noark.AdministrativEnhetResource
 import no.novari.fint.model.resource.arkiv.noark.ArkivressursResource
 import no.novari.fint.model.resource.arkiv.noark.SakResource
 import no.novari.fint.model.resource.felles.PersonResource
+import no.novari.flyt.cache.FlytCache
 import no.novari.flyt.egrunnerverv.gateway.ResourceLinkUtil.getFirstLink
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.JournalpostReceipt
 import org.springframework.stereotype.Service
@@ -19,14 +19,14 @@ import java.util.Date
 
 @Service
 class JournalpostToInstanceReceiptDispatchEntityConvertingService(
-    private val administrativEnhetResourceCache: FintCache<String, AdministrativEnhetResource>,
-    private val arkivressursResourceCache: FintCache<String, ArkivressursResource>,
-    private val journalStatusResourceCache: FintCache<String, JournalStatusResource>,
-    private val journalpostTypeResourceCache: FintCache<String, JournalpostTypeResource>,
-    private val tilgangsrestriksjonResourceCache: FintCache<String, TilgangsrestriksjonResource>,
-    private val skjermingshjemmelResourceCache: FintCache<String, SkjermingshjemmelResource>,
-    private val personalressursResourceCache: FintCache<String, PersonalressursResource>,
-    private val personResourceCache: FintCache<String, PersonResource>,
+    private val administrativEnhetResourceCache: FlytCache<String, AdministrativEnhetResource>,
+    private val arkivressursResourceCache: FlytCache<String, ArkivressursResource>,
+    private val journalStatusResourceCache: FlytCache<String, JournalStatusResource>,
+    private val journalpostTypeResourceCache: FlytCache<String, JournalpostTypeResource>,
+    private val tilgangsrestriksjonResourceCache: FlytCache<String, TilgangsrestriksjonResource>,
+    private val skjermingshjemmelResourceCache: FlytCache<String, SkjermingshjemmelResource>,
+    private val personalressursResourceCache: FlytCache<String, PersonalressursResource>,
+    private val personResourceCache: FlytCache<String, PersonResource>,
 ) {
     fun map(
         sakResource: SakResource,
@@ -34,14 +34,14 @@ class JournalpostToInstanceReceiptDispatchEntityConvertingService(
     ): JournalpostReceipt {
         val saksansvarligPersonalressursResource =
             getFirstLink(sakResource::getSaksansvarlig)
-                ?.let { arkivressursResourceCache.getOptional(it).orElse(null) }
+                ?.let { arkivressursResourceCache.getOrNull(it) }
                 ?.let { getFirstLink(it::getPersonalressurs) }
-                ?.let { personalressursResourceCache.getOptional(it).orElse(null) }
+                ?.let { personalressursResourceCache.getOrNull(it) }
 
         val saksansvarligPersonResource =
             saksansvarligPersonalressursResource
                 ?.let { getFirstLink(it::getPerson) }
-                ?.let { personResourceCache.getOptional(it).orElse(null) }
+                ?.let { personResourceCache.getOrNull(it) }
 
         val journalpostResource =
             sakResource.journalpost
@@ -50,27 +50,27 @@ class JournalpostToInstanceReceiptDispatchEntityConvertingService(
 
         val administrativEnhetResource =
             getFirstLink(journalpostResource::getAdministrativEnhet)
-                ?.let { administrativEnhetResourceCache.getOptional(it).orElse(null) }
+                ?.let { administrativEnhetResourceCache.getOrNull(it) }
 
         val journalStatusResource =
             getFirstLink(journalpostResource::getJournalstatus)
-                ?.let { journalStatusResourceCache.getOptional(it).orElse(null) }
+                ?.let { journalStatusResourceCache.getOrNull(it) }
 
         val journalpostTypeResource =
             getFirstLink(journalpostResource::getJournalposttype)
-                ?.let { journalpostTypeResourceCache.getOptional(it).orElse(null) }
+                ?.let { journalpostTypeResourceCache.getOrNull(it) }
 
         val skjermingResource = journalpostResource.skjerming
 
         val tilgangsrestriksjonResource =
             skjermingResource
                 ?.let { getFirstLink(it::getTilgangsrestriksjon) }
-                ?.let { tilgangsrestriksjonResourceCache.getOptional(it).orElse(null) }
+                ?.let { tilgangsrestriksjonResourceCache.getOrNull(it) }
 
         val skjermingshjemmelResource =
             skjermingResource
                 ?.let { getFirstLink(it::getSkjermingshjemmel) }
-                ?.let { skjermingshjemmelResourceCache.getOptional(it).orElse(null) }
+                ?.let { skjermingshjemmelResourceCache.getOrNull(it) }
 
         return JournalpostReceipt(
             journalpostnr = "${sakResource.mappeId.identifikatorverdi}-${journalpostResource.journalPostnummer}",

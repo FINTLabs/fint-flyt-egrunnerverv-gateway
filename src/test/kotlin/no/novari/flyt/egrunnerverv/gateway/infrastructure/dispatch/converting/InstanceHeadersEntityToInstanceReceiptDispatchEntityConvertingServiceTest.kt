@@ -1,6 +1,5 @@
 package no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.converting
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.novari.fint.model.resource.arkiv.noark.SakResource
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.archive.ArchiveGatewayClient
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.InstanceHeadersEntity
@@ -10,20 +9,22 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import tools.jackson.module.kotlin.jsonMapper
+import tools.jackson.module.kotlin.kotlinModule
 import java.time.Instant
 import java.util.Date
 
 class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest {
     private val archiveGatewayClient: ArchiveGatewayClient = mock()
     private val journalpostMapper: JournalpostToInstanceReceiptDispatchEntityConvertingService = mock()
-    private val objectMapper = jacksonObjectMapper()
+    private val objectMapper = jsonMapper { addModule(kotlinModule()) }
 
     private val service =
         InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingService(
             tablenameSak = "sak-table",
             tablenameJournalpost = "journalpost-table",
             archiveGatewayClient = archiveGatewayClient,
-            objectMapper = objectMapper,
+            jsonMapper = objectMapper,
             journalpostToInstanceReceiptDispatchEntityConvertingService = journalpostMapper,
         )
 
@@ -66,9 +67,9 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest 
             )
 
         val json = objectMapper.readTree(result.instanceReceipt)
-        assertThat(json["arkivnummer"].asText()).isEqualTo("ARK-1")
+        assertThat(json["arkivnummer"].asString()).isEqualTo("ARK-1")
         // Format is tested using same environment timezone as prod code uses
-        assertThat(json["opprettelse_i_elements_fullfort"].asText())
+        assertThat(json["opprettelse_i_elements_fullfort"].asString())
             .matches("\\d{2}-\\d{2}-\\d{4} \\d{2}:\\d{2}:\\d{2}")
     }
 
@@ -124,7 +125,7 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest 
             .isEqualTo(
                 "/journalpost-table/id-1?sysparm_fields=journalpostnr&sysparm_query_no_domain=true",
             )
-        assertThat(objectMapper.readTree(result.instanceReceipt)["journalpostnr"].asText()).isEqualTo("CASE-123")
+        assertThat(objectMapper.readTree(result.instanceReceipt)["journalpostnr"].asString()).isEqualTo("CASE-123")
     }
 
     @Test

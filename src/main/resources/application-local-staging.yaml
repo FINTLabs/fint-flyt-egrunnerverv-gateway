@@ -1,5 +1,9 @@
 fint:
   org-id: novari.no
+  flyt:
+    egrunnerverv:
+      sso:
+        client-id: local-egrunnerverv-client
 
 novari:
   flyt:

@@ -35,7 +35,7 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingService(
         val archiveInstanceId = instanceHeadersEntity.archiveInstanceId
         val sourceApplicationInstanceId = instanceHeadersEntity.sourceApplicationInstanceId
 
-        return archiveGatewayClient.getByMappeId(archiveInstanceId)?.let { sakResource ->
+        return archiveGatewayClient.getByArchiveInstanceId(archiveInstanceId)?.let { sakResource ->
             val sakReceipt =
                 SakReceipt(
                     arkivnummer = archiveInstanceId,
@@ -51,18 +51,11 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingService(
     }
 
     private fun convertJournalpost(instanceHeadersEntity: InstanceHeadersEntity): InstanceReceiptDispatchEntity? {
+        val archiveInstanceId = instanceHeadersEntity.archiveInstanceId
         val sourceApplicationInstanceId = instanceHeadersEntity.sourceApplicationInstanceId
-        val splitArchiveInstanceId = instanceHeadersEntity.archiveInstanceId.split("-")
-        val caseId = splitArchiveInstanceId[0]
-        val journalpostNummer =
-            splitArchiveInstanceId[1]
-                .replace("[", "")
-                .replace("]", "")
-                .toLong()
 
-        return archiveGatewayClient.getByMappeId(caseId)?.let { sakResource ->
-            val journalpostReceipt =
-                journalpostToInstanceReceiptDispatchEntityConvertingService.map(sakResource, journalpostNummer)
+        return archiveGatewayClient.getByArchiveInstanceId(archiveInstanceId)?.let { sakResource ->
+            val journalpostReceipt = journalpostToInstanceReceiptDispatchEntityConvertingService.map(sakResource)
 
             InstanceReceiptDispatchEntity(
                 sourceApplicationInstanceId = sourceApplicationInstanceId,

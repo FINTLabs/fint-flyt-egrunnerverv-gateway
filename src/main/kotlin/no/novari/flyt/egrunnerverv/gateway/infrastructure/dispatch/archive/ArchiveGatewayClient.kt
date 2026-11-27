@@ -10,28 +10,22 @@ import org.springframework.web.client.body
 /**
  * Client for the internal client API in fint-flyt-archive-gateway.
  *
- * Returns `null` on 404, and for a mappeId that is not on the format `saksår/saksnummer`, which archive-gateway
- * could not find either.
+ * Looks up the original archive instance ID. Archive-gateway filters journalposts when the ID includes journalpost numbers.
+ * Returns `null` on 404.
  */
 @Service
 class ArchiveGatewayClient(
     @param:Qualifier("archiveGatewayRestClient")
     private val restClient: RestClient,
 ) {
-    fun getByMappeId(mappeId: String): SakResource? {
-        val parts = mappeId.split("/")
-        if (parts.size != 2) {
-            return null
-        }
-        val (caseYear, caseNumber) = parts
-        return try {
+    fun getByArchiveInstanceId(archiveInstanceId: String): SakResource? =
+        try {
             restClient
                 .get()
-                .uri("/arkiv/saker/{caseYear}/{caseNumber}", caseYear, caseNumber)
+                .uri("/arkiv/saker?archiveInstanceId={archiveInstanceId}", archiveInstanceId)
                 .retrieve()
                 .body<SakResource>()
         } catch (_: HttpClientErrorException.NotFound) {
             null
         }
-    }
 }

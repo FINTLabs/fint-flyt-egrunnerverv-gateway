@@ -17,10 +17,13 @@ class RestClientRequestService(
     fun dispatchInstance(instanceReceiptDispatchEntity: InstanceReceiptDispatchEntity) {
         val uri = instanceReceiptDispatchEntity.uri
         val payload = jsonMapper.readTree(instanceReceiptDispatchEntity.instanceReceipt)
+        val saksnummer =
+            payload.path("arkivnummer").stringValue(null)
+                ?: payload.path("journalpostnr").stringValue(null)?.substringBeforeLast('-')
 
         log.atInfo {
             message = "Dispatching instance receipt"
-            arguments = arrayOf(kv("uri", uri))
+            arguments = arrayOf(kv("uri", uri), kv("saksnummer", saksnummer))
         }
 
         try {
@@ -35,7 +38,7 @@ class RestClientRequestService(
 
             log.atInfo {
                 message = "Successfully dispatched instance receipt"
-                arguments = arrayOf(kv("uri", uri), kv("statusCode", response.statusCode))
+                arguments = arrayOf(kv("uri", uri), kv("saksnummer", saksnummer), kv("statusCode", response.statusCode))
             }
         } catch (exception: RestClientResponseException) {
             log.atError {

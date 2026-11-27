@@ -28,10 +28,12 @@ class JournalpostToInstanceReceiptDispatchEntityConvertingService(
     private val personalressursResourceCache: FlytCache<String, PersonalressursResource>,
     private val personResourceCache: FlytCache<String, PersonResource>,
 ) {
-    fun map(
-        sakResource: SakResource,
-        journalpostNummer: Long,
-    ): JournalpostReceipt {
+    fun map(sakResource: SakResource): JournalpostReceipt {
+        val journalpostResource =
+            requireNotNull(sakResource.journalpost.singleOrNull()) {
+                "Expected one journalpost in the archive lookup result"
+            }
+
         val saksansvarligPersonalressursResource =
             getFirstLink(sakResource::getSaksansvarlig)
                 ?.let { arkivressursResourceCache.getOrNull(it) }
@@ -42,11 +44,6 @@ class JournalpostToInstanceReceiptDispatchEntityConvertingService(
             saksansvarligPersonalressursResource
                 ?.let { getFirstLink(it::getPerson) }
                 ?.let { personResourceCache.getOrNull(it) }
-
-        val journalpostResource =
-            sakResource.journalpost
-                .firstOrNull { it.journalPostnummer == journalpostNummer }
-                ?: throw IllegalArgumentException("No journalpost with journalpostNummer=$journalpostNummer")
 
         val administrativEnhetResource =
             getFirstLink(journalpostResource::getAdministrativEnhet)

@@ -10,8 +10,8 @@ import org.springframework.web.client.body
 /**
  * Client for the internal client API in fint-flyt-archive-gateway.
  *
- * Returns `null` on 404, and for a mappeId that is not on the format `saksår/saksnummer`, which archive-gateway
- * could not find either.
+ * Accepts `saksår/saksnummer` and compact mappe IDs with a four-digit year and five-digit case number.
+ * Returns `null` for unsupported formats and on 404.
  */
 @Service
 class ArchiveGatewayClient(
@@ -19,7 +19,7 @@ class ArchiveGatewayClient(
     private val restClient: RestClient,
 ) {
     fun getByMappeId(mappeId: String): SakResource? {
-        val parts = mappeId.split("/")
+        val parts = COMPACT_MAPPE_ID.replace(mappeId, "$1/$2").split("/")
         if (parts.size != 2) {
             return null
         }
@@ -33,5 +33,9 @@ class ArchiveGatewayClient(
         } catch (_: HttpClientErrorException.NotFound) {
             null
         }
+    }
+
+    private companion object {
+        val COMPACT_MAPPE_ID = Regex("""\A([0-9]{4})([0-9]{5})\z""")
     }
 }

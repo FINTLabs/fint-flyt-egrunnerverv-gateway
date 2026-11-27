@@ -61,6 +61,16 @@ class ArchiveGatewayClientTest {
     }
 
     @Test
+    fun `splits compact mappeId into year and case number for the archive lookup`() {
+        server
+            .expect(requestTo("$baseUrl/arkiv/saker/2024/12345"))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess("""{"mappeId":{"identifikatorverdi":"202412345"}}""", MediaType.APPLICATION_JSON))
+
+        assertThat(client.getByMappeId("202412345")?.mappeId?.identifikatorverdi).isEqualTo("202412345")
+    }
+
+    @Test
     fun `mappeId on another format returns null without a call`() {
         assertThat(client.getByMappeId("2024-123")).isNull()
     }

@@ -44,17 +44,17 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest 
     }
 
     @Test
-    fun `convert builds receipt and uri for sak`() {
+    fun `convert preserves the compact archive id in the sak receipt`() {
         val sakResource: SakResource = mock()
         whenever(sakResource.opprettetDato).thenReturn(Date.from(Instant.ofEpochSecond(0)))
-        whenever(archiveGatewayClient.getByMappeId("ARK-1")).thenReturn(sakResource)
+        whenever(archiveGatewayClient.getByMappeId("202412345")).thenReturn(sakResource)
 
         val result =
             service.convert(
                 InstanceHeadersEntity(
                     sourceApplicationInstanceId = "id-1",
                     sourceApplicationIntegrationId = "sak",
-                    archiveInstanceId = "ARK-1",
+                    archiveInstanceId = "202412345",
                 ),
             )
 
@@ -66,7 +66,7 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest 
             )
 
         val json = objectMapper.readTree(result.instanceReceipt)
-        assertThat(json["arkivnummer"].asText()).isEqualTo("ARK-1")
+        assertThat(json["arkivnummer"].asText()).isEqualTo("202412345")
         // Format is tested using same environment timezone as prod code uses
         assertThat(json["opprettelse_i_elements_fullfort"].asText())
             .matches("\\d{2}-\\d{2}-\\d{4} \\d{2}:\\d{2}:\\d{2}")
@@ -89,13 +89,13 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest 
     }
 
     @Test
-    fun `convert builds receipt and uri for journalpost`() {
+    fun `convert builds receipt and uri for journalpost with a compact case id`() {
         val sakResource: SakResource = mock()
-        whenever(archiveGatewayClient.getByMappeId("CASE")).thenReturn(sakResource)
+        whenever(archiveGatewayClient.getByMappeId("202412345")).thenReturn(sakResource)
 
         val receipt =
             JournalpostReceipt(
-                journalpostnr = "CASE-123",
+                journalpostnr = "202412345-8",
                 tittel = "Tittel",
                 statusId = "S",
                 tilgangskode = null,
@@ -108,14 +108,14 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest 
                 adminenhetkortnavn = null,
                 adminenhetnavn = null,
             )
-        whenever(journalpostMapper.map(sakResource, 123L)).thenReturn(receipt)
+        whenever(journalpostMapper.map(sakResource, 8L)).thenReturn(receipt)
 
         val result =
             service.convert(
                 InstanceHeadersEntity(
                     sourceApplicationInstanceId = "id-1",
                     sourceApplicationIntegrationId = "journalpost",
-                    archiveInstanceId = "CASE-[123]",
+                    archiveInstanceId = "202412345-[8]",
                 ),
             )
 
@@ -124,7 +124,7 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest 
             .isEqualTo(
                 "/journalpost-table/id-1?sysparm_fields=journalpostnr&sysparm_query_no_domain=true",
             )
-        assertThat(objectMapper.readTree(result.instanceReceipt)["journalpostnr"].asText()).isEqualTo("CASE-123")
+        assertThat(objectMapper.readTree(result.instanceReceipt)["journalpostnr"].asText()).isEqualTo("202412345-8")
     }
 
     @Test

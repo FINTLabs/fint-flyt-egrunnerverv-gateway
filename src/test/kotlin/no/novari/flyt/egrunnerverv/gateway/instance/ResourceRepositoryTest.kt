@@ -38,10 +38,10 @@ class ResourceRepositoryTest {
 
         val personalressurs =
             PersonalressursResource().apply {
-                val kontaktinformasjon = Kontaktinformasjon().apply { setEpostadresse("Test@Novari.No") }
-                val brukernavn = Identifikator().apply { setIdentifikatorverdi("testuser") }
-                setKontaktinformasjon(kontaktinformasjon)
-                setBrukernavn(brukernavn)
+                val kontaktinformasjon = Kontaktinformasjon().apply { epostadresse = "Test@Novari.No" }
+                val brukernavn = Identifikator().apply { identifikatorverdi = "testuser" }
+                this.kontaktinformasjon = kontaktinformasjon
+                this.brukernavn = brukernavn
                 addSelf(Link(personalressursHref))
             }
 

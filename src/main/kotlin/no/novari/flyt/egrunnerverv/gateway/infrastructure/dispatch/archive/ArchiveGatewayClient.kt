@@ -10,32 +10,22 @@ import org.springframework.web.client.body
 /**
  * Client for the internal client API in fint-flyt-archive-gateway.
  *
- * Accepts `saksår/saksnummer` and compact mappe IDs with a four-digit year and five-digit case number.
- * Returns `null` for unsupported formats and on 404.
+ * Looks up the original archive instance ID. Archive-gateway filters journalposts when the ID includes journalpost numbers.
+ * Returns `null` on 404.
  */
 @Service
 class ArchiveGatewayClient(
     @param:Qualifier("archiveGatewayRestClient")
     private val restClient: RestClient,
 ) {
-    fun getByMappeId(mappeId: String): SakResource? {
-        val parts = COMPACT_MAPPE_ID.replace(mappeId, "$1/$2").split("/")
-        if (parts.size != 2) {
-            return null
-        }
-        val (caseYear, caseNumber) = parts
-        return try {
+    fun getByArchiveInstanceId(archiveInstanceId: String): SakResource? =
+        try {
             restClient
                 .get()
-                .uri("/arkiv/saker/{caseYear}/{caseNumber}", caseYear, caseNumber)
+                .uri("/arkiv/saker?archiveInstanceId={archiveInstanceId}", archiveInstanceId)
                 .retrieve()
                 .body<SakResource>()
         } catch (_: HttpClientErrorException.NotFound) {
             null
         }
-    }
-
-    private companion object {
-        val COMPACT_MAPPE_ID = Regex("""\A([0-9]{4})([0-9]{5})\z""")
-    }
 }

@@ -20,6 +20,7 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestClient
 import java.time.Instant
@@ -45,41 +46,39 @@ class ArchiveGatewayClientTest {
     @Test
     fun `sends archive-gateway token and returns the sak`() {
         server
-            .expect(requestTo("$baseUrl/arkiv/saker/2024/123"))
+            .expect(requestTo("$baseUrl/arkiv/saker?archiveInstanceId=2024%2F123"))
             .andExpect(method(HttpMethod.GET))
             .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer token-archive-gateway"))
             .andRespond(withSuccess("""{"mappeId":{"identifikatorverdi":"2024/123"}}""", MediaType.APPLICATION_JSON))
 
-        assertThat(client.getByMappeId("2024/123")?.mappeId?.identifikatorverdi).isEqualTo("2024/123")
+        assertThat(client.getByArchiveInstanceId("2024/123")?.mappeId?.identifikatorverdi).isEqualTo("2024/123")
     }
 
     @Test
     fun `404 returns null like the Kafka reply did`() {
-        server.expect(requestTo("$baseUrl/arkiv/saker/2024/123")).andRespond(withStatus(HttpStatus.NOT_FOUND))
-
-        assertThat(client.getByMappeId("2024/123")).isNull()
-    }
-
-    @Test
-    fun `splits compact mappeId into year and case number for the archive lookup`() {
         server
-            .expect(requestTo("$baseUrl/arkiv/saker/2024/12345"))
-            .andExpect(method(HttpMethod.GET))
-            .andRespond(withSuccess("""{"mappeId":{"identifikatorverdi":"202412345"}}""", MediaType.APPLICATION_JSON))
+            .expect(requestTo("$baseUrl/arkiv/saker?archiveInstanceId=2024%2F123"))
+            .andRespond(withStatus(HttpStatus.NOT_FOUND))
 
-        assertThat(client.getByMappeId("202412345")?.mappeId?.identifikatorverdi).isEqualTo("202412345")
+        assertThat(client.getByArchiveInstanceId("2024/123")).isNull()
     }
 
     @Test
-    fun `mappeId on another format returns null without a call`() {
-        assertThat(client.getByMappeId("2024-123")).isNull()
+    fun `bad request is thrown`() {
+        server
+            .expect(requestTo("$baseUrl/arkiv/saker?archiveInstanceId=invalid"))
+            .andRespond(withStatus(HttpStatus.BAD_REQUEST))
+
+        assertThrows<HttpClientErrorException.BadRequest> { client.getByArchiveInstanceId("invalid") }
     }
 
     @Test
     fun `server error is thrown`() {
-        server.expect(requestTo("$baseUrl/arkiv/saker/2024/123")).andRespond(withStatus(HttpStatus.BAD_GATEWAY))
+        server
+            .expect(requestTo("$baseUrl/arkiv/saker?archiveInstanceId=2024%2F123"))
+            .andRespond(withStatus(HttpStatus.BAD_GATEWAY))
 
-        assertThrows<HttpServerErrorException> { client.getByMappeId("2024/123") }
+        assertThrows<HttpServerErrorException> { client.getByArchiveInstanceId("2024/123") }
     }
 
     private fun tokenPerRegistration() =

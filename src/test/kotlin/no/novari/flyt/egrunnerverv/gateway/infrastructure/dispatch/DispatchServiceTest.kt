@@ -35,7 +35,7 @@ class DispatchServiceTest {
         )
 
     @Test
-    fun `dispatch deletes both rows on success`() {
+    fun `scheduled dispatch sends receipts for waiting headers and deletes both rows on success`() {
         val header = InstanceHeadersEntity(sourceApplicationInstanceId = "id-1")
         val dispatch =
             InstanceReceiptDispatchEntity(
@@ -44,10 +44,12 @@ class DispatchServiceTest {
                 instanceReceipt = "{}",
             )
 
+        whenever(instanceHeadersRepository.findAll()).thenReturn(listOf(header))
         whenever(dispatchConverter.convert(header)).thenReturn(dispatch)
         whenever(instanceReceiptDispatchRepository.save(dispatch)).thenReturn(dispatch)
+        whenever(instanceReceiptDispatchRepository.findAll()).thenReturn(listOf(dispatch))
 
-        service.dispatch(header)
+        service.dispatchAll()
 
         verify(instanceReceiptDispatchRepository).save(dispatch)
         verify(instanceHeadersRepository).delete(header)

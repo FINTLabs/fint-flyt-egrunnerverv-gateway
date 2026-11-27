@@ -1,42 +1,70 @@
 package no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.converting
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.novari.fint.model.resource.arkiv.noark.SakResource
+import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.RestClientRequestService
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.archive.ArchiveGatewayClient
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.InstanceHeadersEntity
-import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.JournalpostReceipt
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
-import java.time.Instant
-import java.util.Date
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers.content
+import org.springframework.test.web.client.match.MockRestRequestMatchers.method
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators.withNoContent
+import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
+import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
+import org.springframework.web.client.RestClient
 
 class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest {
-    private val archiveGatewayClient: ArchiveGatewayClient = mock()
-    private val journalpostMapper: JournalpostToInstanceReceiptDispatchEntityConvertingService = mock()
+    private val baseUrl = "http://gateway.test"
+    private val restClientBuilder = RestClient.builder().baseUrl(baseUrl)
+    private val server = MockRestServiceServer.bindTo(restClientBuilder).build()
+    private val restClient = restClientBuilder.build()
     private val objectMapper = jacksonObjectMapper()
+    private val restClientRequestService = RestClientRequestService(restClient, objectMapper)
 
     private val service =
         InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingService(
             tablenameSak = "sak-table",
             tablenameJournalpost = "journalpost-table",
-            archiveGatewayClient = archiveGatewayClient,
+            archiveGatewayClient = ArchiveGatewayClient(restClient),
             objectMapper = objectMapper,
-            journalpostToInstanceReceiptDispatchEntityConvertingService = journalpostMapper,
+            journalpostToInstanceReceiptDispatchEntityConvertingService =
+                JournalpostToInstanceReceiptDispatchEntityConvertingService(
+                    administrativEnhetResourceCache = mock(),
+                    arkivressursResourceCache = mock(),
+                    journalStatusResourceCache = mock(),
+                    journalpostTypeResourceCache = mock(),
+                    tilgangsrestriksjonResourceCache = mock(),
+                    skjermingshjemmelResourceCache = mock(),
+                    personalressursResourceCache = mock(),
+                    personResourceCache = mock(),
+                ),
         )
+
+    @AfterEach
+    fun verify() {
+        server.verify()
+    }
 
     @Test
     fun `convert returns null when case is missing (sak)`() {
-        whenever(archiveGatewayClient.getByMappeId("ARK-1")).thenReturn(null)
+        server
+            .expect(requestTo("$baseUrl/arkiv/saker?archiveInstanceId=20249999"))
+            .andRespond(withStatus(HttpStatus.NOT_FOUND))
 
         val result =
             service.convert(
                 InstanceHeadersEntity(
                     sourceApplicationInstanceId = "id-1",
                     sourceApplicationIntegrationId = "sak",
-                    archiveInstanceId = "ARK-1",
+                    archiveInstanceId = "20249999",
                 ),
             )
 
@@ -44,44 +72,52 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest 
     }
 
     @Test
-    fun `convert builds receipt and uri for sak`() {
-        val sakResource: SakResource = mock()
-        whenever(sakResource.opprettetDato).thenReturn(Date.from(Instant.ofEpochSecond(0)))
-        whenever(archiveGatewayClient.getByMappeId("ARK-1")).thenReturn(sakResource)
+    fun `looks up a compact case id and sends it in the sak receipt`() {
+        server
+            .expect(requestTo("$baseUrl/arkiv/saker?archiveInstanceId=2024123456"))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(
+                withSuccess(
+                    """{"mappeId":{"identifikatorverdi":"2024123456"},"opprettetDato":0}""",
+                    MediaType.APPLICATION_JSON,
+                ),
+            )
+        server
+            .expect(requestTo("$baseUrl/sak-table/id-1?sysparm_fields=arkivnummer&sysparm_query_no_domain=true"))
+            .andExpect(method(HttpMethod.PATCH))
+            .andExpect(content().json("""{"arkivnummer":"2024123456"}"""))
+            .andRespond(withNoContent())
 
         val result =
             service.convert(
                 InstanceHeadersEntity(
                     sourceApplicationInstanceId = "id-1",
                     sourceApplicationIntegrationId = "sak",
-                    archiveInstanceId = "ARK-1",
+                    archiveInstanceId = "2024123456",
                 ),
             )
 
         requireNotNull(result)
         assertThat(result.sourceApplicationInstanceId).isEqualTo("id-1")
-        assertThat(result.uri)
-            .isEqualTo(
-                "/sak-table/id-1?sysparm_fields=arkivnummer&sysparm_query_no_domain=true",
-            )
 
         val json = objectMapper.readTree(result.instanceReceipt)
-        assertThat(json["arkivnummer"].asText()).isEqualTo("ARK-1")
-        // Format is tested using same environment timezone as prod code uses
         assertThat(json["opprettelse_i_elements_fullfort"].asText())
             .matches("\\d{2}-\\d{2}-\\d{4} \\d{2}:\\d{2}:\\d{2}")
+        restClientRequestService.dispatchInstance(result)
     }
 
     @Test
     fun `convert returns null when case is missing (journalpost)`() {
-        whenever(archiveGatewayClient.getByMappeId("CASE")).thenReturn(null)
+        server
+            .expect(requestTo("$baseUrl/arkiv/saker?archiveInstanceId=202412345-%5B8%5D"))
+            .andRespond(withStatus(HttpStatus.NOT_FOUND))
 
         val result =
             service.convert(
                 InstanceHeadersEntity(
                     sourceApplicationInstanceId = "id-1",
                     sourceApplicationIntegrationId = "journalpost",
-                    archiveInstanceId = "CASE-[123]",
+                    archiveInstanceId = "202412345-[8]",
                 ),
             )
 
@@ -89,42 +125,38 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest 
     }
 
     @Test
-    fun `convert builds receipt and uri for journalpost`() {
-        val sakResource: SakResource = mock()
-        whenever(archiveGatewayClient.getByMappeId("CASE")).thenReturn(sakResource)
-
-        val receipt =
-            JournalpostReceipt(
-                journalpostnr = "CASE-123",
-                tittel = "Tittel",
-                statusId = "S",
-                tilgangskode = null,
-                hjemmel = null,
-                dokumentdato = "01-01-2024 10:11:12",
-                dokumenttypeid = "T",
-                dokumenttypenavn = null,
-                saksansvarligbrukernavn = null,
-                saksansvarlignavn = null,
-                adminenhetkortnavn = null,
-                adminenhetnavn = null,
+    fun `looks up the full journalpost id and sends the filtered journalpost in the receipt`() {
+        val receiptQuery = "sysparm_fields=journalpostnr&sysparm_query_no_domain=true"
+        server
+            .expect(requestTo("$baseUrl/arkiv/saker?archiveInstanceId=202412345-%5B8%5D"))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(
+                withSuccess(
+                    """
+                    {
+                      "mappeId": {"identifikatorverdi":"202412345"},
+                      "journalpost": [{"journalPostnummer":8,"tittel":"Tittel"}]
+                    }
+                    """.trimIndent(),
+                    MediaType.APPLICATION_JSON,
+                ),
             )
-        whenever(journalpostMapper.map(sakResource, 123L)).thenReturn(receipt)
+        server
+            .expect(requestTo("$baseUrl/journalpost-table/id-1?$receiptQuery"))
+            .andExpect(method(HttpMethod.PATCH))
+            .andExpect(content().json("""{"journalpostnr":"202412345-8","tittel":"Tittel"}"""))
+            .andRespond(withNoContent())
 
         val result =
             service.convert(
                 InstanceHeadersEntity(
                     sourceApplicationInstanceId = "id-1",
                     sourceApplicationIntegrationId = "journalpost",
-                    archiveInstanceId = "CASE-[123]",
+                    archiveInstanceId = "202412345-[8]",
                 ),
             )
 
-        requireNotNull(result)
-        assertThat(result.uri)
-            .isEqualTo(
-                "/journalpost-table/id-1?sysparm_fields=journalpostnr&sysparm_query_no_domain=true",
-            )
-        assertThat(objectMapper.readTree(result.instanceReceipt)["journalpostnr"].asText()).isEqualTo("CASE-123")
+        restClientRequestService.dispatchInstance(requireNotNull(result))
     }
 
     @Test

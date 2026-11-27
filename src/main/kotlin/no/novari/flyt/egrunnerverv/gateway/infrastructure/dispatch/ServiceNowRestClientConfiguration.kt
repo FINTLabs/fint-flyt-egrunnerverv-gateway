@@ -4,11 +4,10 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder
-import org.springframework.boot.http.client.ClientHttpRequestFactorySettings
+import org.springframework.boot.http.client.HttpClientSettings
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
-import org.springframework.security.oauth2.client.OAuth2AuthorizationContext
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder
@@ -26,10 +25,11 @@ class ServiceNowRestClientConfiguration {
         authorizedClientService: OAuth2AuthorizedClientService,
         props: ServiceNowDispatchProperties,
     ): OAuth2AuthorizedClientManager {
+        // Spring Security 7 has no password grant. Refresh as before, and a new password grant when that is not possible.
         val provider =
             OAuth2AuthorizedClientProviderBuilder
                 .builder()
-                .password()
+                .provider(PasswordGrantAuthorizedClientProvider(props.username, props.password))
                 .refreshToken()
                 .build()
 
@@ -38,12 +38,6 @@ class ServiceNowRestClientConfiguration {
             authorizedClientService,
         ).apply {
             setAuthorizedClientProvider(provider)
-            setContextAttributesMapper {
-                mapOf(
-                    OAuth2AuthorizationContext.USERNAME_ATTRIBUTE_NAME to props.username,
-                    OAuth2AuthorizationContext.PASSWORD_ATTRIBUTE_NAME to props.password,
-                )
-            }
         }
     }
 
@@ -54,7 +48,7 @@ class ServiceNowRestClientConfiguration {
         builder: RestClient.Builder,
     ): RestClient {
         val settings =
-            ClientHttpRequestFactorySettings
+            HttpClientSettings
                 .defaults()
                 .withConnectTimeout(Duration.ofMinutes(15))
                 .withReadTimeout(Duration.ofMinutes(10))

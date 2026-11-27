@@ -30,6 +30,11 @@ spec:
     enabled: true
     basePath: path
   env:
+    - name: fint.flyt.egrunnerverv.sso.client-id
+      valueFrom:
+        secretKeyRef:
+          name: fint-flyt-egrunnerverv-oauth2-client
+          key: fint.flyt.egrunnerverv.sso.client-id
     - name: JAVA_TOOL_OPTIONS
       value: '-XX:+ExitOnOutOfMemoryError -XX:MaxRAMPercentage=45 -XX:-UseBASE64Intrinsics'
     - name: fint.flyt.authorization.sso.client-id

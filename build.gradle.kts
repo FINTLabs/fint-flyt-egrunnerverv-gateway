@@ -1,35 +1,30 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-    repositories {
-        gradlePluginPortal()
-    }
     dependencies {
-        classpath(platform("com.fasterxml.jackson:jackson-bom:2.23.0"))
         constraints {
-            classpath("org.apache.httpcomponents.client5:httpclient5:5.6.5")
-            classpath("org.apache.httpcomponents.core5:httpcore5:5.5")
-            classpath("org.apache.httpcomponents.core5:httpcore5-h2:5.5")
-            classpath("org.apache.commons:commons-lang3:3.22.0")
+            classpath(libs.commons.lang3) {
+                because("Fixes CVE-2025-48924 in spring-boot-buildpack-platform")
+            }
         }
     }
 }
 
 plugins {
-    id("org.springframework.boot") version "3.5.16"
-    id("io.spring.dependency-management") version "1.1.7"
-    id("io.github.ben-manes.versions") version "0.67.0"
-    id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlin.jpa)
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.ktlint)
     jacoco
-    kotlin("jvm") version "2.4.10"
-    kotlin("plugin.spring") version "2.4.10"
-    kotlin("plugin.jpa") version "2.4.10"
 }
 
 group = "no.novari"
 
-kotlin {
-    jvmToolchain(25)
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
 }
 
 // Dependabot resolves with JDK 21; an explicit release keeps JVM 25 as the resolution target so gradle.lockfile gets updated.
@@ -49,67 +44,57 @@ tasks.jar {
     isEnabled = false
 }
 
-val fintModelResourceVersion = "1.0.1"
-val fintResourceModelVersion = "4.1.0"
-
-extra["commons-lang3.version"] = "3.21.0"
-extra["httpclient5.version"] = "5.6.3"
-extra["httpcore5.version"] = "5.4.4"
-extra["jackson-bom.version"] = "2.22.4"
-extra["log4j2.version"] = "2.26.1"
-extra["netty.version"] = "4.2.17.Final"
-extra["postgresql.version"] = "42.7.12"
-extra["tomcat.version"] = "10.1.59"
-
 dependencyLocking {
     lockAllConfigurations()
 }
 
 dependencies {
+    // A platform instead of the dependency-management plugin, which puts Boot's Kotlin on ktlint's classpath.
+    implementation(platform(libs.spring.boot.dependencies))
+
     constraints {
-        implementation("at.yawk.lz4:lz4-java:1.14.1") {
-            because("Fixes CVE-2026-59949 in the kafka-clients transitive dependency")
-        }
-        implementation("org.xerial.snappy:snappy-java:1.1.10.12") {
-            because("Fixes CVE-2026-93451, CVE-2026-108106 and CVE-2026-116590 in kafka-clients")
-        }
-        testImplementation("org.apache.commons:commons-compress:1.28.0") {
-            because("Fixes CVE-2024-25710 and CVE-2024-26308 in the Testcontainers transitive dependency")
+        ktlint(libs.logback.core) {
+            because(
+                "ktlint 1.8.0 brings logback-core 1.3.16, which has CVE-2026-1225, CVE-2026-9828 and CVE-2026-10532. " +
+                    "Only the ktlint tool classpath",
+            )
         }
     }
+
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
+    implementation("org.springframework.boot:spring-boot-starter-security-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-
-    implementation("io.github.oshai:kotlin-logging-jvm:8.0.7")
-    // Pinned to 8.x: 9.x pulls in Jackson 3 (tools.jackson), while Spring Boot 3.5 uses Jackson 2
-    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
-
-    implementation("org.flywaydb:flyway-core")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.boot:spring-boot-starter-restclient")
+    implementation("org.springframework.kafka:spring-kafka")
     implementation("org.flywaydb:flyway-database-postgresql")
-    runtimeOnly("org.postgresql:postgresql")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("tools.jackson.module:jackson-module-kotlin")
 
-    implementation("no.novari:flyt-gateway-starter:5.0.0")
-    implementation("no.novari:flyt-cache:3.0.1")
-
-    implementation("no.novari:fint-model-resource:$fintModelResourceVersion")
-    implementation("no.novari:fint-arkiv-resource-model-java:$fintResourceModelVersion")
-    implementation("no.novari:fint-administrasjon-resource-model-java:$fintResourceModelVersion")
-
-    // For compatibility with the fint models pulled in above
-    implementation("javax.validation:validation-api:2.0.1.Final")
+    implementation(libs.flyt.gateway.starter)
+    implementation(libs.flyt.cache)
+    implementation(libs.fint.model.resource)
+    implementation(libs.fint.arkiv.resource.model)
+    implementation(libs.fint.administrasjon.resource.model)
+    // For compatibility with the fint models above
+    implementation(libs.validation.api)
+    implementation(libs.kotlin.logging)
+    implementation(libs.logstash.logback.encoder)
 
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+    runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:6.4.0")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-restclient-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-security-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
+    testImplementation(libs.mockito.kotlin)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -119,12 +104,16 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
-tasks.test {
-    useJUnitPlatform()
+ktlint {
+    version = libs.versions.ktlint.cli
 }
 
 jacoco {
-    toolVersion = "0.8.13"
+    toolVersion = libs.versions.jacoco.get()
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 tasks.jacocoTestReport {
@@ -133,10 +122,6 @@ tasks.jacocoTestReport {
         xml.required.set(true)
         html.required.set(true)
     }
-}
-
-ktlint {
-    version.set("1.8.0")
 }
 
 tasks.named("check") {

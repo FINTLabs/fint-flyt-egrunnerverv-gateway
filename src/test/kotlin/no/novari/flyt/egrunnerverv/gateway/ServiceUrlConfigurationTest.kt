@@ -30,7 +30,5 @@ class ServiceUrlConfigurationTest {
             .isEqualTo("http://fint-flyt-history-service:8080/beta/afk-no")
         assertThat(environment.getProperty("novari.flyt.archive-gateway-url"))
             .isEqualTo("http://fint-flyt-archive-gateway:8080/beta/afk-no")
-        assertThat(environment.getProperty("novari.flyt.web-resource-server.security.authorization.base-url"))
-            .isEqualTo("http://fint-flyt-authorization-service:8080/beta/afk-no")
     }
 }

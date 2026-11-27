@@ -1,82 +1,48 @@
 package no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.kafka
 
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.DispatchService
-import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.InstanceReceiptDispatchEntity
-import no.novari.flyt.kafka.instanceflow.consuming.InstanceFlowListenerFactoryService
-import no.novari.kafka.consuming.ErrorHandlerConfiguration
-import no.novari.kafka.consuming.ErrorHandlerFactory
-import no.novari.kafka.consuming.ListenerConfiguration
-import no.novari.kafka.topic.EventTopicService
-import no.novari.kafka.topic.configuration.EventCleanupFrequency
-import no.novari.kafka.topic.configuration.EventTopicConfiguration
-import no.novari.kafka.topic.name.EventTopicNameParameters
-import no.novari.kafka.topic.name.TopicNamePrefixParameters
+import no.novari.flyt.kafka.instanceflow.headers.INSTANCE_FLOW_HEADERS_KEY
+import no.novari.flyt.kafka.instanceflow.headers.InstanceFlowHeaders
+import no.novari.kafka.starter.topic.EventCleanupFrequency
+import no.novari.kafka.starter.topic.EventTopicConfig
+import no.novari.kafka.starter.topic.EventTopicName
+import no.novari.kafka.starter.topic.KafkaTopics
+import org.apache.kafka.clients.admin.NewTopic
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
+import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.messaging.handler.annotation.Header
+import org.springframework.stereotype.Component
 import java.time.Duration
 
 @Configuration
-class InstanceConsumerConfiguration(
-    private val eventTopicService: EventTopicService,
+class InstanceConsumerConfiguration {
+    @Bean
+    fun instanceDispatchedTopic(topics: KafkaTopics): EventTopicName = topics.event("instance-dispatched")
+
+    /** Created or updated at startup, as fint-kafka 6 did with `createOrModifyTopic`. */
+    @Bean
+    fun instanceDispatchedTopicCreation(
+        topics: KafkaTopics,
+        instanceDispatchedTopic: EventTopicName,
+    ): NewTopic =
+        topics.newTopic(
+            instanceDispatchedTopic,
+            EventTopicConfig(
+                retention = Duration.ofDays(7),
+                cleanupFrequency = EventCleanupFrequency.NORMAL,
+                partitions = 1,
+            ),
+        )
+}
+
+/** Starts the dispatch of the receipt to ServiceNow. The records are tombstones, so only the header is read. */
+@Component
+class InstanceDispatchedListener(
     private val dispatchService: DispatchService,
 ) {
-    @Bean
-    fun prepareInstanceToDispatchEventConsumer(
-        instanceFlowListenerFactoryService: InstanceFlowListenerFactoryService,
-        errorHandlerFactory: ErrorHandlerFactory,
-    ): ConcurrentMessageListenerContainer<String, InstanceReceiptDispatchEntity> {
-        val topic =
-            EventTopicNameParameters
-                .builder()
-                .topicNamePrefixParameters(
-                    TopicNamePrefixParameters
-                        .stepBuilder()
-                        .orgIdApplicationDefault()
-                        .domainContextApplicationDefault()
-                        .build(),
-                ).eventName("instance-dispatched")
-                .build()
-
-        eventTopicService.createOrModifyTopic(
-            topic,
-            EventTopicConfiguration
-                .stepBuilder()
-                .partitions(PARTITIONS)
-                .retentionTime(RETENTION_TIME)
-                .cleanupFrequency(CLEANUP_FREQUENCY)
-                .build(),
-        )
-
-        val errorHandlerConfiguration: ErrorHandlerConfiguration<InstanceReceiptDispatchEntity> =
-            ErrorHandlerConfiguration
-                .stepBuilder<InstanceReceiptDispatchEntity>()
-                .noRetries()
-                .skipFailedRecords()
-                .build()
-
-        return instanceFlowListenerFactoryService
-            .createRecordListenerContainerFactory(
-                InstanceReceiptDispatchEntity::class.java,
-                { instanceFlowConsumerRecord ->
-                    dispatchService.handleNewInstance(instanceFlowConsumerRecord.instanceFlowHeaders)
-                },
-                ListenerConfiguration
-                    .stepBuilder()
-                    .groupIdApplicationDefault()
-                    .maxPollRecordsKafkaDefault()
-                    .maxPollIntervalKafkaDefault()
-                    .continueFromPreviousOffsetOnAssignment()
-                    .build(),
-                errorHandlerFactory.createErrorHandler(
-                    errorHandlerConfiguration,
-                ),
-            ).createContainer(topic)
-    }
-
-    private companion object {
-        private const val PARTITIONS = 1
-        private val RETENTION_TIME = Duration.ofDays(7)
-        private val CLEANUP_FREQUENCY = EventCleanupFrequency.NORMAL
-    }
+    @KafkaListener(topics = ["#{@instanceDispatchedTopic.name}"])
+    fun on(
+        @Header(INSTANCE_FLOW_HEADERS_KEY) instanceFlowHeaders: InstanceFlowHeaders,
+    ) = dispatchService.handleNewInstance(instanceFlowHeaders)
 }

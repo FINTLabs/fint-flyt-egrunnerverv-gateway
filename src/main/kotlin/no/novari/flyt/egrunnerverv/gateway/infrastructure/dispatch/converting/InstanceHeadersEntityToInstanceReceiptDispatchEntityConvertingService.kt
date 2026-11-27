@@ -1,7 +1,5 @@
 package no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.converting
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.archive.ArchiveGatewayClient
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.InstanceHeadersEntity
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.InstanceReceiptDispatchEntity
@@ -9,6 +7,8 @@ import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.SakRece
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.json.JsonMapper
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
@@ -20,7 +20,7 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingService(
     @param:Value("\${novari.flyt.egrunnerverv.dispatch.tablenameJournalpost}")
     private val tablenameJournalpost: String,
     private val archiveGatewayClient: ArchiveGatewayClient,
-    private val objectMapper: ObjectMapper,
+    private val jsonMapper: JsonMapper,
     private val journalpostToInstanceReceiptDispatchEntityConvertingService:
         JournalpostToInstanceReceiptDispatchEntityConvertingService,
 ) {
@@ -79,8 +79,8 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingService(
 
     private fun toJson(value: Any): String =
         try {
-            objectMapper.writeValueAsString(value)
-        } catch (exception: JsonProcessingException) {
+            jsonMapper.writeValueAsString(value)
+        } catch (exception: JacksonException) {
             throw RuntimeException("Failed to serialize instance receipt: $value", exception)
         }
 

@@ -1,6 +1,5 @@
 package no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.InstanceReceiptDispatchEntity
@@ -8,18 +7,19 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientResponseException
+import tools.jackson.databind.json.JsonMapper
 
 @Service
 class RestClientRequestService(
     private val restClient: RestClient,
-    private val objectMapper: ObjectMapper,
+    private val jsonMapper: JsonMapper,
 ) {
     fun dispatchInstance(instanceReceiptDispatchEntity: InstanceReceiptDispatchEntity) {
         val uri = instanceReceiptDispatchEntity.uri
-        val payload = objectMapper.readTree(instanceReceiptDispatchEntity.instanceReceipt)
+        val payload = jsonMapper.readTree(instanceReceiptDispatchEntity.instanceReceipt)
         val saksnummer =
-            payload.path("arkivnummer").textValue()
-                ?: payload.path("journalpostnr").textValue()?.substringBeforeLast('-')
+            payload.path("arkivnummer").stringValue(null)
+                ?: payload.path("journalpostnr").stringValue(null)?.substringBeforeLast('-')
 
         log.atInfo {
             message = "Dispatching instance receipt"

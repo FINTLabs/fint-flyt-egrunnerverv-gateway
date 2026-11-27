@@ -5,9 +5,8 @@ import no.novari.flyt.egrunnerverv.gateway.instance.model.EgrunnervervJournalpos
 import no.novari.flyt.egrunnerverv.gateway.instance.model.EgrunnervervJournalpostInstanceBody
 import no.novari.flyt.egrunnerverv.gateway.instance.model.EgrunnervervSakInstance
 import no.novari.flyt.gateway.instance.InstanceProcessor
-import no.novari.flyt.webresourceserver.UrlPaths.EXTERNAL_API
+import no.novari.flyt.security.UrlPaths.EXTERNAL_API
 import org.springframework.http.HttpStatus
-import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -25,9 +24,8 @@ class EgrunnervervInstanceController(
     @ResponseStatus(HttpStatus.ACCEPTED)
     fun postSakInstance(
         @Valid @RequestBody egrunnervervSakInstance: EgrunnervervSakInstance,
-        authentication: Authentication,
     ) {
-        sakInstanceProcessor.processInstance(authentication, egrunnervervSakInstance)
+        sakInstanceProcessor.processInstance(egrunnervervSakInstance)
     }
 
     @PostMapping("document")
@@ -35,10 +33,8 @@ class EgrunnervervInstanceController(
     fun postJournalpostInstance(
         @Valid @RequestBody body: EgrunnervervJournalpostInstanceBody,
         @RequestParam("id") saksnummer: String,
-        authentication: Authentication,
     ) {
         journalpostInstanceProcessor.processInstance(
-            authentication,
             EgrunnervervJournalpostInstance(
                 egrunnervervJournalpostInstanceBody = body,
                 saksnummer = saksnummer,

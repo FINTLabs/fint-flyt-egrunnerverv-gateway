@@ -1,30 +1,28 @@
 package no.novari.flyt.egrunnerverv.gateway.api.instance
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import no.novari.flyt.egrunnerverv.gateway.api.error.EgrunnervervGlobalExceptionHandler
 import no.novari.flyt.egrunnerverv.gateway.instance.model.EgrunnervervJournalpostDocument
 import no.novari.flyt.egrunnerverv.gateway.instance.model.EgrunnervervJournalpostInstanceBody
 import no.novari.flyt.egrunnerverv.gateway.instance.model.EgrunnervervJournalpostReceiver
 import no.novari.flyt.egrunnerverv.gateway.instance.model.EgrunnervervSakInstance
 import no.novari.flyt.gateway.instance.InstanceProcessor
-import no.novari.flyt.webresourceserver.UrlPaths.EXTERNAL_API
-import no.novari.flyt.webresourceserver.security.client.sourceapplication.SourceApplicationAuthorityMappingService
+import no.novari.flyt.security.UrlPaths.EXTERNAL_API
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
-import org.springframework.security.core.Authentication
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import tools.jackson.databind.json.JsonMapper
 
 @WebMvcTest(controllers = [EgrunnervervInstanceController::class])
 @Import(EgrunnervervGlobalExceptionHandler::class)
@@ -33,16 +31,13 @@ class EgrunnervervInstanceControllerWebMvcTest {
     private lateinit var mockMvc: MockMvc
 
     @Autowired
-    private lateinit var objectMapper: ObjectMapper
+    private lateinit var objectMapper: JsonMapper
 
     @MockitoBean(name = "sakInstanceProcessor")
     private lateinit var sakInstanceProcessor: InstanceProcessor<EgrunnervervSakInstance>
 
     @MockitoBean(name = "journalpostInstanceProcessor")
     private lateinit var journalpostInstanceProcessor: InstanceProcessor<*>
-
-    @MockitoBean
-    private lateinit var sourceApplicationAuthorityMappingService: SourceApplicationAuthorityMappingService
 
     @Test
     fun `POST archive returns 202 and processes instance`() {
@@ -56,7 +51,7 @@ class EgrunnervervInstanceControllerWebMvcTest {
                     .content(objectMapper.writeValueAsBytes(validSakInstance())),
             ).andExpect(status().isAccepted)
 
-        verify(sakInstanceProcessor).processInstance(any<Authentication>(), any<EgrunnervervSakInstance>())
+        verify(sakInstanceProcessor).processInstance(any<EgrunnervervSakInstance>())
     }
 
     @Test
@@ -80,7 +75,7 @@ class EgrunnervervInstanceControllerWebMvcTest {
     fun `POST archive when processor throws IllegalArgumentException returns ErrorResponse 400`() {
         doThrow(IllegalArgumentException("bad input"))
             .whenever(sakInstanceProcessor)
-            .processInstance(any<Authentication>(), any<EgrunnervervSakInstance>())
+            .processInstance(any<EgrunnervervSakInstance>())
 
         mockMvc
             .perform(
@@ -98,7 +93,7 @@ class EgrunnervervInstanceControllerWebMvcTest {
     fun `POST archive when processor throws unexpected exception returns ErrorResponse 500`() {
         doThrow(RuntimeException("boom"))
             .whenever(sakInstanceProcessor)
-            .processInstance(any<Authentication>(), any<EgrunnervervSakInstance>())
+            .processInstance(any<EgrunnervervSakInstance>())
 
         mockMvc
             .perform(
@@ -112,8 +107,9 @@ class EgrunnervervInstanceControllerWebMvcTest {
             .andExpect(jsonPath("$.error").value("Internal Server Error"))
     }
 
+    // gateway-starter 6 answers Spring MVC errors with their own status. With 5 a missing parameter gave 500.
     @Test
-    fun `POST document without id returns ErrorResponse 500`() {
+    fun `POST document without id returns ErrorResponse 400`() {
         mockMvc
             .perform(
                 org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -122,8 +118,8 @@ class EgrunnervervInstanceControllerWebMvcTest {
                     .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsBytes(validJournalpostBody())),
-            ).andExpect(status().isInternalServerError)
-            .andExpect(jsonPath("$.error").value("Internal Server Error"))
+            ).andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.error").value("Bad Request"))
     }
 
     private fun validSakInstance(): EgrunnervervSakInstance =

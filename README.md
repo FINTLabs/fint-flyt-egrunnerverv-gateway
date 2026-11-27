@@ -4,12 +4,13 @@ Kotlin-basert Spring Boot-tjeneste for mottak av eGrunnerverv-instanser i Flyt. 
 
 ## Høydepunkter
 
-- Spring Boot 3.5.x
-- Spring MVC (`spring-boot-starter-web`)
-- Kotlin 2.4.10
+- Spring Boot 4.2
+- Spring MVC (`spring-boot-starter-webmvc`)
+- Kotlin 2.4.21
 - Java 25
 - `flyt-gateway-starter` for mottak og videreformidling av instanser
-- `flyt-web-resource-server` for sikring av eksterne API-er
+- `flyt-security-starter` (via `flyt-gateway-starter`) for sikring av eksterne API-er
+- `fint-kafka-starter` (via `flyt-kafka`) og standard `@KafkaListener` for Kafka
 - Global feilbehandling med `ProblemDetail`
 - Kafka-basert dispatchflyt for kvitteringer
 - Postgres + Flyway for persistens av dispatch-kø
@@ -90,7 +91,7 @@ Base path:
 /api/egrunnerverv/instances/{orgNr}
 ```
 
-API-et er beskyttet av `flyt-web-resource-server`. Autoriserte source application IDs er satt i [`src/main/resources/application-flyt-web-resource-server.yaml`](src/main/resources/application-flyt-web-resource-server.yaml).
+API-et er beskyttet av `flyt-security-starter`. Bare tokens fra eGrunnerverv sin NAM-klient slipper til (`sub` lik `fint.flyt.egrunnerverv.sso.client-id`, fra secreten `fint-flyt-egrunnerverv-oauth2-client` som authorization-service eier). Kildeapplikasjonen (`EGRUNNERVERV`) og rutene (`/api/egrunnerverv/**`) er satt i [`src/main/resources/application-flyt-security.yaml`](src/main/resources/application-flyt-security.yaml).
 
 ### POST `/archive`
 
@@ -231,7 +232,7 @@ Opprettede tabeller:
 Viktige konfigurasjonsfiler:
 
 - [`src/main/resources/application.yaml`](src/main/resources/application.yaml)
-- [`src/main/resources/application-flyt-web-resource-server.yaml`](src/main/resources/application-flyt-web-resource-server.yaml)
+- [`src/main/resources/application-flyt-security.yaml`](src/main/resources/application-flyt-security.yaml)
 - [`src/main/resources/application-flyt-file-web-client.yaml`](src/main/resources/application-flyt-file-web-client.yaml)
 - [`src/main/resources/application-flyt-service-now-web-client.yaml`](src/main/resources/application-flyt-service-now-web-client.yaml)
 - [`src/main/resources/application-flyt-postgres.yaml`](src/main/resources/application-flyt-postgres.yaml)
@@ -257,11 +258,11 @@ Vanlige properties og secrets:
 | `novari.flyt.egrunnerverv.dispatch.token-uri`     | Token endpoint for ServiceNow OAuth2.                                                                 |
 | `novari.flyt.egrunnerverv.dispatch.client-id`     | OAuth2 client id for ServiceNow.                                                                      |
 | `novari.flyt.egrunnerverv.dispatch.client-secret` | OAuth2 client secret for ServiceNow.                                                                  |
-| `novari.flyt.egrunnerverv.dispatch.username`      | ServiceNow brukernavn for password grant.                                                             |
+| `novari.flyt.egrunnerverv.dispatch.username`      | ServiceNow brukernavn for password grant (`PasswordGrantAuthorizedClientProvider`).                   |
 | `novari.flyt.egrunnerverv.dispatch.password`      | ServiceNow passord for password grant.                                                                |
 | `slack.webhook.url`                               | Webhook for Slack-varsling ved manglende arkivressurs.                                                |
 
-Registreringene `intgr-conf-service`, `history-service`, `authorization-service` og `archive-gateway` bruker den felles
+Registreringene `intgr-conf-service`, `history-service` og `archive-gateway` bruker den felles
 `fint-flyt-authorization-oauth2-client`, mappet til `fint.flyt.authorization.sso.*` med `secretKeyRef`.
 
 ## Profiler
@@ -271,7 +272,7 @@ Default profiler inkludert via `application.yaml`:
 - `flyt-kafka`
 - `flyt-logging`
 - `flyt-postgres`
-- `flyt-web-resource-server`
+- `flyt-security`
 - `flyt-file-web-client`
 - `flyt-service-now-web-client`
 
@@ -307,7 +308,7 @@ Legg til `--profile tools` for å også starte Kafdrop på http://localhost:1900
 Merk:
 
 - `docker compose` starter ikke `fint-flyt-file-service`; den må kjøres separat eller erstattes via `novari.flyt.file-service-url`
-- `local-staging` slår ikke av `flyt-web-resource-server`, så kall mot API-et må fortsatt være autoriserte dersom du tester HTTP-endepunktene manuelt
+- `local-staging` slår ikke av sikkerheten, så kall mot API-et må ha et token fra eGrunnerverv-klienten dersom du tester HTTP-endepunktene manuelt
 - dispatch mot ServiceNow krever gyldige OAuth2-credentials dersom du vil teste hele callback-flyten lokalt
 
 Kjør appen:
@@ -347,7 +348,7 @@ Det betyr i praksis:
 
 - `spec.url.basePath` skal ikke brukes til å legge på servlet context path
 - overlay skal sette `server.servlet.context-path`
-- overlay skal sette `novari.flyt.egrunnerverv.service-context-path`, fordi gatewayens egen context path (tom i api, `/beta` i beta) ikke er den samme som for de andre FLYT-tjenestene. Den gir URL-ene til intgr-conf-service, history-service, archive-gateway og authorization-service
+- overlay skal sette `novari.flyt.egrunnerverv.service-context-path`, fordi gatewayens egen context path (tom i api, `/beta` i beta) ikke er den samme som for de andre FLYT-tjenestene. Den gir URL-ene til intgr-conf-service, history-service og archive-gateway
 - overlay skal oppdatere probe-paths og metrics-paths tilsvarende
 
 ## Relevante filer

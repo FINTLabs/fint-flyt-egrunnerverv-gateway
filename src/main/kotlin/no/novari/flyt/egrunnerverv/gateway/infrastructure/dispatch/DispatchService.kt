@@ -10,6 +10,7 @@ import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.Instanc
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.repository.InstanceHeadersRepository
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.repository.InstanceReceiptDispatchRepository
 import no.novari.flyt.kafka.instanceflow.headers.InstanceFlowHeaders
+import no.novari.flyt.security.SourceApplication
 import org.springframework.http.HttpStatus
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -30,7 +31,7 @@ class DispatchService(
     private val dispatchExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
     fun handleNewInstance(instanceFlowHeaders: InstanceFlowHeaders) {
-        if (instanceFlowHeaders.sourceApplicationId != EGRUNNERVERV_SOURCE_APPLICATION_ID) {
+        if (instanceFlowHeaders.sourceApplicationId != SourceApplication.EGRUNNERVERV.id) {
             return
         }
 
@@ -165,7 +166,6 @@ class DispatchService(
     }
 
     private companion object {
-        private const val EGRUNNERVERV_SOURCE_APPLICATION_ID = 2L
         private val log = KotlinLogging.logger {}
     }
 }

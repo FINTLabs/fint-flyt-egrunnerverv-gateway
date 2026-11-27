@@ -1,6 +1,5 @@
 package no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.converting
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.RestClientRequestService
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.archive.ArchiveGatewayClient
 import no.novari.flyt.egrunnerverv.gateway.infrastructure.dispatch.model.InstanceHeadersEntity
@@ -20,21 +19,23 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestClient
+import tools.jackson.module.kotlin.jsonMapper
+import tools.jackson.module.kotlin.kotlinModule
 
 class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest {
     private val baseUrl = "http://gateway.test"
     private val restClientBuilder = RestClient.builder().baseUrl(baseUrl)
     private val server = MockRestServiceServer.bindTo(restClientBuilder).build()
     private val restClient = restClientBuilder.build()
-    private val objectMapper = jacksonObjectMapper()
-    private val restClientRequestService = RestClientRequestService(restClient, objectMapper)
+    private val jsonMapper = jsonMapper { addModule(kotlinModule()) }
+    private val restClientRequestService = RestClientRequestService(restClient, jsonMapper)
 
     private val service =
         InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingService(
             tablenameSak = "sak-table",
             tablenameJournalpost = "journalpost-table",
             archiveGatewayClient = ArchiveGatewayClient(restClient),
-            objectMapper = objectMapper,
+            jsonMapper = jsonMapper,
             journalpostToInstanceReceiptDispatchEntityConvertingService =
                 JournalpostToInstanceReceiptDispatchEntityConvertingService(
                     administrativEnhetResourceCache = mock(),
@@ -100,8 +101,8 @@ class InstanceHeadersEntityToInstanceReceiptDispatchEntityConvertingServiceTest 
         requireNotNull(result)
         assertThat(result.sourceApplicationInstanceId).isEqualTo("id-1")
 
-        val json = objectMapper.readTree(result.instanceReceipt)
-        assertThat(json["opprettelse_i_elements_fullfort"].asText())
+        val json = jsonMapper.readTree(result.instanceReceipt)
+        assertThat(json["opprettelse_i_elements_fullfort"].asString())
             .matches("\\d{2}-\\d{2}-\\d{4} \\d{2}:\\d{2}:\\d{2}")
         restClientRequestService.dispatchInstance(result)
     }

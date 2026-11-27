@@ -1,16 +1,16 @@
 package no.novari.flyt.egrunnerverv.gateway.instance
 
-import no.novari.cache.FintCache
 import no.novari.fint.model.resource.administrasjon.personal.PersonalressursResource
 import no.novari.fint.model.resource.arkiv.noark.ArkivressursResource
+import no.novari.flyt.cache.FlytCache
 import no.novari.flyt.egrunnerverv.gateway.ResourceLinkUtil
 import org.springframework.stereotype.Repository
 import org.springframework.util.StringUtils
 
 @Repository
 class ResourceRepository(
-    private val personalressursResourceCache: FintCache<String, PersonalressursResource>,
-    private val arkivressursResourceCache: FintCache<String, ArkivressursResource>,
+    private val personalressursResourceCache: FlytCache<String, PersonalressursResource>,
+    private val arkivressursResourceCache: FlytCache<String, ArkivressursResource>,
 ) {
     fun getArkivressursHrefFromPersonEmail(epost: String): String? {
         val normalizedEmail = epost.trim().lowercase()
@@ -20,7 +20,7 @@ class ResourceRepository(
 
         val personalRessursUsername =
             personalressursResourceCache
-                .getAllDistinct()
+                .distinctValues()
                 .asSequence()
                 .filter { getEmailAddress(it)?.trim()?.lowercase() == normalizedEmail }
                 .mapNotNull(::getUsername)
@@ -29,7 +29,7 @@ class ResourceRepository(
                 ?: return null
 
         return arkivressursResourceCache
-            .getAllDistinct()
+            .distinctValues()
             .asSequence()
             .firstOrNull { filterArkivRessurs(it, personalRessursUsername) }
             ?.let(ResourceLinkUtil::getFirstSelfLink)

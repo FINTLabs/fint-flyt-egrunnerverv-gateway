@@ -21,14 +21,6 @@ novari:
     intgr-conf-service-url: http://fint-flyt-intgr-conf-service:8080${novari.flyt.egrunnerverv.service-context-path}
     history-service-url: http://fint-flyt-history-service:8080${novari.flyt.egrunnerverv.service-context-path}
     archive-gateway-url: http://fint-flyt-archive-gateway:8080${novari.flyt.egrunnerverv.service-context-path}
-    web-resource-server:
-      security:
-        authorization:
-          base-url: http://fint-flyt-authorization-service:8080${novari.flyt.egrunnerverv.service-context-path}
-
-logging:
-  level:
-    no.novari.cache.ehcache.FintEhCacheEventLogger: WARN
 
 server:
   max-http-request-header-size: 40KB
@@ -42,7 +34,7 @@ spring:
       - flyt-kafka
       - flyt-logging
       - flyt-postgres
-      - flyt-web-resource-server
+      - flyt-security
       - flyt-file-web-client
       - flyt-authorization-client
       - flyt-service-now-web-client
